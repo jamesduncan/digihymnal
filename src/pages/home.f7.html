@@ -82,10 +82,11 @@ export default {
   },
   on: {
 
-    pageInit: function(e, page) {
+    pageInit: async function(e, page) {
       var self = this;
       app = self.$app;
 
+      await songCollection.initSample();
       songCollection.list({ start: 0, limit: 10}).then(result => {
         self.$setState({ loading: false, songs: result });
       });

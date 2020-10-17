@@ -1,11 +1,13 @@
 import localForage from "localforage";
 
-let initialed = false;
+let isConfig;
+let DB_Instances = {};
 
 export default class DB {
 
-    static get instance() {
-        if (!initialed) {
+    static getInstance(name) {
+
+        if (!isConfig) {
             localForage.config({
                 driver: localForage.WEBSQL, // Force WebSQL; same as using setDriver()
                 name: 'digiHymnal',
@@ -13,9 +15,11 @@ export default class DB {
                 size: 4980736, // Size of database, in bytes. WebSQL-only for now.
                 storeName: 'keyvaluepairs', // Should be alphanumeric, with underscores.
             });
-            initialed = true;
         }
 
-        return localForage;
+        if (DB_Instances[name] == null)
+            DB_Instances[name] = localForage.createInstance({ name });
+
+        return DB_Instances[name];
     }
 }

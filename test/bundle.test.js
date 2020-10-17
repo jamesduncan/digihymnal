@@ -154,27 +154,47 @@ __webpack_require__.r(__webpack_exports__);
 
 const SAMPLE_SONGS = [_samples_1_js__WEBPACK_IMPORTED_MODULE_1__["default"], _samples_2_js__WEBPACK_IMPORTED_MODULE_2__["default"]];
 
-const KEY_NAME = "DIGIHYMNAL_SONG";
+const DB_NAME = "DIGIHYMNAL_SONG";
 
 class SongCollection {
     constructor() {
-        this.db = _DB__WEBPACK_IMPORTED_MODULE_0__["default"].instance;
+        this.db = _DB__WEBPACK_IMPORTED_MODULE_0__["default"].getInstance(DB_NAME);
     }
 
     async initSample() {
-        return await this.db.setItem(KEY_NAME, SAMPLE_SONGS);
+        let tasks = [];
+
+        SAMPLE_SONGS.forEach(async (song) => {
+            tasks.push(await this.db.setItem(song.id, song));
+        })
+
+        return Promise.all(tasks);
     }
 
     async list({ start, limit }) {
-        let result = await this.db.getItem(KEY_NAME) || [];
+        let tasks = [];
+        let result = [];
+        let ids = await this.db.keys();
+        ids = ids.slice(start || 0, limit || 10);
 
-        return Promise.resolve(result.slice(start || 0, limit || 10));
+        // load and push songs to an array consequently
+        (ids || []).forEach((id) => {
+            tasks.push(() => new Promise(async (next, bad) => {
+                result.push(await this.get(id));
+                next();
+            }));
+        });
+
+        // Return data
+        tasks.push(() => Promise.resolve(result));
+
+        return tasks.reduce((promiseChain, currTask) => {
+            return promiseChain.then(currTask);
+         }, Promise.resolve([]));
     }
 
     async get(id) {
-        let result = await this.db.getItem(KEY_NAME) || [];
-
-        return Promise.resolve(result.filter((s) => s.id == id)[0]);
+        return await this.db.getItem(id);
     }
 
     async languages(id) {
@@ -196,12 +216,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var localforage__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(localforage__WEBPACK_IMPORTED_MODULE_0__);
 
 
-let initialed = false;
+let isConfig;
+let DB_Instances = {};
 
 class DB {
 
-    static get instance() {
-        if (!initialed) {
+    static getInstance(name) {
+
+        if (!isConfig) {
             localforage__WEBPACK_IMPORTED_MODULE_0___default.a.config({
                 driver: localforage__WEBPACK_IMPORTED_MODULE_0___default.a.WEBSQL, // Force WebSQL; same as using setDriver()
                 name: 'digiHymnal',
@@ -209,10 +231,12 @@ class DB {
                 size: 4980736, // Size of database, in bytes. WebSQL-only for now.
                 storeName: 'keyvaluepairs', // Should be alphanumeric, with underscores.
             });
-            initialed = true;
         }
 
-        return localforage__WEBPACK_IMPORTED_MODULE_0___default.a;
+        if (DB_Instances[name] == null)
+            DB_Instances[name] = localforage__WEBPACK_IMPORTED_MODULE_0___default.a.createInstance({ name });
+
+        return DB_Instances[name];
     }
 }
 

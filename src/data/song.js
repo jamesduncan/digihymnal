@@ -4,27 +4,47 @@ import SAMPLE_2 from "../../samples/2.js"
 
 const SAMPLE_SONGS = [SAMPLE_1, SAMPLE_2];
 
-const KEY_NAME = "DIGIHYMNAL_SONG";
+const DB_NAME = "DIGIHYMNAL_SONG";
 
 export default class SongCollection {
     constructor() {
-        this.db = DB.instance;
+        this.db = DB.getInstance(DB_NAME);
     }
 
     async initSample() {
-        return await this.db.setItem(KEY_NAME, SAMPLE_SONGS);
+        let tasks = [];
+
+        SAMPLE_SONGS.forEach(async (song) => {
+            tasks.push(await this.db.setItem(song.id, song));
+        })
+
+        return Promise.all(tasks);
     }
 
     async list({ start, limit }) {
-        let result = await this.db.getItem(KEY_NAME) || [];
+        let tasks = [];
+        let result = [];
+        let ids = await this.db.keys();
+        ids = ids.slice(start || 0, limit || 10);
 
-        return Promise.resolve(result.slice(start || 0, limit || 10));
+        // load and push songs to an array consequently
+        (ids || []).forEach((id) => {
+            tasks.push(() => new Promise(async (next, bad) => {
+                result.push(await this.get(id));
+                next();
+            }));
+        });
+
+        // Return data
+        tasks.push(() => Promise.resolve(result));
+
+        return tasks.reduce((promiseChain, currTask) => {
+            return promiseChain.then(currTask);
+         }, Promise.resolve([]));
     }
 
     async get(id) {
-        let result = await this.db.getItem(KEY_NAME) || [];
-
-        return Promise.resolve(result.filter((s) => s.id == id)[0]);
+        return await this.db.getItem(id);
     }
 
     async languages(id) {

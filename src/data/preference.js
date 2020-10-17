@@ -1,17 +1,18 @@
 import DB from "./DB";
 
-const KEY_NAME = "DIGIHYMNAL_LANGUAGE";
+const DB_NAME = "DIGIHYMNAL_PREFERENCE";
+const LANGUAGE_KEY_NAME = "DIGIHYMNAL_LANGUAGE";
 
 export default class Preference {
     constructor() {
-        this.db = DB.instance;
+        this.db = DB.getInstance(DB_NAME);
     }
 
     async setLanguage(languageCode) {
-        return await this.db.setItem(KEY_NAME, languageCode);
+        return await this.db.setItem(LANGUAGE_KEY_NAME, languageCode);
     }
 
     async getLanguage() {
-        return await this.db.getItem(KEY_NAME);
+        return await this.db.getItem(LANGUAGE_KEY_NAME);
     }
 }

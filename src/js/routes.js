@@ -6,6 +6,7 @@ import FormPage from '../pages/form.f7.html';
 
 import DynamicRoutePage from '../pages/dynamic-route.f7.html';
 import RequestAndLoad from '../pages/request-and-load.f7.html';
+import SongViewPage from '../pages/song-view.f7.html';
 import NotFoundPage from '../pages/404.f7.html';
 
 var routes = [
@@ -21,11 +22,13 @@ var routes = [
     path: '/form/',
     component: FormPage,
   },
-
-
   {
     path: '/dynamic-route/blog/:blogId/post/:postId/',
     component: DynamicRoutePage,
+  },
+  {
+    path: '/song-view/:songId/',
+    component: SongViewPage,
   },
   {
     path: '/request-and-load/user/:userId/',

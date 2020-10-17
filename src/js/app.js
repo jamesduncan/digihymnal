@@ -8,6 +8,10 @@ import 'framework7/css/framework7.bundle.css';
 
 import '../css/app.css';
 
+// Import FontAwesome Icons
+
+import '../../node_modules/@fortawesome/fontawesome-free/css/all.min.css';
+
 // Import Routes
 import routes from './routes.js';
 
@@ -20,9 +24,10 @@ var app = new Framework7({
 
   name: 'digiHymnal', // App name
   theme: 'auto', // Automatic theme detection
-
-
-
+  panel: {
+    swipe: true,
+  },
+  autoDarkTheme: true,
   // App routes
   routes: routes,
   // Register service worker

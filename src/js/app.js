@@ -24,9 +24,10 @@ var app = new Framework7({
 
   name: 'digiHymnal', // App name
   theme: 'auto', // Automatic theme detection
-
-
-
+  panel: {
+    swipe: true,
+  },
+  autoDarkTheme: true,
   // App routes
   routes: routes,
   // Register service worker

@@ -16,7 +16,7 @@
                   <a @click="changeLanguage" data-languageCode="{{tag}}" class="item-content">
                     <div class="item-inner">
                       <div class="item-title text-color-gray">{{#if local}}{{local}}{{else}}{{name}}{{/if}}</div>
-                      <div class="item-after text-color-primary">{{#js_if '"en" == this.tag' }}<i class="fas fa-check-circle"></i>{{else}}<i class="far fa-circle"></i>{{/js_if}}</div>
+                      <div class="item-after text-color-primary">{{#if default}}<i class="fas fa-check-circle"></i>{{else}}<i class="far fa-circle">{{/if}}</div>
                     </div>
                   </a>
                 </li>
@@ -39,21 +39,51 @@ const preference = new Preference();
 export default {
   // Component Data
   data: function () {
+    
     // Must return an object
     return {
-      languages: locale.customLocales,
+      languages: locale.customLocales
     }
   },
   on: {
-    panelOpened: async function(e, page) {
-      let self = this;
+    panelOpened: async function(event) {
+      var self = this;
 
-      self.languageCode = await preference.getLanguage() || "en";
+      preference.getLanguage().then((languageCode) => {
+        var languages = [];
+        locale.customLocales.forEach((item) => {
+          if (item.tag == languageCode) {
+            item.default = true;
+          } else {
+            item.default = false;
+          }
+          languages.push(item)
+        });
+        
+        self.$setState({
+          languages: languages
+        })
+      });
     }
   },
   methods: {
     changeLanguage: async function(event) {
-      let languageCode = this.$$(event.currentTarget).data("languagecode");
+      var self = this;
+      var languageCode = this.$$(event.currentTarget).data("languagecode");
+      var languages = [];
+      locale.customLocales.forEach((item) => {
+        if (item.tag == languageCode) {
+          item.default = true;
+        } else {
+          item.default = false;
+        }
+        languages.push(item)
+      });
+      
+      self.$setState({
+        languages: languages
+      })
+
       await preference.setLanguage(languageCode);
     }
   }

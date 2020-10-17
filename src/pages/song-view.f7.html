@@ -13,19 +13,133 @@
       </div>
     </div>
     <div class="page-content">
-      <div class="block block-strong">
-        <p>Component page is alos compiled with Template7, but it has much more functionality. In addition to Template7 page it has lifecycle hooks, events handling and data managment.</p>
-        <p>It is useful to use Component page when you need page-specific logic.</p>
+      <div class="block-title">
+        By: Nathan Schubert
+      </div>
+      <div class="block">
+        <strong>Key:</strong> C
+      </div>
+      <div class="menu">
+        <div class="menu-inner">
+          <a @click="zoomIn" class="menu-item icon-only">
+            <div class="menu-item-content">
+              <i class="fa-bigger fas fa-search-plus"></i>
+            </div>
+          </a>
+          <a @click="zoomOut" class="menu-item icon-only">
+            <div class="menu-item-content">
+              <i class="fa-bigger fas fa-search-minus"></i>
+            </div>
+          </a>
+          <div style="margin-left: auto" class="menu-item menu-item-dropdown">
+            <div class="menu-item-content icon-only">
+              <div class="menu-item-content">
+                <i class="fa-bigger fas fa-language"></i>
+              </div>
+            </div>
+            <div class="menu-dropdown menu-dropdown-right">
+              <div class="menu-dropdown-content">
+                <a href="#" class="menu-dropdown-link menu-close">
+                  <span>Language #1</span>
+                  <i class="margin-left fas fa-check-circle"></i>
+                </a>
+                <a href="#" class="menu-dropdown-link menu-close">
+                  <span>Language #2</span>
+                </a>
+                <a href="#" class="menu-dropdown-link menu-close">
+                  <span>Language #3</span>
+                </a>
+                <a href="#" class="menu-dropdown-link menu-close">
+                  <span>Language #4</span>
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="menu-item menu-item-dropdown">
+            <div class="menu-item-content icon-only">
+              <div class="menu-item-content">
+                <i class="fa-bigger fas fa-music"></i>
+              </div>
+            </div>
+            <div class="menu-dropdown menu-dropdown-right">
+              <div class="menu-dropdown-content">
+                <a href="#" class="menu-dropdown-link menu-close">
+                  <span>Chords</span>
+                </a>
+                <a href="#" class="menu-dropdown-link menu-close">
+                  <span>Asian</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="block block-strong" style="margin-top: 10px;">
+        
+        <div class="sheet">
+          <div class="song">
+            <div class="line">
+              <div class="phrase"><div class="chord">C</div>Grace that flows like a river</div>
+            </div>
+            
+            <div class="line">
+              <div class="phrase"><div class="chord">F</div>Washing&nbsp;</div>
+              <div class="phrase"><div class="chord">C</div>over me</div>
+            </div>
+
+            <div class="line">
+              <div class="phrase"><div class="chord">C</div>Grace that flows like a river</div>
+            </div>
+            
+            <div class="line">
+              <div class="phrase"><div class="chord">F</div>Washing&nbsp;</div>
+              <div class="phrase"><div class="chord">C</div>over me</div>
+            </div>
+
+            <div class="line">
+              <div class="phrase"><div class="chord">C</div>Grace that flows like a river</div>
+            </div>
+            
+            <div class="line">
+              <div class="phrase"><div class="chord">F</div>Washing&nbsp;</div>
+              <div class="phrase"><div class="chord">C</div>over me</div>
+            </div>
+          </div>
+        </div>
+        
       </div>
     </div>
   </div>
 </template>
 <style>
-  p {
-    margin: 10px 0;
+  .fa-bigger {
+    font-size: larger;
+  }
+  .song {
+    transform-origin: left top;
+  }
+  .line {
+    margin-top: 30px;
+  }
+  .phrase {
+    position: relative;
+    display: inline-block;
+  }
+  .chord {
+    position: absolute;
+    bottom: 20px;
+    background: var(--f7-theme-color);
+    border-radius: 3px;
+    min-width: 20px;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    color: white;
+    font-weight: bold;
   }
 </style>
 <script>
+  var initScale = 1;
   export default {
     // Component Data
     data: function () {
@@ -39,6 +153,20 @@
       pageInit: function(e, page) {
         console.log('pageInit', page);
       },
+    },
+    methods: {
+      zoomIn: function(e) {
+        initScale += 0.05;
+        this.$(".song")[0].style.transform = "scale("+initScale+")";
+        this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
+        // debugger;
+      },
+      zoomOut: function(e) {
+        initScale -= 0.05;
+        this.$(".song")[0].style.transform = "scale("+initScale+")";
+        this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
+        // debugger;
+      }
     }
   }
 </script>

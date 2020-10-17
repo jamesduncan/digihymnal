@@ -1,0 +1,38 @@
+{
+    "song":{
+    "title": "AT 1 Ah Lord God",
+    "author": "༠༡། ཀྱེ། དཀོན་མཆགོ",
+    "key": "C",
+        "lyrics":{
+            "line_1":{
+                "phrase_1":{
+                    "chord":".C",
+                    "number":"1",
+                    "tib":"ཀྱེ། དཀོན་མཆོག",
+                    "eng":"Grace that flows like a river",
+                    "thai":"พระคุณที่ไหลเหมือนสายน้ำ",
+                    "thai-rom":"Phrakhuṇ thī̀ h̄ịl h̄emụ̄xn s̄āyn̂ả"
+                }
+            },
+            "line_2":{
+                "phrase_1":{
+                    "chord":".F",
+                    "number":"4",
+                    "tib":"ནམ་མཁའ ",
+                    "eng":"Washing ",
+                    "thai":"ซักผ้า",
+                    "thai-rom":"Sạk p̄ĥā "
+                },
+                "phrase_2":{
+                    "chord":"C",
+                    "number":"1",
+                    "tib":" ་དང་ས་གཞི",
+                    "eng":"over me",
+                    "thai":"มากกว่าฉัน",
+                    "thai-rom":"Mākkẁā c̄hạn "
+                }
+            }
+        }
+    }
+    }
+    

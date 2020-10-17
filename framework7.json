@@ -1,0 +1,26 @@
+{
+  "cwd": "/Users/jamesduncan/Desktop/tbworld",
+  "type": [
+    "pwa"
+  ],
+  "name": "digiHymnal",
+  "framework": "core",
+  "template": "single-view",
+  "bundler": "webpack",
+  "cssPreProcessor": false,
+  "theming": {
+    "customColor": true,
+    "color": "#ff5d00",
+    "darkTheme": true,
+    "iconFonts": false,
+    "fillBars": false
+  },
+  "customBuild": false,
+  "webpack": {
+    "developmentSourceMap": true,
+    "productionSourceMap": true,
+    "hashAssets": false,
+    "preserveAssetsPaths": false,
+    "inlineAssets": true
+  }
+}

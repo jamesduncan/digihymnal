@@ -53,7 +53,7 @@ module.exports = {
   },
   optimization: {
     minimizer: [new TerserPlugin({
-      sourceMap: true,
+      //sourceMap: true, TODO: We may want to come back and fix this later
     })],
   },
   module: {

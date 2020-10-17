@@ -1,5 +1,6 @@
 {
     "song":{
+    "id":"000001",
     "title": {"eng":"AT 1 Ah Lord God"},
     "author": {"tib":"༠༡། ཀྱེ། དཀོན་མཆགོ"},
     "key": "C",
@@ -7,8 +8,8 @@
             "Verse":[
                 {
                     "label":"Intro Verse",
-                    "lines":[{
-                        "phrases":[{
+                    "line":[{
+                        "phrase":[{
                             "chord":"C",
                             "number":"1",
                             "tib":"ཀྱེ། དཀོན་མཆོག",
@@ -18,7 +19,7 @@
                         }]
                     },
                     {
-                        "phrases":[{
+                        "phrase":[{
                             "chord":"F",
                             "number":"4",
                             "tib":"ནམ་མཁའ ",
@@ -40,8 +41,8 @@
             "Chorus":[
                 {
                     "label":"Main Chorus",
-                    "lines":[{
-                        "phrases":[{
+                    "line":[{
+                        "phrase":[{
                             "chord":".C",
                             "number":"1",
                             "tib":"ཀྱེ། དཀོན་མཆོག",
@@ -51,7 +52,7 @@
                         }]
                     },
                     {
-                        "phrases":[{
+                        "phrase":[{
                             "chord":".F",
                             "number":"4",
                             "tib":"ནམ་མཁའ ",
@@ -70,7 +71,18 @@
                     }]
                 }
             ],
-            "Bridge":[]
+            "Bridge":[
+                {
+                    "label":"",
+                    "line":[{
+                        "phrase":[{
+                            "chord":"C",
+                            "number":"1",
+                            "eng":"Do"
+                        }]
+                    }]
+                }
+            ]
     }
     }
     

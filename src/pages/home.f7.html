@@ -6,7 +6,7 @@
       <div class="navbar-inner">
         <div class="title sliding">digiHymnal</div>
         <div class="right">
-          <a href="#" class="link icon-only panel-open" data-panel="right">
+          <a href="/settings/" class="link icon-only">
             <i class="fas fa-cog"></i>
           </a>
         </div>
@@ -33,30 +33,57 @@
       </div>
       <div class="list media-list searchbar-found">
         <ul>
-          {{#each "1234567890123456789012345678901234567890"}}
-          <li>
+          {{#if loading}}
+          {{#each "1234567890"}}
+          <li class="skeleton-text skeleton-effect-fade">
             <div class="item-content">
               <div class="item-inner">
                 <div class="item-title-row">
-                  <div class="item-title">Song Name</div>
+                  <div class="item-title">Song Name will go Here</div>
                 </div>
-                <div class="item-subtitle">Credit</div>
+                <div class="item-subtitle">Credit Here</div>
               </div>
             </div>
           </li>
           {{/each}}
+          {{else}}
+          {{#each "1234567890123456789012345678901234567890"}}
+          <li>
+            <a href="/song/view/1/" class="item-link">
+              <div class="item-content">
+                <div class="item-inner">
+                  <div class="item-title-row">
+                    <div class="item-title">Song Name</div>
+                  </div>
+                  <div class="item-subtitle">Credit</div>
+                </div>
+              </div>
+            </a>
+          </li>
+          {{/each}}
+          {{/if}}
         </ul>
       </div>
     </div>
   </div>
 </template>
 <script>
+var app;
 export default {
+
+  data: function () {
+    return {
+      loading: true
+    }
+  },
   on: {
   
     pageInit: function(e, page) {
+      var self = this;
+      app = self.$app;
+      
       // create searchbar
-      var searchbar = this.$app.searchbar.create({
+      var searchbar = app.searchbar.create({
         el: '.searchbar',
         searchContainer: '.list',
         searchIn: '.item-title',
@@ -66,6 +93,12 @@ export default {
           }
         }
       });
+      
+      function loaded() {
+        self.$setState({ loading: false });
+      }
+
+      setTimeout(loaded, 2000);
     }
   
   }

@@ -1,0 +1,54 @@
+<template>
+  <div class="panel panel-right panel-reveal theme-dark">
+    <div class="view">
+      <div class="page">
+        <div class="navbar">
+          <div class="navbar-bg"></div>
+          <div class="navbar-inner">
+            <div class="title">Choose a language</div>
+          </div>
+        </div>
+        <div class="page-content">
+          <div class="list simple-list">
+            <ul>
+              {{#if loading}}
+                {{#each "123456"}}
+                  <li class="skeleton-text skeleton-effect-fade">checking Item 1</li>
+                {{/each}}
+              {{else}}
+                {{#each languages}}
+                  <li>{{#if local}}{{local}}{{else}}{{name}}{{/if}}</li>
+                {{/each}}
+              {{/if}}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+<script>
+
+// Import locales
+const locale = require('../js/locales.js')
+
+export default {
+  // Component Data
+  data: function () {
+    // Must return an object
+    return {
+      loading: true
+    }
+  },
+  on: {
+    panelOpened: function(e, page) {
+      var self = this;
+      
+      self.$setState({
+        languages: locale.customLocales,
+        loading: false
+      });
+    }
+  }
+}
+</script>

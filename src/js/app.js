@@ -1,6 +1,9 @@
 import $$ from 'dom7';
 import Framework7 from 'framework7/framework7.esm.bundle.js';
 
+// Import locales
+import './locales.js';
+
 // Import F7 Styles
 import 'framework7/css/framework7.bundle.css';
 

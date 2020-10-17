@@ -9,7 +9,8 @@
     "start": "npm run dev",
     "dev": "cross-env NODE_ENV=development webpack-dev-server --config ./build/webpack.config.js",
     "build-dev": "cross-env NODE_ENV=development node ./build/build.js",
-    "build-prod": "cross-env NODE_ENV=production node ./build/build.js"
+    "build-prod": "cross-env NODE_ENV=production node ./build/build.js",
+    "test": "webpack --config ./test/webpack.config.js --display-error-details && mocha ./test/bundle.test.js"
   },
   "browserslist": [
     "Android >= 7",
@@ -34,6 +35,7 @@
     "@babel/preset-env": "^7.12.1",
     "@babel/runtime": "^7.12.1",
     "babel-loader": "^8.1.0",
+    "chai": "^4.2.0",
     "chalk": "^4.1.0",
     "copy-webpack-plugin": "^6.2.1",
     "cross-env": "^7.0.2",
@@ -42,6 +44,7 @@
     "framework7-component-loader": "^2.1.2",
     "html-webpack-plugin": "^4.5.0",
     "mini-css-extract-plugin": "^1.0.0",
+    "mocha": "^8.2.0",
     "optimize-css-assets-webpack-plugin": "^5.0.4",
     "ora": "^5.1.0",
     "postcss-loader": "^4.0.4",

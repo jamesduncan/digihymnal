@@ -1,0 +1,86 @@
+export default {
+    "id": "sample02",
+    "title": { "eng": "AT 1 Ah Lord God" },
+    "author": { "tib": "༠༡། ཀྱེ། དཀོན་མཆགོ" },
+    "key": "C",
+    "lyrics": {
+        "Verse": [
+            {
+                "label": "Intro Verse",
+                "line": [{
+                    "phrase": [{
+                        "chord": "C",
+                        "number": "1",
+                        "tib": "ཀྱེ། དཀོན་མཆོག",
+                        "eng": "Grace that flows like a river",
+                        "thai": "พระคุณที่ไหลเหมือนสายน้ำ",
+                        "thai-rom": "Phrakhuṇ thī̀ h̄ịl h̄emụ̄xn s̄āyn̂ả"
+                    }]
+                },
+                {
+                    "phrase": [{
+                        "chord": "F",
+                        "number": "4",
+                        "tib": "ནམ་མཁའ ",
+                        "eng": "Washing ",
+                        "thai": "ซักผ้า",
+                        "thai-rom": "Sạk p̄ĥā "
+                    },
+                    {
+                        "chord": "C",
+                        "number": "1",
+                        "tib": " ་དང་ས་གཞི",
+                        "eng": "over me",
+                        "thai": "มากกว่าฉัน",
+                        "thai-rom": "Mākkẁā c̄hạn "
+                    }]
+                }]
+            }
+        ],
+        "Chorus": [
+            {
+                "label": "Main Chorus",
+                "line": [{
+                    "phrase": [{
+                        "chord": ".C",
+                        "number": "1",
+                        "tib": "ཀྱེ། དཀོན་མཆོག",
+                        "eng": "Grace that flows like a river",
+                        "thai": "พระคุณที่ไหลเหมือนสายน้ำ",
+                        "thai-rom": "Phrakhuṇ thī̀ h̄ịl h̄emụ̄xn s̄āyn̂ả"
+                    }]
+                },
+                {
+                    "phrase": [{
+                        "chord": ".F",
+                        "number": "4",
+                        "tib": "ནམ་མཁའ ",
+                        "eng": "Washing ",
+                        "thai": "ซักผ้า",
+                        "thai-rom": "Sạk p̄ĥā "
+                    },
+                    {
+                        "chord": "C",
+                        "number": "1",
+                        "tib": " ་དང་ས་གཞི",
+                        "eng": "over me",
+                        "thai": "มากกว่าฉัน",
+                        "thai-rom": "Mākkẁā c̄hạn "
+                    }]
+                }]
+            }
+        ],
+        "Bridge": [
+            {
+                "label": "",
+                "line": [{
+                    "phrase": [{
+                        "chord": "C",
+                        "number": "1",
+                        "eng": "Do"
+                    }]
+                }]
+            }
+        ]
+    }
+}

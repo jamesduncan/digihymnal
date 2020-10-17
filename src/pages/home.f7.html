@@ -47,15 +47,15 @@
           </li>
           {{/each}}
           {{else}}
-          {{#each "1234567890123456789012345678901234567890"}}
+          {{#each songs}}
           <li>
             <a href="/song/view/1/" class="item-link">
               <div class="item-content">
                 <div class="item-inner">
                   <div class="item-title-row">
-                    <div class="item-title">Song Name</div>
+                    <div class="item-title">{{title[locale]}}</div>
                   </div>
-                  <div class="item-subtitle">Credit</div>
+                  <div class="item-subtitle">{{author[locale]}}</div>
                 </div>
               </div>
             </a>
@@ -68,6 +68,10 @@
   </div>
 </template>
 <script>
+import Song from '../data/song';
+const songCollection = new Song();
+let locale = 'eng';
+
 var app;
 export default {
 
@@ -77,11 +81,15 @@ export default {
     }
   },
   on: {
-  
+
     pageInit: function(e, page) {
       var self = this;
       app = self.$app;
-      
+
+      songCollection.list({ start: 0, limit: 10}).then(result => {
+        self.$setState({ loading: false, songs: result });
+      });
+
       // create searchbar
       var searchbar = app.searchbar.create({
         el: '.searchbar',
@@ -93,11 +101,7 @@ export default {
           }
         }
       });
-      
-      self.$setState({ loading: false });
     }
-  
   }
-  
 }
 </script>

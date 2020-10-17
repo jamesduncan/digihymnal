@@ -6,7 +6,7 @@ Framework7 app created with following options:
 
 ```
 {
-  "cwd": "/Users/jamesduncan/Desktop/tbworld",
+  "cwd": "",
   "type": [
     "pwa"
   ],

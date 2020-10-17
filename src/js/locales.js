@@ -1,9 +1,12 @@
 import locale from 'locale-codes';
 
-//Add for non iso languages - copied some from wikipedia, not sure if its correct.
+//Languages shown in settings
 export const customLocales = [
   locale.getByTag('en'),
-  {name:"Tibetan", local:"ས་སྐད", location: "", tag: "bo"},
+  locale.getByTag('ne'),
+  locale.getByTag('zh'),
+  //Add for non iso languages - copied some from wikipedia, not sure if its correct.
+  {name:"Tibetan", local:"བོད་སྐད་", location: "", tag: "bo"},
   {name:"Central Tibetan", local:"དབུས་སྐད", location: "", tag: "ct"},
   {name:"Central Tibetan Romanized", local:"Ü-Tsang", location: "", tag: "ctr"},
   {name:"Amdo Tibetan", local:"ཨ་མདོ་སྐད", location: "", tag: "at"},
@@ -12,9 +15,9 @@ export const customLocales = [
 
 
 export function getLocale(code) {
-  var locale = locale.getByTag(code);
+  var locale = customLocales.find( ({tag}) => tag === code );
   if (locale === 'undefined') {
-    locale = customLocales.find( ({tag}) => tag === code );
+    locale = locale.getByTag(code);
   }
   return locale;
 }

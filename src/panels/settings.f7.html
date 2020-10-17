@@ -11,29 +11,16 @@
         <div class="page-content">
           <div class="list">
             <ul>
-              {{#if loading}}
-                {{#each "12345678"}}
-                  <li class="skeleton-text skeleton-effect-fade">
-                    <a href="#" class="item-content">
-                      <div class="item-inner">
-                        <div class="item-title text-color-gray">Language</div>
-                        <div class="item-after text-color-primary"><i class="far fa-circle"></i></div>
-                      </div>
-                    </a>
-                  </li>
-                {{/each}}
-              {{else}}
-                {{#each languages}}
-                  <li>
-                    <a @click="changeLanguage" data-languageCode="{{tag}}" class="item-content">
-                      <div class="item-inner">
-                        <div class="item-title text-color-gray">{{#if local}}{{local}}{{else}}{{name}}{{/if}}</div>
-                        <div class="item-after text-color-primary">{{#js_if '"en" == this.tag' }}<i class="fas fa-check-circle"></i>{{else}}<i class="far fa-circle"></i>{{/js_if}}</div>
-                      </div>
-                    </a>
-                  </li>
-                {{/each}}
-              {{/if}}
+              {{#each languages}}
+                <li>
+                  <a @click="changeLanguage" data-languageCode="{{tag}}" class="item-content">
+                    <div class="item-inner">
+                      <div class="item-title text-color-gray">{{#if local}}{{local}}{{else}}{{name}}{{/if}}</div>
+                      <div class="item-after text-color-primary">{{#js_if '"en" == this.tag' }}<i class="fas fa-check-circle"></i>{{else}}<i class="far fa-circle"></i>{{/js_if}}</div>
+                    </div>
+                  </a>
+                </li>
+              {{/each}}
             </ul>
           </div>
         </div>
@@ -51,17 +38,13 @@ export default {
   data: function () {
     // Must return an object
     return {
-      loading: true
+      languages: locale.customLocales,
     }
   },
   on: {
     panelOpened: function(e, page) {
       var self = this;
       
-      self.$setState({
-        languages: locale.customLocales,
-        loading: false
-      });
     }
   },
   methods: {

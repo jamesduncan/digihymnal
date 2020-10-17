@@ -31,7 +31,10 @@
 <script>
 
 // Import locales
-const locale = require('../js/locales.js')
+const locale = require('../js/locales.js');
+
+import Preference from "../data/preference";
+const preference = new Preference();
 
 export default {
   // Component Data
@@ -42,14 +45,16 @@ export default {
     }
   },
   on: {
-    panelOpened: function(e, page) {
-      var self = this;
-      
+    panelOpened: async function(e, page) {
+      let self = this;
+
+      self.languageCode = await preference.getLanguage() || "en";
     }
   },
   methods: {
-    changeLanguage(event) {
-      console.log(this.$$(event.currentTarget).data("languagecode"));
+    changeLanguage: async function(event) {
+      let languageCode = this.$$(event.currentTarget).data("languagecode");
+      await preference.setLanguage(languageCode);
     }
   }
 }

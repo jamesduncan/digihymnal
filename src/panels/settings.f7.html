@@ -14,18 +14,21 @@
               {{#if loading}}
                 {{#each "123456"}}
                   <li class="skeleton-text skeleton-effect-fade">
-                    <a href="#">
-                      checking Item 1
+                    <a href="#" class="item-content">
+                      <div class="item-inner">
+                        <div class="item-title text-color-gray">Language</div>
+                        <div class="item-after text-color-primary"><i class="far fa-circle"></i></div>
+                      </div>
                     </a>
                   </li>
                 {{/each}}
               {{else}}
                 {{#each languages}}
                   <li>
-                    <a @click="changeLanguage" data-languageCode="{{tag}}" class="item-link item-content">
+                    <a @click="changeLanguage" data-languageCode="{{tag}}" class="item-content">
                       <div class="item-inner">
-                        <div class="item-title">{{#if local}}{{local}}{{else}}{{name}}{{/if}}</div>
-                        <div class="item-after">{{#js_if '"en" == this.tag' }}<i class="fas fa-check-circle"></i>{{else}}<i class="far fa-circle"></i>{{/js_if}}</div>
+                        <div class="item-title text-color-gray">{{#if local}}{{local}}{{else}}{{name}}{{/if}}</div>
+                        <div class="item-after text-color-primary">{{#js_if '"en" == this.tag' }}<i class="fas fa-check-circle"></i>{{else}}<i class="far fa-circle"></i>{{/js_if}}</div>
                       </div>
                     </a>
                   </li>

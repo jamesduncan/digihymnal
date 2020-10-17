@@ -12,7 +12,7 @@
         <div class="title">{{#if loading}}Song Title{{else}} {{song.title[lyric1]}} {{/if}}</div>
       </div>
     </div>
-    <div class="page-content">
+    <div class="page-content hide-navbar-on-scroll">
       {{#if loading}}
       {{else}}
       <div class="block-title">
@@ -65,11 +65,15 @@
             </div>
             <div class="menu-dropdown menu-dropdown-right">
               <div class="menu-dropdown-content">
-                <a href="#" class="menu-dropdown-link menu-close">
+                <a @click="toggleChords" class="menu-dropdown-link menu-close menuChords">
                   <span>Chords</span>
+                  <i class="margin-left text-color-primary fas fa-check-circle"></i>
+                  <i style="display: none;" class="margin-left text-color-primary far fa-circle"></i>
                 </a>
-                <a href="#" class="menu-dropdown-link menu-close">
-                  <span>Asian</span>
+                <a @click="toggleNumbers" class="menu-dropdown-link menu-close menuNumbers">
+                  <span>Number Notation</span>
+                  <i style="display: none;" class="margin-left text-color-primary fas fa-check-circle"></i>
+                  <i class="margin-left text-color-primary far fa-circle"></i>
                 </a>
               </div>
             </div>
@@ -80,57 +84,87 @@
 
         <div class="sheet">
           <div class="song">
-          {{#each song.lyrics.Verse}}
-            <h4>{{label}}</h4>
-            {{#each lines}}
-            <div class="line">
-              {{#each phrases}}
-              <div class="phrase">
-                {{#if chord}}
-                <div class="chord">{{chord}}</div>
-                {{/if}}
-                <div class="number">{{number}}</div>
-                <div class="lyric">{{this[lyric1]}}</div>
-                <div class="lyric">{{this[lyric2]}}</div>
-              </div>
+            <div class="verse">
+              {{#each song.lyrics.Verse}}
+                <h3>{{label}}</h3>
+                {{#each lines}}
+                <div class="line">
+                  {{#each phrases}}
+                  <div class="phrase noNumbers">
+                    {{#if chord}}
+                    {{#if @root.showChord}}
+                    <div class="chord">{{chord}}</div>
+                    {{/if}}
+                    {{/if}}
+                    {{#if number}}
+                    {{#if @root.showNumber}}
+                    <div class="number">{{number}}</div>
+                    {{/if}}
+                    {{/if}}
+                    <div class="lyric">{{this[lyric1]}}&nbsp;</div>
+                    {{#if @root.showLyric2}}
+                    <div class="lyric">{{this[lyric2]}}&nbsp;</div>
+                    {{/if}}
+                  </div>
+                  {{/each}}
+                </div>
+                {{/each}}
               {{/each}}
             </div>
-            {{/each}}
-          {{/each}}
-          {{#each song.lyrics.Chorus}}
-            <h4>{{label}}</h4>
-            {{#each lines}}
-            <div class="line">
-              {{#each phrases}}
-              <div class="phrase">
-                {{#if chord}}
-                <div class="chord">{{chord}}</div>
-                {{/if}}
-                <div class="number">{{number}}</div>
-                <div class="lyric">{{at}}</div>
-                <div class="lyric">{{ctr}}</div>
-              </div>
+            <div class="chorus">
+              {{#each song.lyrics.Chorus}}
+                <h3>{{label}}</h3>
+                {{#each lines}}
+                <div class="line">
+                  {{#each phrases}}
+                  <div class="phrase noNumbers">
+                    {{#if chord}}
+                    {{#if @root.showChord}}
+                    <div class="chord">{{chord}}</div>
+                    {{/if}}
+                    {{/if}}
+                    {{#if number}}
+                    {{#if @root.showNumber}}
+                    <div class="number">{{number}}</div>
+                    {{/if}}
+                    {{/if}}
+                    <div class="lyric">{{this[lyric1]}}&nbsp;</div>
+                    {{#if @root.showLyric2}}
+                    <div class="lyric">{{this[lyric2]}}&nbsp;</div>
+                    {{/if}}
+                  </div>
+                  {{/each}}
+                </div>
+                {{/each}}
               {{/each}}
             </div>
-            {{/each}}
-          {{/each}}
-          {{#each song.lyrics.Bridge}}
-            <h4>{{label}}</h4>
-            {{#each lines}}
-            <div class="line">
-              {{#each phrases}}
-              <div class="phrase">
-                {{#if chord}}
-                <div class="chord">{{chord}}</div>
-                {{/if}}
-                <div class="number">{{number}}</div>
-                <div class="lyric">{{at}}</div>
-                <div class="lyric">{{ctr}}</div>
-              </div>
+            <div class="bridge">
+              {{#each song.lyrics.Bridge}}
+                <h3>{{label}}</h3>
+                {{#each lines}}
+                <div class="line">
+                  {{#each phrases}}
+                  <div class="phrase noNumbers">
+                    {{#if chord}}
+                    {{#if @root.showChord}}
+                    <div class="chord">{{chord}}</div>
+                    {{/if}}
+                    {{/if}}
+                    {{#if number}}
+                    {{#if @root.showNumber}}
+                    <div class="number">{{number}}</div>
+                    {{/if}}
+                    {{/if}}
+                    <div class="lyric">{{this[lyric1]}}&nbsp;</div>
+                    {{#if @root.showLyric2}}
+                    <div class="lyric">{{this[lyric2]}}&nbsp;</div>
+                    {{/if}}
+                  </div>
+                  {{/each}}
+                </div>
+                {{/each}}
               {{/each}}
             </div>
-            {{/each}}
-          {{/each}}
           </div>
         </div>
       </div>
@@ -146,14 +180,16 @@
     transform-origin: left top;
   }
   .line {
-    margin-top: 30px;
+    margin-bottom: 20px;
   }
   .phrase {
     position: relative;
     display: inline-block;
+    margin: 55px 10px 0 0;
+    min-width: 20px;
   }
-  .chord {
-    bottom: 20px;
+  .chord, .number {
+    top: -55px;
     background: var(--f7-theme-color);
     border-radius: 3px;
     min-width: 20px;
@@ -162,22 +198,48 @@
     text-align: center;
     color: white;
     font-weight: bold;
+    display: inline-block;
+    padding: 0 2px;
+    margin-right: 5px;
+    position: absolute;
+    padding: 2px;
+  }
+  .number {
+    top: -25px;
+    border-radius: 100%;
+    width: 20px;
+    height: 20px;
+    padding: 2px;
+  }
+  .noNumbers, .noChords {
+    margin-top: 30px !important;
+  }
+  .noNumbers .chord, .noChords .chord {
+    top: -30px;
   }
 </style>
 <script>
   import Song from '../data/song';
+  import Preference from "../data/preference";
+  const preference = new Preference();
+  
   const songCollection = new Song();
-  songCollection.initSample();
+  // songCollection.initSample();
 
   var initScale = 1;
-  var lyric1 = "ct";
-  var lyric2 = "ctr";
+  var lyric1;
+  var lyric2;
+  var showNumbers = false;
+  var showChords = true;
+
   export default {
     // Component Data
     data: function () {
       // Must return an object
       return {
-        loading: true
+        loading: true,
+        showNumber: showNumbers,
+        showChord: showChords
       }
     },
     // Page Events
@@ -185,8 +247,12 @@
       pageInit: function(e, page) {
         var self = this;
         var songId = this.$route.params.songId;
-        songCollection.get(songId).then(result => {
-          self.$setState({ loading: false, song: result });
+        preference.getLanguage().then((languageCode) => {
+          lyric1 = languageCode;
+          console.log(lyric1);
+          songCollection.get(songId).then(result => {
+            self.$setState({ loading: false, song: result });
+          });
         });
       },
     },
@@ -202,6 +268,44 @@
         this.$(".song")[0].style.transform = "scale("+initScale+")";
         this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
         // debugger;
+      },
+      toggleChords: function(e) {
+        if (showChords) {
+          showChords = false;
+          this.$setState({
+            showChord: showChords
+          });
+          this.$(".menuChords .fa-circle")[0].style.display = "";
+          this.$(".menuChords .fa-check-circle")[0].style.display = "none";
+          this.$(".phrase").addClass("noChords");
+        } else {
+          showChords = true;
+          this.$setState({
+            showChord: showChords
+          });
+          this.$(".menuChords .fa-check-circle")[0].style.display = "";
+          this.$(".menuChords .fa-circle")[0].style.display = "none";
+          this.$(".phrase").removeClass("noChords");
+        }
+      },
+      toggleNumbers: function(e) {
+        if (showNumbers) {
+          showNumbers = false;
+          this.$setState({
+            showNumber: showNumbers
+          });
+          this.$(".menuNumbers .fa-circle")[0].style.display = "";
+          this.$(".menuNumbers .fa-check-circle")[0].style.display = "none";
+          this.$(".phrase").addClass("noNumbers");
+        } else {
+          showNumbers = true;
+          this.$setState({
+            showNumber: showNumbers
+          });
+          this.$(".menuNumbers .fa-check-circle")[0].style.display = "";
+          this.$(".menuNumbers .fa-circle")[0].style.display = "none";
+          this.$(".phrase").removeClass("noNumbers");
+        }
       }
     }
   }

@@ -9,15 +9,17 @@
             <span class="if-not-md">Back</span>
           </a>
         </div>
-        <div class="title">Song Title</div>
+        <div class="title">{{#if loading}}Song Title{{else}} {{song.title[locale]}} {{/if}}</div>
       </div>
     </div>
     <div class="page-content">
+      {{#if loading}}
+      {{else}}
       <div class="block-title">
-        By: Nathan Schubert
+        {{song.author[locale]}}
       </div>
       <div class="block">
-        <strong>Key:</strong> C
+        <strong>Key:</strong> {{song.key}}
       </div>
       <div class="menu">
         <div class="menu-inner">
@@ -75,39 +77,64 @@
         </div>
       </div>
       <div class="block block-strong" style="margin-top: 10px;">
-        
+
         <div class="sheet">
           <div class="song">
+          {{#each song.lyrics.Verse}}
+            <h4>{{label}}</h4>
+            {{#each lines}}
             <div class="line">
-              <div class="phrase"><div class="chord">C</div>Grace that flows like a river</div>
+              {{#each phrases}}
+              <div class="phrase">
+                {{#if chord}}
+                <div class="chord">{{chord}}</div>
+                {{/if}}
+                <div class="number">{{number}}</div>
+                <div class="lyric">{{this[lyric1]}}</div>
+                <div class="lyric">{{this[lyric2]}}</div>
+              </div>
+              {{/each}}
             </div>
-            
+            {{/each}}
+          {{/each}}
+          {{#each song.lyrics.Chorus}}
+            <h4>{{label}}</h4>
+            {{#each lines}}
             <div class="line">
-              <div class="phrase"><div class="chord">F</div>Washing&nbsp;</div>
-              <div class="phrase"><div class="chord">C</div>over me</div>
+              {{#each phrases}}
+              <div class="phrase">
+                {{#if chord}}
+                <div class="chord">{{chord}}</div>
+                {{/if}}
+                <div class="number">{{number}}</div>
+                <div class="lyric">{{at}}</div>
+                <div class="lyric">{{ctr}}</div>
+              </div>
+              {{/each}}
             </div>
-
+            {{/each}}
+          {{/each}}
+          {{#each song.lyrics.Bridge}}
+            <h4>{{label}}</h4>
+            {{#each lines}}
             <div class="line">
-              <div class="phrase"><div class="chord">C</div>Grace that flows like a river</div>
+              {{#each phrases}}
+              <div class="phrase">
+                {{#if chord}}
+                <div class="chord">{{chord}}</div>
+                {{/if}}
+                <div class="number">{{number}}</div>
+                <div class="lyric">{{at}}</div>
+                <div class="lyric">{{ctr}}</div>
+              </div>
+              {{/each}}
             </div>
-            
-            <div class="line">
-              <div class="phrase"><div class="chord">F</div>Washing&nbsp;</div>
-              <div class="phrase"><div class="chord">C</div>over me</div>
-            </div>
-
-            <div class="line">
-              <div class="phrase"><div class="chord">C</div>Grace that flows like a river</div>
-            </div>
-            
-            <div class="line">
-              <div class="phrase"><div class="chord">F</div>Washing&nbsp;</div>
-              <div class="phrase"><div class="chord">C</div>over me</div>
-            </div>
+            {{/each}}
+          {{/each}}
           </div>
         </div>
-        
       </div>
+      {{/if}}
     </div>
   </div>
 </template>
@@ -126,7 +153,6 @@
     display: inline-block;
   }
   .chord {
-    position: absolute;
     bottom: 20px;
     background: var(--f7-theme-color);
     border-radius: 3px;
@@ -139,7 +165,13 @@
   }
 </style>
 <script>
+  import Song from '../data/song';
+  const songCollection = new Song();
+
   var initScale = 1;
+  var locale = "eng";
+  var lyric1 = "ct";
+  var lyric2 = "ctr";
   export default {
     // Component Data
     data: function () {
@@ -151,7 +183,11 @@
     // Page Events
     on: {
       pageInit: function(e, page) {
-        console.log('pageInit', page);
+        var self = this;
+        var id = this.$route.params.songId;
+        songCollection.get(id).then(result => {
+          self.$setState({ loading: false, song: result });
+        });
       },
     },
     methods: {

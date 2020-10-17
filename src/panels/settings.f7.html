@@ -36,6 +36,19 @@ const locale = require('../js/locales.js');
 import Preference from "../data/preference";
 const preference = new Preference();
 
+function setDefaultLanguage(languageCode) {
+  var languages = [];
+  locale.customLocales.forEach((item) => {
+    if (item.tag == languageCode) {
+      item.default = true;
+    } else {
+      item.default = false;
+    }
+    languages.push(item)
+  });
+  return languages;
+}
+
 export default {
   // Component Data
   data: function () {
@@ -50,15 +63,7 @@ export default {
       var self = this;
 
       preference.getLanguage().then((languageCode) => {
-        var languages = [];
-        locale.customLocales.forEach((item) => {
-          if (item.tag == languageCode) {
-            item.default = true;
-          } else {
-            item.default = false;
-          }
-          languages.push(item)
-        });
+        var languages = setDefaultLanguage(languageCode);
         
         self.$setState({
           languages: languages
@@ -70,15 +75,7 @@ export default {
     changeLanguage: async function(event) {
       var self = this;
       var languageCode = this.$$(event.currentTarget).data("languagecode");
-      var languages = [];
-      locale.customLocales.forEach((item) => {
-        if (item.tag == languageCode) {
-          item.default = true;
-        } else {
-          item.default = false;
-        }
-        languages.push(item)
-      });
+      var languages = setDefaultLanguage(languageCode);
       
       self.$setState({
         languages: languages

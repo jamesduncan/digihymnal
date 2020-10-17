@@ -9,15 +9,26 @@
           </div>
         </div>
         <div class="page-content">
-          <div class="list simple-list">
+          <div class="list">
             <ul>
               {{#if loading}}
                 {{#each "123456"}}
-                  <li class="skeleton-text skeleton-effect-fade">checking Item 1</li>
+                  <li class="skeleton-text skeleton-effect-fade">
+                    <a href="#">
+                      checking Item 1
+                    </a>
+                  </li>
                 {{/each}}
               {{else}}
                 {{#each languages}}
-                  <li>{{#if local}}{{local}}{{else}}{{name}}{{/if}}</li>
+                  <li>
+                    <a @click="changeLanguage" data-languageCode="{{tag}}" class="item-link item-content">
+                      <div class="item-inner">
+                        <div class="item-title">{{#if local}}{{local}}{{else}}{{name}}{{/if}}</div>
+                        <div class="item-after">{{#js_if '"en" == this.tag' }}<i class="fas fa-check-circle"></i>{{else}}<i class="far fa-circle"></i>{{/js_if}}</div>
+                      </div>
+                    </a>
+                  </li>
                 {{/each}}
               {{/if}}
             </ul>
@@ -48,6 +59,11 @@ export default {
         languages: locale.customLocales,
         loading: false
       });
+    }
+  },
+  methods: {
+    changeLanguage(event) {
+      console.log(this.$$(event.currentTarget).data("languagecode"));
     }
   }
 }

@@ -93,8 +93,6 @@ export default {
       preference.getLanguage().then((languageCode) => {
         locale = languageCode;
         songCollection.list({start: 0, limit: 50}).then(result => {
-          console.log(result);
-          console.log(locale);
           self.$setState({ loading: false, songs: result });
         });
       });

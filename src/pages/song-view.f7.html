@@ -9,14 +9,14 @@
             <span class="if-not-md">Back</span>
           </a>
         </div>
-        <div class="title">{{#if loading}}Song Title{{else}} {{song.title[locale]}} {{/if}}</div>
+        <div class="title">{{#if loading}}Song Title{{else}} {{song.title[lyric1]}} {{/if}}</div>
       </div>
     </div>
     <div class="page-content">
       {{#if loading}}
       {{else}}
       <div class="block-title">
-        {{song.author[locale]}}
+        {{song.author[lyric1]}}
       </div>
       <div class="block">
         <strong>Key:</strong> {{song.key}}
@@ -167,9 +167,9 @@
 <script>
   import Song from '../data/song';
   const songCollection = new Song();
+  songCollection.initSample();
 
   var initScale = 1;
-  var locale = "eng";
   var lyric1 = "ct";
   var lyric2 = "ctr";
   export default {
@@ -184,8 +184,8 @@
     on: {
       pageInit: function(e, page) {
         var self = this;
-        var id = this.$route.params.songId;
-        songCollection.get(id).then(result => {
+        var songId = this.$route.params.songId;
+        songCollection.get(songId).then(result => {
           self.$setState({ loading: false, song: result });
         });
       },

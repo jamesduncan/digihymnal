@@ -49,7 +49,7 @@
           {{else}}
           {{#each songs}}
           <li>
-            <a href="/song/view/1/" class="item-link">
+            <a href="/song/view/{{id}}/" class="item-link">
               <div class="item-content">
                 <div class="item-inner">
                   <div class="item-title-row">
@@ -73,8 +73,9 @@ import Song from '../data/song';
 
 const preference = new Preference();
 const songCollection = new Song();
+songCollection.initSample();
 
-var locale = 'eng';
+var locale = 'en';
 var app;
 
 export default {

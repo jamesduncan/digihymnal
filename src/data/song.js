@@ -21,7 +21,7 @@ export default class SongCollection {
         return Promise.all(tasks);
     }
 
-    async list({ start, limit }) {
+    async list({ start, limit, languageCode }) {
         let tasks = [];
         let result = [];
         let ids = await this.db.keys();
@@ -36,11 +36,27 @@ export default class SongCollection {
         });
 
         // Return data
-        tasks.push(() => Promise.resolve(result));
+        tasks.push(() => {
+
+            // Convert title to current language
+            if (languageCode) {
+                (result || []).forEach((item) => {
+                    if (!item.title) return;
+
+                    Object.keys(item.title).forEach((prop) => {
+                        console.log(prop, languageCode);
+                        if (prop == languageCode)
+                            item.title = item.title[prop];
+                    });
+                });
+            }
+
+            return Promise.resolve(result);
+        });
 
         return tasks.reduce((promiseChain, currTask) => {
             return promiseChain.then(currTask);
-         }, Promise.resolve([]));
+        }, Promise.resolve([]));
     }
 
     async get(id) {

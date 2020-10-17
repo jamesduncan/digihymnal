@@ -3,8 +3,8 @@ import locale from 'locale-codes';
 //Languages shown in settings
 export const customLocales = [
   locale.getByTag('en'),
-  locale.getByTag('ne'),
-  locale.getByTag('zh'),
+  // locale.getByTag('ne'),
+  // locale.getByTag('zh'),
   //Add for non iso languages - copied some from wikipedia, not sure if its correct.
   {name:"Tibetan", local:"བོད་སྐད་", location: "", tag: "bo"},
   {name:"Central Tibetan", local:"དབུས་སྐད", location: "", tag: "ct"},

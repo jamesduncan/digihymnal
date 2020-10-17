@@ -1,7 +1,7 @@
 export default {
     "id": "sample02",
-    "title": { "eng": "AT 1 Ah Lord God" },
-    "author": { "tib": "༠༡། ཀྱེ། དཀོན་མཆགོ" },
+    "title": { "en": "AT 1 Ah Lord God", "bo": "ཀྱེ། དཀོན་མཆོག", "thai": "พระคุณที่ไหลเหมือนสายน้ำ", "thai-rom": "Phrakhuṇ thī̀ h̄ịl h̄emụ̄xn s̄āyn̂ả"},
+    "author": { "en": "Author Name", "bo": "༠༡། ཀྱེ། དཀོན་མཆགོ", "thai": "ลเหมือนสายน้ำ", "thai-rom": "Phrakhuṇ" },
     "key": "C",
     "lyrics": {
         "Verse": [
@@ -11,8 +11,8 @@ export default {
                     "phrase": [{
                         "chord": "C",
                         "number": "1",
-                        "tib": "ཀྱེ། དཀོན་མཆོག",
-                        "eng": "Grace that flows like a river",
+                        "bo": "ཀྱེ། དཀོན་མཆོག",
+                        "en": "Grace that flows like a river",
                         "thai": "พระคุณที่ไหลเหมือนสายน้ำ",
                         "thai-rom": "Phrakhuṇ thī̀ h̄ịl h̄emụ̄xn s̄āyn̂ả"
                     }]
@@ -21,16 +21,16 @@ export default {
                     "phrase": [{
                         "chord": "F",
                         "number": "4",
-                        "tib": "ནམ་མཁའ ",
-                        "eng": "Washing ",
+                        "bo": "ནམ་མཁའ ",
+                        "en": "Washing ",
                         "thai": "ซักผ้า",
                         "thai-rom": "Sạk p̄ĥā "
                     },
                     {
                         "chord": "C",
                         "number": "1",
-                        "tib": " ་དང་ས་གཞི",
-                        "eng": "over me",
+                        "bo": " ་དང་ས་གཞི",
+                        "en": "over me",
                         "thai": "มากกว่าฉัน",
                         "thai-rom": "Mākkẁā c̄hạn "
                     }]
@@ -44,8 +44,8 @@ export default {
                     "phrase": [{
                         "chord": ".C",
                         "number": "1",
-                        "tib": "ཀྱེ། དཀོན་མཆོག",
-                        "eng": "Grace that flows like a river",
+                        "bo": "ཀྱེ། དཀོན་མཆོག",
+                        "en": "Grace that flows like a river",
                         "thai": "พระคุณที่ไหลเหมือนสายน้ำ",
                         "thai-rom": "Phrakhuṇ thī̀ h̄ịl h̄emụ̄xn s̄āyn̂ả"
                     }]
@@ -54,16 +54,16 @@ export default {
                     "phrase": [{
                         "chord": ".F",
                         "number": "4",
-                        "tib": "ནམ་མཁའ ",
-                        "eng": "Washing ",
+                        "bo": "ནམ་མཁའ ",
+                        "en": "Washing ",
                         "thai": "ซักผ้า",
                         "thai-rom": "Sạk p̄ĥā "
                     },
                     {
                         "chord": "C",
                         "number": "1",
-                        "tib": " ་དང་ས་གཞི",
-                        "eng": "over me",
+                        "bo": " ་དང་ས་གཞི",
+                        "en": "over me",
                         "thai": "มากกว่าฉัน",
                         "thai-rom": "Mākkẁā c̄hạn "
                     }]
@@ -77,7 +77,7 @@ export default {
                     "phrase": [{
                         "chord": "C",
                         "number": "1",
-                        "eng": "Do"
+                        "en": "Do"
                     }]
                 }]
             }

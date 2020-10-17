@@ -2,12 +2,17 @@ export default {
     "id": "sample01",
     "title":
     {
-        "eng": "Ah Lord God",
-        "at": "༠༡། ཀྱེ། དཀོན་མཆགོོ",
-        "ct": "ཞེས་པའི་དབྱིན་ཇིའི་བསྟོད་དབྱངས།",
-        "ctr": "GYE, GÖNCHÒ",
+      "en": "Ah Lord God",
+      "at": "༠༡། ཀྱེ། དཀོན་མཆགོོ",
+      "ct": "ཞེས་པའི་དབྱིན་ཇིའི་བསྟོད་དབྱངས།",
+      "ctr": "GYE, GÖNCHÒ"
     },
-    "author": {},
+    "author": {
+      "en": "Author Name",
+      "at": "དཀོན་མཆགོོ",
+      "ct": "སྟོད་དབྱངས།",
+      "ctr": "GÖNCHÒ"
+    },
     "key": "C",
     "lyrics":
     {

@@ -41,7 +41,7 @@
                 <div class="item-title-row">
                   <div class="item-title">Song Name will go Here</div>
                 </div>
-                <div class="item-subtitle">Credit Here</div>
+                <div class="item-subtitle text-color-gray">Credit Here</div>
               </div>
             </div>
           </li>
@@ -55,7 +55,7 @@
                   <div class="item-title-row">
                     <div class="item-title">{{title[locale]}}</div>
                   </div>
-                  <div class="item-subtitle">{{author[locale]}}</div>
+                  <div class="item-subtitle text-color-gray">{{author[locale]}}</div>
                 </div>
               </div>
             </a>
@@ -68,11 +68,15 @@
   </div>
 </template>
 <script>
+import Preference from "../data/preference";
 import Song from '../data/song';
-const songCollection = new Song();
-let locale = 'eng';
 
+const preference = new Preference();
+const songCollection = new Song();
+
+var locale = 'eng';
 var app;
+
 export default {
 
   data: function () {
@@ -85,10 +89,14 @@ export default {
     pageInit: async function(e, page) {
       var self = this;
       app = self.$app;
-
-      await songCollection.initSample();
-      songCollection.list({ start: 0, limit: 10}).then(result => {
-        self.$setState({ loading: false, songs: result });
+      
+      preference.getLanguage().then((languageCode) => {
+        locale = languageCode;
+        songCollection.list({start: 0, limit: 50}).then(result => {
+          console.log(result);
+          console.log(locale);
+          self.$setState({ loading: false, songs: result });
+        });
       });
 
       // create searchbar

@@ -33,6 +33,18 @@ Framework7 app created with following options:
 }
 ```
 
+## Development
+
+Install webpack
+`npm install -g webpack`
+
+```
+git clone git@github.com:owner/digihymnal.git digihymnal
+cd digihymnal
+npm install
+npm run dev
+```
+
 ## NPM Scripts
 
 * 🔥 `start` - run development server

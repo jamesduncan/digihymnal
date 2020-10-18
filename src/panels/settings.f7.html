@@ -82,8 +82,7 @@ export default {
       })
 
       await preference.setLanguage(languageCode);
-      
-      
+      self.$router.back('/', {force: true, ignoreCache: true});
     }
   }
 }

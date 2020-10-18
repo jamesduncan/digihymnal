@@ -21,66 +21,66 @@
       <div class="block">
         <strong>Key:</strong> {{song.key}}
       </div>
-      <div class="menu">
-        <div class="menu-inner">
-          <a @click="zoomIn" class="menu-item icon-only">
-            <div class="menu-item-content">
-              <i class="fa-bigger fas fa-search-plus"></i>
-            </div>
-          </a>
-          <a @click="zoomOut" class="menu-item icon-only">
-            <div class="menu-item-content">
-              <i class="fa-bigger fas fa-search-minus"></i>
-            </div>
-          </a>
-          <div style="margin-left: auto" class="menu-item menu-item-dropdown">
-            <div class="menu-item-content icon-only">
+      <div class="block block-strong" style="margin-top: 10px;">
+        <div class="menu">
+          <div class="menu-inner no-margin-padding">
+            <a @click="zoomIn" class="menu-item icon-only">
               <div class="menu-item-content">
-                <i class="fa-bigger fas fa-language"></i>
+                <i class="fa-bigger fas fa-search-plus"></i>
               </div>
-            </div>
-            <div class="menu-dropdown menu-dropdown-right">
-              <div class="menu-dropdown-content">
-                <a href="#" class="menu-dropdown-link menu-close">
-                  <span>Language #1</span>
-                  <i class="margin-left fas fa-check-circle"></i>
-                </a>
-                <a href="#" class="menu-dropdown-link menu-close">
-                  <span>Language #2</span>
-                </a>
-                <a href="#" class="menu-dropdown-link menu-close">
-                  <span>Language #3</span>
-                </a>
-                <a href="#" class="menu-dropdown-link menu-close">
-                  <span>Language #4</span>
-                </a>
-              </div>
-            </div>
-          </div>
-          <div class="menu-item menu-item-dropdown">
-            <div class="menu-item-content icon-only">
+            </a>
+            <a @click="zoomOut" class="menu-item icon-only">
               <div class="menu-item-content">
-                <i class="fa-bigger fas fa-music"></i>
+                <i class="fa-bigger fas fa-search-minus"></i>
+              </div>
+            </a>
+            <div style="margin-left: auto" class="menu-item menu-item-dropdown">
+              <div class="menu-item-content icon-only">
+                <div class="menu-item-content">
+                  <i class="fa-bigger fas fa-language"></i>
+                </div>
+              </div>
+              <div class="menu-dropdown menu-dropdown-right">
+                <div class="menu-dropdown-content">
+                  <a href="#" class="menu-dropdown-link menu-close">
+                    <span>Language #1</span>
+                    <i class="margin-left fas fa-check-circle"></i>
+                  </a>
+                  <a href="#" class="menu-dropdown-link menu-close">
+                    <span>Language #2</span>
+                  </a>
+                  <a href="#" class="menu-dropdown-link menu-close">
+                    <span>Language #3</span>
+                  </a>
+                  <a href="#" class="menu-dropdown-link menu-close">
+                    <span>Language #4</span>
+                  </a>
+                </div>
               </div>
             </div>
-            <div class="menu-dropdown menu-dropdown-right">
-              <div class="menu-dropdown-content">
-                <a @click="toggleChords" class="menu-dropdown-link menu-close menuChords">
-                  <span>Chords</span>
-                  <i class="margin-left text-color-primary fas fa-check-circle"></i>
-                  <i style="display: none;" class="margin-left text-color-primary far fa-circle"></i>
-                </a>
-                <a @click="toggleNumbers" class="menu-dropdown-link menu-close menuNumbers">
-                  <span>Number Notation</span>
-                  <i style="display: none;" class="margin-left text-color-primary fas fa-check-circle"></i>
-                  <i class="margin-left text-color-primary far fa-circle"></i>
-                </a>
+            <div class="menu-item menu-item-dropdown">
+              <div class="menu-item-content icon-only">
+                <div class="menu-item-content">
+                  <i class="fa-bigger fas fa-music"></i>
+                </div>
+              </div>
+              <div class="menu-dropdown menu-dropdown-right">
+                <div class="menu-dropdown-content">
+                  <a @click="toggleChords" class="menu-dropdown-link menu-close menuChords">
+                    <span>Chords</span>
+                    <i class="margin-left text-color-primary fas fa-check-circle"></i>
+                    <i style="display: none;" class="margin-left text-color-primary far fa-circle"></i>
+                  </a>
+                  <a @click="toggleNumbers" class="menu-dropdown-link menu-close menuNumbers">
+                    <span>Number Notation</span>
+                    <i style="display: none;" class="margin-left text-color-primary fas fa-check-circle"></i>
+                    <i class="margin-left text-color-primary far fa-circle"></i>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="block block-strong" style="margin-top: 10px;">
 
         <div class="sheet">
           <div class="song">
@@ -173,6 +173,10 @@
   </div>
 </template>
 <style>
+  .no-margin-padding {
+    margin: 0;
+    padding: 0;
+  }
   .fa-bigger {
     font-size: larger;
   }

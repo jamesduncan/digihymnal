@@ -7,8 +7,8 @@ export default {
         "Verse": [
             {
                 "label": "Intro Verse",
-                "line": [{
-                    "phrase": [{
+                "lines": [{
+                    "phrases": [{
                         "chord": "C",
                         "number": "1",
                         "bo": "ཀྱེ། དཀོན་མཆོག",
@@ -18,7 +18,7 @@ export default {
                     }]
                 },
                 {
-                    "phrase": [{
+                    "phrases": [{
                         "chord": "F",
                         "number": "4",
                         "bo": "ནམ་མཁའ ",
@@ -40,8 +40,8 @@ export default {
         "Chorus": [
             {
                 "label": "Main Chorus",
-                "line": [{
-                    "phrase": [{
+                "lines": [{
+                    "phrases": [{
                         "chord": ".C",
                         "number": "1",
                         "bo": "ཀྱེ། དཀོན་མཆོག",
@@ -51,7 +51,7 @@ export default {
                     }]
                 },
                 {
-                    "phrase": [{
+                    "phrases": [{
                         "chord": ".F",
                         "number": "4",
                         "bo": "ནམ་མཁའ ",
@@ -71,16 +71,6 @@ export default {
             }
         ],
         "Bridge": [
-            {
-                "label": "",
-                "line": [{
-                    "phrase": [{
-                        "chord": "C",
-                        "number": "1",
-                        "en": "Do"
-                    }]
-                }]
-            }
         ]
     }
 }

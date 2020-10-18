@@ -29,7 +29,7 @@
           <div class="stepper-button-plus"></div>
         </div>
       </div>
-      <div class="block block-strong" style="margin-top: 10px;">
+      <div class="block block-strong" style="margin-top: 10px; overflow: hidden;">
         <div class="menu">
           <div class="menu-inner no-margin-padding">
             <a @click="zoomIn" class="menu-item icon-only">
@@ -243,6 +243,12 @@
   var lyric2;
   var showNumbers = false;
   var showChords = true;
+  var deviceWidth = window.innerWidth;
+  if (deviceWidth >= 700) {
+    initScale = 2;
+  } else if (deviceWidth >= 500) {
+    initScale = 1.5;
+  }
   var steps = 0;
 
   export default {
@@ -263,13 +269,15 @@
         var songId = this.$route.params.songId;
         preference.getLanguage().then((languageCode) => {
           lyric1 = languageCode;
-          console.log(lyric1);
+          console.log('current lang: ' + lyric1);
           songCollection.get(songId).then(result => {
             self.$setState({
               loading: false,
               song: result,
               steps: steps,
             }, () => {
+              self.$(".song")[0].style.transform = "scale("+initScale+")";
+              self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
               var stepper = app.stepper.create({
                 el: '.stepper',
                 value: steps,

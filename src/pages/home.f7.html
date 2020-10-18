@@ -48,6 +48,7 @@
           {{/each}}
           {{else}}
           {{#each songs}}
+          {{#if title}}
           <li>
             <a href="/song/view/{{id}}/" class="item-link">
               <div class="item-content">
@@ -60,6 +61,7 @@
               </div>
             </a>
           </li>
+          {{/if}}
           {{/each}}
           {{/if}}
         </ul>

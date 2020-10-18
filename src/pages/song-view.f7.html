@@ -15,21 +15,7 @@
     <div class="page-content hide-navbar-on-scroll">
       {{#if loading}}
       {{else}}
-      <div class="block-title">
-        {{song.author[lyric1]}}
-      </div>
-      <div class="block">
-        <strong>Key:</strong> {{transpose song.key @root.steps}}
-        <!-- Stepper element -->
-        <div class="stepper">
-          <div class="stepper-button-minus"></div>
-          <div class="stepper-input-wrap">
-            <input type="text" readonly>
-          </div>
-          <div class="stepper-button-plus"></div>
-        </div>
-      </div>
-      <div class="block block-strong" style="margin-top: 10px; overflow: hidden;">
+      <div class="block block-strong" style="margin-bottom: 10px; overflow: hidden;">
         <div class="menu">
           <div class="menu-inner no-margin-padding">
             <a @click="zoomIn" class="menu-item icon-only">
@@ -42,6 +28,14 @@
                 <i class="fa-bigger fas fa-search-minus"></i>
               </div>
             </a>
+            <!-- Stepper element -->
+            <div class="stepper stepper-large stepper-fill" style="margin-left: auto; height: 40px;">
+              <div class="stepper-button-minus"></div>
+              <div class="stepper-input-wrap">
+                <input type="text" value="{{transpose song.key @root.steps}}" readonly>
+              </div>
+              <div class="stepper-button-plus"></div>
+            </div>
             <div style="margin-left: auto" class="menu-item menu-item-dropdown">
               <div class="menu-item-content icon-only">
                 <div class="menu-item-content">
@@ -75,14 +69,14 @@
               <div class="menu-dropdown menu-dropdown-right">
                 <div class="menu-dropdown-content">
                   <a @click="toggleChords" class="menu-dropdown-link menu-close menuChords">
-                    <span>Chords</span>
-                    <i class="margin-left text-color-primary fas fa-check-circle"></i>
-                    <i style="display: none;" class="margin-left text-color-primary far fa-circle"></i>
+                    <span>{{translate "Chords"}}</span>
+                    <i class="margin-left text-color-primary fas fa-check-square"></i>
+                    <i style="display: none;" class="margin-left text-color-gray far fa-square"></i>
                   </a>
                   <a @click="toggleNumbers" class="menu-dropdown-link menu-close menuNumbers">
-                    <span>Number Notation</span>
-                    <i style="display: none;" class="margin-left text-color-primary fas fa-check-circle"></i>
-                    <i class="margin-left text-color-primary far fa-circle"></i>
+                    <span>{{translate "Number Notation"}}</span>
+                    <i style="display: none;" class="margin-left text-color-blue fas fa-check-circle"></i>
+                    <i class="margin-left text-color-gray far fa-circle"></i>
                   </a>
                 </div>
               </div>
@@ -94,7 +88,7 @@
           <div class="song">
             <div class="verse">
               {{#each song.lyrics.Verse}}
-                <h3>{{label}}</h3>
+                <h3>{{translate label}}</h3>
                 {{#each lines}}
                 <div class="line">
                   {{#each phrases}}
@@ -121,7 +115,7 @@
             </div>
             <div class="chorus">
               {{#each song.lyrics.Chorus}}
-                <h3>{{label}}</h3>
+                <h3>{{translate label}}</h3>
                 {{#each lines}}
                 <div class="line">
                   {{#each phrases}}
@@ -176,6 +170,9 @@
           </div>
         </div>
       </div>
+      <div class="block text-align-right text-color-gray" style="margin-top: 10px;">
+        {{song.author[lyric1]}}
+      </div>
       {{/if}}
     </div>
   </div>
@@ -222,6 +219,7 @@
     width: 20px;
     height: 20px;
     padding: 2px;
+    background: var(--f7-color-blue);
   }
   .noNumbers, .noChords {
     margin-top: 30px !important;
@@ -317,17 +315,19 @@
           this.$setState({
             showChord: showChords
           });
-          this.$(".menuChords .fa-circle")[0].style.display = "";
-          this.$(".menuChords .fa-check-circle")[0].style.display = "none";
+          this.$(".menuChords .fa-circle, .menuChords .fa-square")[0].style.display = "";
+          this.$(".menuChords .fa-check-circle, .menuChords .fa-check-square")[0].style.display = "none";
           this.$(".phrase").addClass("noChords");
+          this.$(".stepper")[0].style.display = "none";
         } else {
           showChords = true;
           this.$setState({
             showChord: showChords
           });
-          this.$(".menuChords .fa-check-circle")[0].style.display = "";
-          this.$(".menuChords .fa-circle")[0].style.display = "none";
+          this.$(".menuChords .fa-check-circle, .menuChords .fa-check-square")[0].style.display = "";
+          this.$(".menuChords .fa-circle, .menuChords .fa-square")[0].style.display = "none";
           this.$(".phrase").removeClass("noChords");
+          this.$(".stepper")[0].style.display = "";
         }
       },
       toggleNumbers: function(e) {

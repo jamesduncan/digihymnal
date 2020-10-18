@@ -7,7 +7,9 @@ const translations = {
     "Back": "Back",
     "Key": "Key",
     "Chords": "Chords",
-    "Number Notation": "Number Notation"
+    "Number Notation": "Number Notation",
+    "Intro Verse": "Intro Verse",
+    "Main Chorus": "Main Chorus"
   },
   "thai": {
     "Digital Hymnal": "เพลงสวดดิจิตอล",
@@ -17,7 +19,9 @@ const translations = {
     "Back": "กลับ",
     "Key": "คีย์เพลง",
     "Chords": "คอร์ด",
-    "Number Notation": "สัญกรณ์ตัวเลข"
+    "Number Notation": "สัญกรณ์ตัวเลข",
+    "Intro Verse": "กลอน",
+    "Main Chorus": "คอรัส"
   }
 }
 

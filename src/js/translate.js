@@ -23,5 +23,6 @@ const translations = {
 
 export function translate (text) {
   var languageCode = window.languageCode || "en";
+  if (!translations[languageCode]) languageCode = "en";
   return translations[languageCode][text];
 }

@@ -171,7 +171,7 @@ class SongCollection {
         return Promise.all(tasks);
     }
 
-    async list({ start, limit }) {
+    async list({ start, limit, languageCode }) {
         let tasks = [];
         let result = [];
         let ids = await this.db.keys();
@@ -186,11 +186,33 @@ class SongCollection {
         });
 
         // Return data
-        tasks.push(() => Promise.resolve(result));
+        tasks.push(() => {
+
+            // Convert title to current language
+            if (languageCode) {
+                (result || []).forEach((item) => {
+                    if (!item.title) return;
+
+                    var found = false;
+                    Object.keys(item.title).forEach((prop) => {
+                        console.log(prop, languageCode);
+                        if (prop == languageCode) {
+                          item.title = item.title[prop];
+                          found = true;
+                        }
+                    });
+                    if (!found) {
+                      delete item.title;
+                    }
+                });
+            }
+
+            return Promise.resolve(result);
+        });
 
         return tasks.reduce((promiseChain, currTask) => {
             return promiseChain.then(currTask);
-         }, Promise.resolve([]));
+        }, Promise.resolve([]));
     }
 
     async get(id) {
@@ -3084,12 +3106,17 @@ __webpack_require__.r(__webpack_exports__);
     "id": "sample01",
     "title":
     {
-        "eng": "Ah Lord God",
-        "at": "༠༡། ཀྱེ། དཀོན་མཆགོོ",
-        "ct": "ཞེས་པའི་དབྱིན་ཇིའི་བསྟོད་དབྱངས།",
-        "ctr": "GYE, GÖNCHÒ",
+      "en": "Ah Lord God",
+      "at": "༠༡། ཀྱེ། དཀོན་མཆགོོ",
+      "ct": "ཞེས་པའི་དབྱིན་ཇིའི་བསྟོད་དབྱངས།",
+      "ctr": "GYE, GÖNCHÒ"
     },
-    "author": {},
+    "author": {
+      "en": "Isaac Horst",
+      "at": "དཀོན་མཆགོོ",
+      "ct": "སྟོད་དབྱངས།",
+      "ctr": "GÖNCHÒ"
+    },
     "key": "C",
     "lyrics":
     {
@@ -3447,37 +3474,37 @@ __webpack_require__.r(__webpack_exports__);
 __webpack_require__.r(__webpack_exports__);
 /* harmony default export */ __webpack_exports__["default"] = ({
     "id": "sample02",
-    "title": { "eng": "AT 1 Ah Lord God" },
-    "author": { "tib": "༠༡། ཀྱེ། དཀོན་མཆགོ" },
+    "title": { "en": "Oh, Lord God", "bo": "ཀྱེ། དཀོན་མཆོག", "thai": "พระคุณที่ไหลเหมือนสายน้ำ", "thai-rom": "Phrakhuṇ thī̀ h̄ịl h̄emụ̄xn s̄āyn̂ả"},
+    "author": { "en": "Nathan Schubert", "bo": "༠༡། ཀྱེ། དཀོན་མཆགོ", "thai": "ลเหมือนสายน้ำ", "thai-rom": "Phrakhuṇ" },
     "key": "C",
     "lyrics": {
         "Verse": [
             {
                 "label": "Intro Verse",
-                "line": [{
-                    "phrase": [{
+                "lines": [{
+                    "phrases": [{
                         "chord": "C",
                         "number": "1",
-                        "tib": "ཀྱེ། དཀོན་མཆོག",
-                        "eng": "Grace that flows like a river",
+                        "bo": "ཀྱེ། དཀོན་མཆོག",
+                        "en": "Grace that flows like a river",
                         "thai": "พระคุณที่ไหลเหมือนสายน้ำ",
                         "thai-rom": "Phrakhuṇ thī̀ h̄ịl h̄emụ̄xn s̄āyn̂ả"
                     }]
                 },
                 {
-                    "phrase": [{
+                    "phrases": [{
                         "chord": "F",
                         "number": "4",
-                        "tib": "ནམ་མཁའ ",
-                        "eng": "Washing ",
+                        "bo": "ནམ་མཁའ ",
+                        "en": "Washing ",
                         "thai": "ซักผ้า",
                         "thai-rom": "Sạk p̄ĥā "
                     },
                     {
                         "chord": "C",
                         "number": "1",
-                        "tib": " ་དང་ས་གཞི",
-                        "eng": "over me",
+                        "bo": " ་དང་ས་གཞི",
+                        "en": "over me",
                         "thai": "มากกว่าฉัน",
                         "thai-rom": "Mākkẁā c̄hạn "
                     }]
@@ -3487,30 +3514,30 @@ __webpack_require__.r(__webpack_exports__);
         "Chorus": [
             {
                 "label": "Main Chorus",
-                "line": [{
-                    "phrase": [{
+                "lines": [{
+                    "phrases": [{
                         "chord": ".C",
                         "number": "1",
-                        "tib": "ཀྱེ། དཀོན་མཆོག",
-                        "eng": "Grace that flows like a river",
+                        "bo": "ཀྱེ། དཀོན་མཆོག",
+                        "en": "Grace that flows like a river",
                         "thai": "พระคุณที่ไหลเหมือนสายน้ำ",
                         "thai-rom": "Phrakhuṇ thī̀ h̄ịl h̄emụ̄xn s̄āyn̂ả"
                     }]
                 },
                 {
-                    "phrase": [{
+                    "phrases": [{
                         "chord": ".F",
                         "number": "4",
-                        "tib": "ནམ་མཁའ ",
-                        "eng": "Washing ",
+                        "bo": "ནམ་མཁའ ",
+                        "en": "Washing ",
                         "thai": "ซักผ้า",
                         "thai-rom": "Sạk p̄ĥā "
                     },
                     {
                         "chord": "C",
                         "number": "1",
-                        "tib": " ་དང་ས་གཞི",
-                        "eng": "over me",
+                        "bo": " ་དང་ས་གཞི",
+                        "en": "over me",
                         "thai": "มากกว่าฉัน",
                         "thai-rom": "Mākkẁā c̄hạn "
                     }]
@@ -3518,16 +3545,6 @@ __webpack_require__.r(__webpack_exports__);
             }
         ],
         "Bridge": [
-            {
-                "label": "",
-                "line": [{
-                    "phrase": [{
-                        "chord": "C",
-                        "number": "1",
-                        "eng": "Do"
-                    }]
-                }]
-            }
         ]
     }
 });

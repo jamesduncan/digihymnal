@@ -1,7 +1,7 @@
 export default {
     "id": "sample02",
-    "title": { "en": "AT 1 Ah Lord God", "bo": "ཀྱེ། དཀོན་མཆོག", "thai": "พระคุณที่ไหลเหมือนสายน้ำ", "thai-rom": "Phrakhuṇ thī̀ h̄ịl h̄emụ̄xn s̄āyn̂ả"},
-    "author": { "en": "Author Name", "bo": "༠༡། ཀྱེ། དཀོན་མཆགོ", "thai": "ลเหมือนสายน้ำ", "thai-rom": "Phrakhuṇ" },
+    "title": { "en": "Oh, Lord God", "bo": "ཀྱེ། དཀོན་མཆོག", "thai": "พระคุณที่ไหลเหมือนสายน้ำ", "thai-rom": "Phrakhuṇ thī̀ h̄ịl h̄emụ̄xn s̄āyn̂ả"},
+    "author": { "en": "Nathan Schubert", "bo": "༠༡། ཀྱེ། དཀོན་མཆགོ", "thai": "ลเหมือนสายน้ำ", "thai-rom": "Phrakhuṇ" },
     "key": "C",
     "lyrics": {
         "Verse": [

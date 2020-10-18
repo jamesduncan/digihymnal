@@ -24,6 +24,10 @@ import App from '../app.f7.html';
 import { transpose } from "./transpose";
 Template7.registerHelper('transpose', transpose);
 
+// Import translation tool
+import { translate } from "./translate";
+Template7.registerHelper('translate', translate);
+
 var app = new Framework7({
   root: '#app', // App root element
   component: App, // App main component

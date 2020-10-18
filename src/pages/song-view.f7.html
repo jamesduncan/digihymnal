@@ -6,10 +6,10 @@
         <div class="left">
           <a href="#" class="link back">
             <i class="icon icon-back"></i>
-            <span class="if-not-md">Back</span>
+            <span class="if-not-md">{{#if loading}}Back{{else}}{{translate "Back"}}{{/if}}</span>
           </a>
         </div>
-        <div class="title">{{#if loading}}Song Title{{else}} {{song.title[lyric1]}} {{/if}}</div>
+        <div class="title">{{#if loading}}{{else}} {{song.title[lyric1]}} {{/if}}</div>
       </div>
     </div>
     <div class="page-content hide-navbar-on-scroll">

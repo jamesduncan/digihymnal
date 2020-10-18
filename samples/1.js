@@ -8,7 +8,7 @@ export default {
       "ctr": "GYE, GÖNCHÒ"
     },
     "author": {
-      "en": "Author Name",
+      "en": "Isaac Horst",
       "at": "དཀོན་མཆགོོ",
       "ct": "སྟོད་དབྱངས།",
       "ctr": "GÖNCHÒ"

@@ -4,10 +4,10 @@
     <div class="navbar">
       <div class="navbar-bg"></div>
       <div class="navbar-inner">
-        <div class="title sliding">Digital Hymnal</div>
+        <div class="title sliding">{{#if loading}}Digital Hymnal{{else}}{{translate "Digital Hymnal"}}{{/if}}</div>
         <div class="right">
           <a href="/settings/" class="link icon-only">
-            <i class="fas fa-cog"></i>
+            <i class="fas fa-language"></i>
           </a>
         </div>
         <div class="subnavbar">
@@ -15,11 +15,11 @@
           <form class="searchbar">
             <div class="searchbar-inner">
               <div class="searchbar-input-wrap">
-                <input type="search" placeholder="Search">
+                <input type="search" placeholder='{{#if loading}}Search{{else}}{{translate "Search"}}{{/if}}'>
                 <i class="searchbar-icon"></i>
                 <span class="input-clear-button"></span>
               </div>
-              <span class="searchbar-disable-button if-not-aurora">Cancel</span>
+              <span class="searchbar-disable-button if-not-aurora">{{#if loading}}Cancel{{else}}{{translate "Cancel"}}{{/if}}</span>
             </div>
           </form>
         </div>
@@ -93,10 +93,11 @@ export default {
       var self = this;
       app = self.$app;
       
-      // songCollection.initSample();
+      songCollection.initSample();
 
       preference.getLanguage().then((languageCode) => {
         locale = languageCode;
+        window.languageCode = locale;
         songCollection.list({languageCode: languageCode, start: 0, limit: 50}).then(result => {
           console.log(result);
           self.$setState({ loading: false, songs: result });
@@ -107,7 +108,7 @@ export default {
       var searchbar = app.searchbar.create({
         el: '.searchbar',
         searchContainer: '.list',
-        searchIn: '.item-title',
+        searchIn: '.item-title, .item-subtitle',
         on: {
           search(sb, query, previousQuery) {
             console.log(query, previousQuery);

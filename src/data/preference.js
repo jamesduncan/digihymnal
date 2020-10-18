@@ -9,6 +9,7 @@ export default class Preference {
     }
 
     async setLanguage(languageCode) {
+        window.languageCode = languageCode;
         return await this.db.setItem(LANGUAGE_KEY_NAME, languageCode);
     }
 

@@ -5,4 +5,4 @@
   For example:
   module.exports = ['custom-helper', 'formatDate'];
 */
-module.exports = ['transpose'];
+module.exports = ['transpose', 'translate'];

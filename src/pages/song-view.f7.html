@@ -6,127 +6,347 @@
         <div class="left">
           <a href="#" class="link back">
             <i class="icon icon-back"></i>
-            <span class="if-not-md">Back</span>
+            <span class="if-not-md">{{#if loading}}Back{{else}}{{translate "Back"}}{{/if}}</span>
           </a>
         </div>
-        <div class="title">Component Page</div>
+        <div class="title">{{#if loading}}{{else}} {{song.title[lyric1]}} {{/if}}</div>
       </div>
     </div>
-    <div class="page-content">
-      <div class="block block-strong">
-        <p>Component page is alos compiled with Template7, but it has much more functionality. In addition to Template7 page it has lifecycle hooks, events handling and data managment.</p>
-        <p>It is useful to use Component page when you need page-specific logic.</p>
-      </div>
-      <div class="block-title">Events Handling</div>
-      <div class="block block-strong">
-        <a href="#" class="button button-raised" @click="openAlert">Open Alert</a>
-      </div>
-      <div class="block-title">Page Component Data</div>
-      <div class="block block-strong">
-        <p>Hello! My name is {{name}}. I am {{age}} years old.</p>
-        <p>I like to play:</p>
-        <ul>
-          {{#each like}}
-          <li>{{this}}</li>
-          {{/each}}
-        </ul>
-      </div>
-      <div class="block-title">Extended Context</div>
-      <div class="block block-strong">
-        <p>Component page context as Template7 page context is also extended with some additional variables.</p>
-        <h4>$route</h4>
-        <p>Contains properties of the current route:</p>
-        <ul style="padding-left:25px">
-          <li><b>$route.url</b>: {{$route.url}}</li>
-          <li><b>$route.path</b>: {{$route.path}}</li>
-          <li><b>$route.params</b>: {{js 'return JSON.stringify(this.$route.params)'}}</li>
-          <li><b>$route.hash</b>: {{$route.hash}}</li>
-          <li><b>$route.query</b>: {{js 'return JSON.stringify(this.$route.query)'}}</li>
-        </ul>
+    <div class="page-content hide-navbar-on-scroll">
+      {{#if loading}}
+      {{else}}
+      <div class="block block-strong" style="margin-bottom: 10px; overflow: hidden;">
+        <div class="menu">
+          <div class="menu-inner no-margin-padding">
+            <a @click="zoomOut" class="menu-item icon-only">
+              <div class="menu-item-content">
+                <i class="fa-bigger fas fa-search-minus"></i>
+              </div>
+            </a>
+            <a @click="zoomIn" class="menu-item icon-only">
+              <div class="menu-item-content">
+                <i class="fa-bigger fas fa-search-plus"></i>
+              </div>
+            </a>
+            <!-- Stepper element -->
+            <div class="stepper stepper-large stepper-fill" style="margin-left: auto; height: 40px;">
+              <div class="stepper-button-minus"></div>
+              <div class="stepper-input-wrap">
+                <input type="text" value="{{transpose song.key @root.steps}}" readonly>
+              </div>
+              <div class="stepper-button-plus"></div>
+            </div>
+            <div style="margin-left: auto" class="menu-item menu-item-dropdown">
+              <div class="menu-item-content icon-only">
+                <div class="menu-item-content">
+                  <i class="fa-bigger fas fa-language"></i>
+                </div>
+              </div>
+              <div class="menu-dropdown menu-dropdown-right">
+                <div class="menu-dropdown-content">
+                  <a href="#" class="menu-dropdown-link menu-close">
+                    <span>Language #1</span>
+                    <i class="margin-left fas fa-check-circle"></i>
+                  </a>
+                  <a href="#" class="menu-dropdown-link menu-close">
+                    <span>Language #2</span>
+                  </a>
+                  <a href="#" class="menu-dropdown-link menu-close">
+                    <span>Language #3</span>
+                  </a>
+                  <a href="#" class="menu-dropdown-link menu-close">
+                    <span>Language #4</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div class="menu-item menu-item-dropdown">
+              <div class="menu-item-content icon-only">
+                <div class="menu-item-content">
+                  <i class="fa-bigger fas fa-music"></i>
+                </div>
+              </div>
+              <div class="menu-dropdown menu-dropdown-right">
+                <div class="menu-dropdown-content">
+                  <a @click="toggleChords" class="menu-dropdown-link menu-close menuChords">
+                    <span>{{translate "Chords"}}</span>
+                    <i class="margin-left text-color-primary fas fa-check-square"></i>
+                    <i style="display: none;" class="margin-left text-color-gray far fa-square"></i>
+                  </a>
+                  <a @click="toggleNumbers" class="menu-dropdown-link menu-close menuNumbers">
+                    <span>{{translate "Number Notation"}}</span>
+                    <i style="display: none;" class="margin-left text-color-blue fas fa-check-circle"></i>
+                    <i class="margin-left text-color-gray far fa-circle"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        <h4>$root</h4>
-        <p>Root data & methods:</p>
-        <ul style="padding-left:25px">
-          <li><b>$root.user.firstName</b>: {{$root.user.firstName}}</li>
-          <li><b>$root.user.lastName</b>: {{$root.user.lastName}}</li>
-          <li><a @click="$root.helloWorld()">$root.helloWorld()</a></li>
-        </ul>
-
-        <h4>$theme</h4>
-        <p>Currently active theme:</p>
-        <ul style="padding-left:25px">
-          <li><b>$theme.ios</b>: {{$theme.ios}}</li>
-          <li><b>$theme.md</b>: {{$theme.md}}</li>
-          <li><b>$theme.aurora</b>: {{$theme.aurora}}</li>
-        </ul>
+        <div class="sheet">
+          <div class="song">
+            <div class="verse">
+              {{#each song.lyrics.Verse}}
+                <h3>{{translate label}}</h3>
+                {{#each lines}}
+                <div class="line">
+                  {{#each phrases}}
+                  <div class="phrase noNumbers">
+                    {{#if chord}}
+                    {{#if @root.showChord}}
+                    <div class="chord">{{transpose chord @root.steps}}</div>
+                    {{/if}}
+                    {{/if}}
+                    {{#if number}}
+                    {{#if @root.showNumber}}
+                    <div class="number">{{number}}</div>
+                    {{/if}}
+                    {{/if}}
+                    <div class="lyric">{{this[lyric1]}}&nbsp;</div>
+                    {{#if @root.showLyric2}}
+                    <div class="lyric">{{this[lyric2]}}&nbsp;</div>
+                    {{/if}}
+                  </div>
+                  {{/each}}
+                </div>
+                {{/each}}
+              {{/each}}
+            </div>
+            <div class="chorus">
+              {{#each song.lyrics.Chorus}}
+                <h3>{{translate label}}</h3>
+                {{#each lines}}
+                <div class="line">
+                  {{#each phrases}}
+                  <div class="phrase noNumbers">
+                    {{#if chord}}
+                    {{#if @root.showChord}}
+                    <div class="chord">{{transpose chord @root.steps}}</div>
+                    {{/if}}
+                    {{/if}}
+                    {{#if number}}
+                    {{#if @root.showNumber}}
+                    <div class="number">{{number}}</div>
+                    {{/if}}
+                    {{/if}}
+                    <div class="lyric">{{this[lyric1]}}&nbsp;</div>
+                    {{#if @root.showLyric2}}
+                    <div class="lyric">{{this[lyric2]}}&nbsp;</div>
+                    {{/if}}
+                  </div>
+                  {{/each}}
+                </div>
+                {{/each}}
+              {{/each}}
+            </div>
+            <div class="bridge">
+              {{#each song.lyrics.Bridge}}
+                <h3>{{label}}</h3>
+                {{#each lines}}
+                <div class="line">
+                  {{#each phrases}}
+                  <div class="phrase noNumbers">
+                    {{#if chord}}
+                    {{#if @root.showChord}}
+                    <div class="chord">{{transpose chord @root.steps}}</div>
+                    {{/if}}
+                    {{/if}}
+                    {{#if number}}
+                    {{#if @root.showNumber}}
+                    <div class="number">{{number}}</div>
+                    {{/if}}
+                    {{/if}}
+                    <div class="lyric">{{this[lyric1]}}&nbsp;</div>
+                    {{#if @root.showLyric2}}
+                    <div class="lyric">{{this[lyric2]}}&nbsp;</div>
+                    {{/if}}
+                  </div>
+                  {{/each}}
+                </div>
+                {{/each}}
+              {{/each}}
+            </div>
+          </div>
+        </div>
       </div>
+      <div class="block text-align-right text-color-gray" style="margin-top: 10px;">
+        {{song.author[lyric1]}}
+      </div>
+      {{/if}}
     </div>
   </div>
 </template>
 <style>
-  p {
-    margin: 10px 0;
+  .no-margin-padding {
+    margin: 0;
+    padding: 0;
+  }
+  .fa-bigger {
+    font-size: larger;
+  }
+  .song {
+    transform-origin: left top;
+  }
+  .line {
+    margin-bottom: 20px;
+  }
+  .phrase {
+    position: relative;
+    display: inline-block;
+    margin: 55px 10px 0 0;
+    min-width: 20px;
+  }
+  .chord, .number {
+    top: -55px;
+    background: var(--f7-theme-color);
+    border-radius: 3px;
+    min-width: 20px;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    display: inline-block;
+    padding: 0 2px;
+    margin-right: 5px;
+    position: absolute;
+    padding: 2px;
+  }
+  .number {
+    top: -25px;
+    border-radius: 100%;
+    width: 20px;
+    height: 20px;
+    padding: 2px;
+    background: var(--f7-color-blue);
+  }
+  .noNumbers, .noChords {
+    margin-top: 30px !important;
+  }
+  .noNumbers .chord, .noChords .chord {
+    top: -30px;
   }
 </style>
 <script>
+  import Song from '../data/song';
+  import Preference from "../data/preference";
+  const preference = new Preference();
+
+  const songCollection = new Song();
+  // songCollection.initSample();
+
+  var initScale = 1;
+  var lyric1;
+  var lyric2;
+  var deviceWidth = window.innerWidth;
+  if (deviceWidth >= 700) {
+    initScale = 2;
+  } else if (deviceWidth >= 500) {
+    initScale = 1.5;
+  }
+  var steps = 0;
+
   export default {
-    // Lifecycle Hooks
-    beforeCreate() {
-      console.log('componentBeforeCreate', this)
-    },
-    created() {
-      console.log('componentCreated', this)
-    },
-    beforeMount() {
-      console.log('componentBeforeMount', this)
-    },
-    mounted() {
-      console.log('componentMounted', this);
-    },
-    beforeDestroy() {
-      console.log('componentBeforeDestroy', this);
-    },
-    destroyed() {
-      console.log('componentDestroyed', this);
-    },
     // Component Data
     data: function () {
       // Must return an object
       return {
-        name: 'Jimmy',
-        age: 25,
-        like: ['Tennis', 'Chess', 'Football'],
+        loading: true,
+        showNumber: false,
+        showChord: true,
       }
-    },
-    // Component Methods
-    methods: {
-      openAlert: function () {
-        var self = this;
-        self.$app.dialog.alert('Hello World');
-      },
     },
     // Page Events
     on: {
-      pageMounted: function(e, page) {
-        console.log('pageMounted', page);
-      },
       pageInit: function(e, page) {
-        console.log('pageInit', page);
+        var self = this;
+        var app = self.$app;
+        var songId = this.$route.params.songId;
+
+        preference.getLanguage().then((languageCode) => {
+          lyric1 = languageCode;
+          console.log('current lang: ' + lyric1);
+          songCollection.get(songId).then(result => {
+            self.$setState({
+              loading: false,
+              song: result,
+              steps: steps
+            }, () => {
+              self.$(".song")[0].style.transform = "scale("+initScale+")";
+              self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+              var stepper = app.stepper.create({
+                el: '.stepper',
+                value: steps,
+                min: 0,
+                max: 11,
+                wraps: true,
+                on: {
+                  change: function (e) {
+                    steps = e.value;
+                    self.$setState({
+                      steps: steps,
+                    });
+                  }
+                }
+              });
+            });
+          });
+        });
       },
-      pageBeforeIn: function(e, page) {
-        console.log('pageBeforeIn', page);
+    },
+    methods: {
+      zoomIn: function(e) {
+        initScale += 0.05;
+        this.$(".song")[0].style.transform = "scale("+initScale+")";
+        this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
+        // debugger;
       },
-      pageAfterIn: function(e, page) {
-        console.log('pageAfterIn', page);
+      zoomOut: function(e) {
+        initScale -= 0.05;
+        this.$(".song")[0].style.transform = "scale("+initScale+")";
+        this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
+        // debugger;
       },
-      pageBeforeOut: function(e, page) {
-        console.log('pageBeforeOut', page);
+      toggleChords: function(e) {
+        if (this.$(".menuChords .fa-check-square")[0].style.display == "") {
+          this.$setState({
+            showChord: false
+          });
+          this.$(".menuChords .fa-square")[0].style.display = "";
+          this.$(".menuChords .fa-check-square")[0].style.display = "none";
+          this.$(".phrase").addClass("noChords");
+          this.$(".stepper")[0].style.display = "none";
+          this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
+        } else {
+          this.$setState({
+            showChord: true
+          });
+          this.$(".menuChords .fa-check-square")[0].style.display = "";
+          this.$(".menuChords .fa-square")[0].style.display = "none";
+          this.$(".phrase").removeClass("noChords");
+          this.$(".stepper")[0].style.display = "";
+          this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
+        }
       },
-      pageAfterOut: function(e, page) {
-        console.log('pageAfterOut', page);
-      },
-      pageBeforeRemove: function(e, page) {
-        console.log('pageBeforeRemove', page);
+      toggleNumbers: function(e) {
+        if (this.$(".menuNumbers .fa-check-circle")[0].style.display == "") {
+          this.$setState({
+            showNumber: false
+          });
+          this.$(".menuNumbers .fa-circle")[0].style.display = "";
+          this.$(".menuNumbers .fa-check-circle")[0].style.display = "none";
+          this.$(".phrase").addClass("noNumbers");
+          this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
+        } else {
+          this.$setState({
+            showNumber: true
+          });
+          this.$(".menuNumbers .fa-check-circle")[0].style.display = "";
+          this.$(".menuNumbers .fa-circle")[0].style.display = "none";
+          this.$(".phrase").removeClass("noNumbers");
+          this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
+        }
       },
     }
   }

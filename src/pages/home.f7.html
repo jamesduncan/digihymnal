@@ -10,6 +10,9 @@
             <i class="fas fa-language"></i>
           </a>
         </div>
+        <div class="title-large">
+          <div class="title-large-text">{{#if loading}}Digital Hymnal{{else}}{{translate "Digital Hymnal"}}{{/if}}</div>
+        </div>
         <div class="subnavbar">
           <!-- Searchbar with auto init -->
           <form class="searchbar">
@@ -100,7 +103,8 @@ export default {
         window.languageCode = locale;
         songCollection.list({languageCode: languageCode, start: 0, limit: 50}).then(result => {
           console.log(result);
-          self.$setState({ loading: false, songs: result });
+          var duplicatedSongs = result.concat(result, result, result, result, result, result, result, result, result, result, result, result);
+          self.$setState({ loading: false, songs: duplicatedSongs });
         });
       });
 

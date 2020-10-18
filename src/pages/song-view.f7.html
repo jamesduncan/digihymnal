@@ -239,8 +239,6 @@
   var initScale = 1;
   var lyric1;
   var lyric2;
-  var showNumbers = false;
-  var showChords = true;
   var deviceWidth = window.innerWidth;
   if (deviceWidth >= 700) {
     initScale = 2;
@@ -255,8 +253,8 @@
       // Must return an object
       return {
         loading: true,
-        showNumber: showNumbers,
-        showChord: showChords,
+        showNumber: false,
+        showChord: true,
       }
     },
     // Page Events
@@ -265,6 +263,7 @@
         var self = this;
         var app = self.$app;
         var songId = this.$route.params.songId;
+
         preference.getLanguage().then((languageCode) => {
           lyric1 = languageCode;
           console.log('current lang: ' + lyric1);
@@ -272,7 +271,7 @@
             self.$setState({
               loading: false,
               song: result,
-              steps: steps,
+              steps: steps
             }, () => {
               self.$(".song")[0].style.transform = "scale("+initScale+")";
               self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
@@ -280,7 +279,7 @@
                 el: '.stepper',
                 value: steps,
                 min: 0,
-                max: 12,
+                max: 11,
                 wraps: true,
                 on: {
                   change: function (e) {
@@ -310,43 +309,43 @@
         // debugger;
       },
       toggleChords: function(e) {
-        if (showChords) {
-          showChords = false;
+        if (this.$(".menuChords .fa-check-square")[0].style.display == "") {
           this.$setState({
-            showChord: showChords
+            showChord: false
           });
-          this.$(".menuChords .fa-circle, .menuChords .fa-square")[0].style.display = "";
-          this.$(".menuChords .fa-check-circle, .menuChords .fa-check-square")[0].style.display = "none";
+          this.$(".menuChords .fa-square")[0].style.display = "";
+          this.$(".menuChords .fa-check-square")[0].style.display = "none";
           this.$(".phrase").addClass("noChords");
           this.$(".stepper")[0].style.display = "none";
+          this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
         } else {
-          showChords = true;
           this.$setState({
-            showChord: showChords
+            showChord: true
           });
-          this.$(".menuChords .fa-check-circle, .menuChords .fa-check-square")[0].style.display = "";
-          this.$(".menuChords .fa-circle, .menuChords .fa-square")[0].style.display = "none";
+          this.$(".menuChords .fa-check-square")[0].style.display = "";
+          this.$(".menuChords .fa-square")[0].style.display = "none";
           this.$(".phrase").removeClass("noChords");
           this.$(".stepper")[0].style.display = "";
+          this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
         }
       },
       toggleNumbers: function(e) {
-        if (showNumbers) {
-          showNumbers = false;
+        if (this.$(".menuNumbers .fa-check-circle")[0].style.display == "") {
           this.$setState({
-            showNumber: showNumbers
+            showNumber: false
           });
           this.$(".menuNumbers .fa-circle")[0].style.display = "";
           this.$(".menuNumbers .fa-check-circle")[0].style.display = "none";
           this.$(".phrase").addClass("noNumbers");
+          this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
         } else {
-          showNumbers = true;
           this.$setState({
-            showNumber: showNumbers
+            showNumber: true
           });
           this.$(".menuNumbers .fa-check-circle")[0].style.display = "";
           this.$(".menuNumbers .fa-circle")[0].style.display = "none";
           this.$(".phrase").removeClass("noNumbers");
+          this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
         }
       },
     }

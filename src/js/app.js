@@ -44,4 +44,8 @@ var app = new Framework7({
   serviceWorker: {
     path: '/service-worker.js',
   },
+  navbar: {
+    hideOnPageScroll: true,
+    iosCenterTitle: false,
+  }
 });

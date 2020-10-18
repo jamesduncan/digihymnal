@@ -17,6 +17,7 @@
       {{else}}
       <div class="block-title">
         {{song.author[lyric1]}}
+        Steps: {{steps}}
       </div>
       <div class="block">
         <strong>Key:</strong> {{song.key}}
@@ -93,7 +94,7 @@
                   <div class="phrase noNumbers">
                     {{#if chord}}
                     {{#if @root.showChord}}
-                    <div class="chord">{{chord}}</div>
+                    <div class="chord">{{transpose chord @root.steps}}</div>
                     {{/if}}
                     {{/if}}
                     {{#if number}}
@@ -231,6 +232,7 @@
   var lyric2;
   var showNumbers = false;
   var showChords = true;
+  var steps = 0;
 
   export default {
     // Component Data
@@ -239,7 +241,7 @@
       return {
         loading: true,
         showNumber: showNumbers,
-        showChord: showChords
+        showChord: showChords,
       }
     },
     // Page Events
@@ -251,7 +253,11 @@
           lyric1 = languageCode;
           console.log(lyric1);
           songCollection.get(songId).then(result => {
-            self.$setState({ loading: false, song: result });
+            self.$setState({
+              loading: false,
+              song: result,
+              steps: steps,
+            });
           });
         });
       },

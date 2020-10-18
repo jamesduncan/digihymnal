@@ -17,10 +17,17 @@
       {{else}}
       <div class="block-title">
         {{song.author[lyric1]}}
-        Steps: {{steps}}
       </div>
       <div class="block">
-        <strong>Key:</strong> {{song.key}}
+        <strong>Key:</strong> {{transpose song.key @root.steps}}
+        <!-- Stepper element -->
+        <div class="stepper">
+          <div class="stepper-button-minus"></div>
+          <div class="stepper-input-wrap">
+            <input type="text" readonly>
+          </div>
+          <div class="stepper-button-plus"></div>
+        </div>
       </div>
       <div class="block block-strong" style="margin-top: 10px;">
         <div class="menu">
@@ -121,7 +128,7 @@
                   <div class="phrase noNumbers">
                     {{#if chord}}
                     {{#if @root.showChord}}
-                    <div class="chord">{{chord}}</div>
+                    <div class="chord">{{transpose chord @root.steps}}</div>
                     {{/if}}
                     {{/if}}
                     {{#if number}}
@@ -148,7 +155,7 @@
                   <div class="phrase noNumbers">
                     {{#if chord}}
                     {{#if @root.showChord}}
-                    <div class="chord">{{chord}}</div>
+                    <div class="chord">{{transpose chord @root.steps}}</div>
                     {{/if}}
                     {{/if}}
                     {{#if number}}
@@ -227,7 +234,7 @@
   import Song from '../data/song';
   import Preference from "../data/preference";
   const preference = new Preference();
-  
+
   const songCollection = new Song();
   // songCollection.initSample();
 
@@ -252,6 +259,7 @@
     on: {
       pageInit: function(e, page) {
         var self = this;
+        var app = self.$app;
         var songId = this.$route.params.songId;
         preference.getLanguage().then((languageCode) => {
           lyric1 = languageCode;
@@ -261,6 +269,22 @@
               loading: false,
               song: result,
               steps: steps,
+            }, () => {
+              var stepper = app.stepper.create({
+                el: '.stepper',
+                value: steps,
+                min: 0,
+                max: 12,
+                wraps: true,
+                on: {
+                  change: function (e) {
+                    steps = e.value;
+                    self.$setState({
+                      steps: steps,
+                    });
+                  }
+                }
+              });
             });
           });
         });
@@ -316,7 +340,7 @@
           this.$(".menuNumbers .fa-circle")[0].style.display = "none";
           this.$(".phrase").removeClass("noNumbers");
         }
-      }
+      },
     }
   }
 </script>

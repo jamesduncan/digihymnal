@@ -28,7 +28,7 @@ var app = new Framework7({
   root: '#app', // App root element
   component: App, // App main component
 
-  name: 'digiHymnal', // App name
+  name: 'Digital Hymnal', // App name
   theme: 'auto', // Automatic theme detection
   panel: {
     swipe: true,

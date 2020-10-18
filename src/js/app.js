@@ -1,5 +1,5 @@
 import $$ from 'dom7';
-import Framework7 from 'framework7/framework7.esm.bundle.js';
+import Framework7,  { Template7 }  from 'framework7/framework7.esm.bundle.js';
 
 // Import locales
 import './locales.js';
@@ -20,6 +20,9 @@ import routes from './routes.js';
 
 // Import main app component
 import App from '../app.f7.html';
+
+import { transpose } from "./transpose";
+Template7.registerHelper('transpose', transpose);
 
 var app = new Framework7({
   root: '#app', // App root element

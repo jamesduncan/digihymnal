@@ -17,6 +17,7 @@
       {{else}}
       <div class="block-title">
         {{song.author[lyric1]}}
+        Steps: {{steps}}
       </div>
       <div class="block">
         <strong>Key:</strong> {{song.key}}
@@ -93,7 +94,7 @@
                   <div class="phrase noNumbers">
                     {{#if chord}}
                     {{#if @root.showChord}}
-                    <div class="chord">{{chord}}</div>
+                    <div class="chord">{{transpose chord @root.steps}}</div>
                     {{/if}}
                     {{/if}}
                     {{#if number}}
@@ -235,13 +236,13 @@
   var lyric2;
   var showNumbers = false;
   var showChords = true;
-  
   var deviceWidth = window.innerWidth;
   if (deviceWidth >= 700) {
     initScale = 2;
   } else if (deviceWidth >= 500) {
     initScale = 1.5;
   }
+  var steps = 0;
 
   export default {
     // Component Data
@@ -250,7 +251,7 @@
       return {
         loading: true,
         showNumber: showNumbers,
-        showChord: showChords
+        showChord: showChords,
       }
     },
     // Page Events
@@ -263,7 +264,7 @@
           console.log('current lang: ' + lyric1);
           songCollection.get(songId).then(result => {
             console.log('song: ', result);
-            self.$setState({ loading: false, song: result }, () => {
+            self.$setState({ loading: false, song: result, steps: steps }, () => {
               self.$(".song")[0].style.transform = "scale("+initScale+")";
               self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
             });

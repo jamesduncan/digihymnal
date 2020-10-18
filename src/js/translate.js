@@ -9,7 +9,8 @@ const translations = {
     "Chords": "Chords",
     "Number Notation": "Number Notation",
     "Intro Verse": "Intro Verse",
-    "Main Chorus": "Main Chorus"
+    "Main Chorus": "Main Chorus",
+    "Chorus": "Chorus"
   },
   "thai": {
     "Digital Hymnal": "เพลงสวดดิจิตอล",
@@ -21,12 +22,14 @@ const translations = {
     "Chords": "คอร์ด",
     "Number Notation": "สัญกรณ์ตัวเลข",
     "Intro Verse": "กลอน",
-    "Main Chorus": "คอรัส"
+    "Main Chorus": "คอรัส",
+    "Chorus": "คอรัส"
   }
 }
 
 export function translate (text) {
   var languageCode = window.languageCode || "en";
   if (!translations[languageCode]) languageCode = "en";
+  if (!translations[languageCode][text]) return text;
   return translations[languageCode][text];
 }

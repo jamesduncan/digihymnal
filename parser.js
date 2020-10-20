@@ -55,7 +55,10 @@ zhing[F#m]kham gi [B]lam [E]toen ye`)
 function onSong2JSON(data, filename) {
   try {
     var song = {};
-    song.id = (filename)
+    var removeSpaces = /\s+,"-"/
+    //str = str.trim().replaceAll("\\s+", " ");
+    song.id = filename.replace(/\s+/g, "_")
+    //song.id = (filename)
 
     // Clean any un-needed characters
     function cleanString(input) {
@@ -102,27 +105,28 @@ function onSong2JSON(data, filename) {
     //console.log(lyrics)
 
     // A temporary variable that toBeParsed calls
-    var currentVerse = []
+    var currentVerse = {}
+    currentVerse.lines = []
     // TODO use label, using a number for now
     var currentVerseLabel = 1
 
-    // add a line to the verse
+    // add a set of phrases (line) to the verse
     function addToVerse(currentLine){
-      currentVerse.push({lines:currentLine})
+      currentVerse.lines.push({phrases:currentLine})
     }
 
     // close the verse, push it to the song, and clear it
     function closeVerse(){
-      label = ("verse " + stringify(currentVerseLabel))
-      song.lyrics.Verses.push({verse:currentVerse})
+      currentVerse.label = ("verse " + currentVerseLabel.toString())
+      song.lyrics.Verses.push(currentVerse)
       currentVerseLabel++
-      currentVerse = []
+      currentVerse = {}
     }
     
     // parse each remaining line in the file
     toBeParsed.forEach(line => {
       if(line == ""){
-        // If new verse/chorus
+        // If there's a totally blank line, new verse/chorus
         closeVerse()
       } else {
         var currentLine = []
@@ -139,6 +143,7 @@ function onSong2JSON(data, filename) {
             addPhrase(['', currentPhrase[0]])
           }
         });
+        // once all phrases have been split up, add the line
         addToVerse(currentLine)        
       }
     });

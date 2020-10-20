@@ -24,6 +24,7 @@
     "@fortawesome/fontawesome-free": "^5.15.1",
     "dom7": "^2.1.5",
     "framework7": "^5.7.13",
+    "fs": "0.0.1-security",
     "locale-codes": "^1.3.1",
     "localforage": "^1.9.0",
     "template7": "^1.4.2",

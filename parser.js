@@ -80,7 +80,7 @@ function onSong2JSON(data, filename) {
     // first line
     //song.title = (getMetaLines.exec(data)[1])
     currentTitle = dataArray[0] 
-    song.title = ({"eng":currentTitle})
+    song.title = ({"en":currentTitle})
     // second line
     //song.author = (getMetaLines.exec(data)[2])
     song.author = (dataArray[1])
@@ -93,7 +93,7 @@ function onSong2JSON(data, filename) {
 
     
     song.lyrics = {}
-    song.lyrics.verses = []
+    song.lyrics.Verses = []
 
     // TODO I'm assuming data starts on 5th line
     let lyricsStart = 4
@@ -108,13 +108,13 @@ function onSong2JSON(data, filename) {
 
     // add a line to the verse
     function addToVerse(currentLine){
-      currentVerse.push({line:currentLine})
+      currentVerse.push({lines:currentLine})
     }
 
     // close the verse, push it to the song, and clear it
     function closeVerse(){
       label = ("verse " + stringify(currentVerseLabel))
-      song.lyrics.verses.push({verse:currentVerse})
+      song.lyrics.Verses.push({verse:currentVerse})
       currentVerseLabel++
       currentVerse = []
     }
@@ -127,13 +127,13 @@ function onSong2JSON(data, filename) {
       } else {
         var currentLine = []
         function addPhrase(phrase){
-          currentLine.push({phrase})
+          currentLine.push({"chord":phrase[0], "en":phrase[1]})
         }
 
         var phrases = (line.split(/\r?\[/))
         phrases.forEach(phrase => {
           let currentPhrase = phrase.split(/\r?]/) // try splitting
-          if(currentPhrase.length === 2){ // has chord
+          if(currentPhrase.length === 2){ // has chord                
             addPhrase(currentPhrase)
           } else if (currentPhrase.length === 1 && currentPhrase != ""){ // Just lyric
             addPhrase(['', currentPhrase[0]])

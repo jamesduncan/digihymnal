@@ -55,6 +55,7 @@ zhing[F#m]kham gi [B]lam [E]toen ye`)
 function onSong2JSON(data, filename) {
   try {
     var song = {};
+    song.id = (filename)
 
     // Clean any un-needed characters
     function cleanString(input) {
@@ -78,7 +79,8 @@ function onSong2JSON(data, filename) {
     //var getMetaLines = /(.*?)\n(.*?)\n(.*?)\n(.*)/
     // first line
     //song.title = (getMetaLines.exec(data)[1])
-    song.title = (dataArray[0])
+    currentTitle = dataArray[0] 
+    song.title = ({"eng":currentTitle})
     // second line
     //song.author = (getMetaLines.exec(data)[2])
     song.author = (dataArray[1])
@@ -147,8 +149,10 @@ function onSong2JSON(data, filename) {
     // print the file
     console.log(song)
 
+    output = (`export default ${JSON.stringify(song)} ;`)
+
     // Output the file...
-    fs.writeFile((`./json/${filename}.json`), JSON.stringify(song), function(err) {
+    fs.writeFile((`./json/${filename}.js`), output, function(err) {
       if (err) {
           console.log(err);
       }

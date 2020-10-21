@@ -109,7 +109,7 @@ function onSong2JSON(data, filename) {
     currentVerse.lines = []
     // TODO use label, using a number for now
     var currentVerseLabel = 1
-
+    currentVerse.label = ("verse " + currentVerseLabel.toString())
     // add a set of phrases (line) to the verse
     function addToVerse(currentLine){
       currentVerse.lines.push({phrases:currentLine})
@@ -117,10 +117,12 @@ function onSong2JSON(data, filename) {
 
     // close the verse, push it to the song, and clear it
     function closeVerse(){
-      currentVerse.label = ("verse " + currentVerseLabel.toString())
+      
       song.lyrics.Verses.push(currentVerse)
       currentVerseLabel++
       currentVerse = {}
+      currentVerse.lines = []
+      currentVerse.label = ("verse " + currentVerseLabel.toString())
     }
     
     // parse each remaining line in the file

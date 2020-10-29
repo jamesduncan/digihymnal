@@ -87,8 +87,8 @@
         <div class="sheet">
           <div class="song">
             <div class="verse">
-              {{#each song.lyrics.Verse}}
-                <h3>{{translate label}}</h3>
+              {{#each song.lyrics.Verses}}
+                <h3>{{#if label}}{{translate label}}{{else}}<br/>{{/if}}</h3>
                 {{#each lines}}
                 <div class="line">
                   {{#each phrases}}
@@ -115,7 +115,7 @@
             </div>
             <div class="chorus">
               {{#each song.lyrics.Chorus}}
-                <h3>{{translate label}}</h3>
+                <h3>{{#if label}}{{translate label}}{{else}}<br/>{{/if}}</h3>
                 {{#each lines}}
                 <div class="line">
                   {{#each phrases}}
@@ -142,7 +142,7 @@
             </div>
             <div class="bridge">
               {{#each song.lyrics.Bridge}}
-                <h3>{{label}}</h3>
+                <h3>{{#if label}}{{translate label}}{{else}}<br/>{{/if}}</h3>
                 {{#each lines}}
                 <div class="line">
                   {{#each phrases}}

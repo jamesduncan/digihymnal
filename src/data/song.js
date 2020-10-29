@@ -15,7 +15,7 @@ import SAMPLE_13 from "../../samples/parsed/BT 108 Yeshu Choe Gi Phama Nga Zha N
 import SAMPLE_14 from "../../samples/parsed/BT 12 Kencho Choe Gi Jampa Di.js";
 import SAMPLE_15 from "../../samples/parsed/BT 12 Lord Your Love Is.js";
 import SAMPLE_16 from "../../samples/parsed/BT 15 Khatsa Dari Deu Tabura.js";
-import SAMPLE_17 from "../../samples/parsed/BT 15 Yesterday, Today.js";
+import SAMPLE_17 from "../../samples/parsed/BT 15 Yesterday Today.js";
 import SAMPLE_18 from "../../samples/parsed/BT 16 Gawa La Da Gawa La.js";
 import SAMPLE_19 from "../../samples/parsed/BT 16 Joy Oh Joy.js";
 import SAMPLE_20 from "../../samples/parsed/BT 17 Gawai Luechi.js";
@@ -61,6 +61,8 @@ import SAMPLE_58 from "../../samples/parsed/Yet Not I But Through Christ In Me.j
 
 const SAMPLE_SONGS = [SAMPLE_4, SAMPLE_5, SAMPLE_6, SAMPLE_7, SAMPLE_8, SAMPLE_9, SAMPLE_10, SAMPLE_11, SAMPLE_12, SAMPLE_13, SAMPLE_14, SAMPLE_15, SAMPLE_16, SAMPLE_17, SAMPLE_18, SAMPLE_19, SAMPLE_20, SAMPLE_21, SAMPLE_22, SAMPLE_23, SAMPLE_24, SAMPLE_25, SAMPLE_26, SAMPLE_27, SAMPLE_28, SAMPLE_29, SAMPLE_30, SAMPLE_31, SAMPLE_32, SAMPLE_33, SAMPLE_34, SAMPLE_35, SAMPLE_36, SAMPLE_37, SAMPLE_38, SAMPLE_39, SAMPLE_40, SAMPLE_41, SAMPLE_42, SAMPLE_43, SAMPLE_44, SAMPLE_45, SAMPLE_46, SAMPLE_47, SAMPLE_48, SAMPLE_49, SAMPLE_50, SAMPLE_51, SAMPLE_52, SAMPLE_53, SAMPLE_54, SAMPLE_55, SAMPLE_56, SAMPLE_57, SAMPLE_58];
 
+// const SAMPLE_SONGS = [SAMPLE_5];
+
 const DB_NAME = "DIGIHYMNAL_SONG";
 
 export default class SongCollection {
@@ -71,7 +73,6 @@ export default class SongCollection {
     async initSample() {
         let tasks = [];
 
-debugger;
         SAMPLE_SONGS.forEach(async (song) => {
             tasks.push(await this.db.setItem(song.id, song));
         })

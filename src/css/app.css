@@ -7,3 +7,7 @@
 }
 
 /* Your app custom styles here */
+@font-face {
+  font-family: 'Notes';
+  src: url('../static/fonts/NOTES.ttf') format('truetype');
+}

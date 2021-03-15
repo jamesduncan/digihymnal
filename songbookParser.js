@@ -9,17 +9,15 @@ var parseDir = function (path) {
     openFile(element.path)
   });
 };
-
-function openFile(path){
-  var fs = require('fs');
-  fs.readFile(path, 'ucs2', function(err, data) {
-      if (err) throw err;
-      var filename = path.split("/").pop()
-      filename = path.split("\\").pop()
-      filename = filename.split(".").shift()
-      console.log(filename)
-      onSong2JSON(data, filename);
-  });
+// opens file, returns array.
+async function openFile(path){
+	//var fs = require('fs');
+	return Promise.resolve(
+		fs.readFile(path, 'ucs2', function(err, data) {
+				if (err) throw err;
+				return(stringToArray(data));
+		})
+	)
 }
 
 function resetFile(filename){
@@ -29,7 +27,7 @@ function resetFile(filename){
 	  // Output the file...
 	  fs.writeFile((`./${filename}.json`), output, function(err) {
 		 if (err) {
-			  console.log(err);
+			  console.err(err);
 		 }
 	  });
  
@@ -38,13 +36,14 @@ function resetFile(filename){
 	}
  }
 function writeToFile(data, filename){
+	console.log({'attempting to save': typeof filename})
   try{
-    output = (`${JSON.stringify(data)}\n`)
+    output = (JSON.stringify(data))
 
     // Output the file...
-    fs.appendFile((`./${filename}.json`), output, function(err) {
+    fs.appendFile((`./json/${filename}.json`), output, function(err) {
       if (err) {
-          console.log(err);
+          console.err(err);
       }
     });
 
@@ -166,28 +165,6 @@ var testData3 = (`1.	ཀྱེ། དཀོན་མཆོག
 	ང་ལ་རང་དབང་ཐོབ་བྱུང་།
 	བཀའ་དྲིན་ཆེན་པོ་རེད།`)
 
-var allSongs = []
-var currentSong = []
-async function checkLine(line, line2, line3, allSongs, currentSong, index){
-  // If it a new-song line
-  // If it a new verse
-  // else just line
-
-
-  var newSong = ["S","A","1","2","3","4","5","6","7","8","9"]
-  if(newSong.includes(line[0])){ // could be new song
-    if(checkIsTitle(line,1)){ // is new song
-			return ({isTitle:true, })
-	 }
-	 // TODO not exiting function
-	 return
-  }
-  
-  console.log({line, line2, line3})
-  writeToFile({index,line, line2, line3}, "titlesTest")
-  currentSong.push({line, line2, line3})
-  
-}
 // find out if the verse indicator takes up more than one character
 async function getVerseIndex(line,i){
 	var newVerseCue = ["1","2","3","4","5","6","7","8","9","༡","༢","༣","༤","༥","༦","༧","༨","༨"," ","ཁ","༩","ཀ","༡","༠","ཁ"]
@@ -203,7 +180,7 @@ async function checkIsTitle(line,i){
 	  console.log("Returning false")
 	  return {isTitle:false}}
   if(line[i] === '.'){
-	console.log("Returning true")
+    console.log("Returning true")
 	 return {isTitle:true,songNumberIndex:i}
   }
   if (MARKERCHARACTERS.includes(line[i])){
@@ -213,10 +190,10 @@ async function checkIsTitle(line,i){
 
 // convert very long string into array
 // array of each new line
-function stringToArray(longString){
+async function stringToArray(longString){
     // Clean any un-needed characters
     function cleanString(input) {
-      //  TODO strip out all '/t'
+      // TODO strip out all '/t'
       var output = "";
 		var output = input.replace(/([\t])/g, '');
 		// TODO remove empty line? no idea if really working
@@ -229,22 +206,27 @@ function stringToArray(longString){
       return output;
     }
     longString = cleanString(longString)
-    // console.log(longString)
+    console.log(longString)
     return longString.split(/\r?\n/)
 }
 
 // turn a full chunk of test data into array
-let converted1 = stringToArray(testData1)
-let converted2 = stringToArray(testData2)
-let converted3 = stringToArray(testData3)
+//let converted1 = stringToArray(testData1)
+//let converted2 = stringToArray(testData2)
+//let converted3 = stringToArray(testData3)
+// get real data from text files
+let converted1 = openFile("./samples/songbooks/AT.txt")
+let converted2 = openFile("./samples/songbooks/KT.txt")
+let converted3 = openFile("./samples/songbooks/CT.txt")
 
 // mark each array with location of verses and new songs?
-// writeToFile({converted1}, "titlesTest")
-// writeToFile({converted2}, "titlesTest")
-// writeToFile({converted3}, "titlesTest")
-
+writeToFile({converted1}, "at")
+writeToFile({converted2}, "kt")
+writeToFile({converted3}, "ct")
+debugger;
 // iterate through each array
 var mainApp = async function (converted1, converted2, converted3){
+	console.log({"first variable is": typeof converted1})
 	var currentTitle = 'emptyRecord' 
 	var song = {}
 	song.title = {}
@@ -272,6 +254,7 @@ var mainApp = async function (converted1, converted2, converted3){
 
 	// Output the file...
 	async function closeSong(output, filename){
+		writeToFile(output, filename)
 		try{
 	     fs.writeFile((`./json/${filename}.json`), output, function(err) {
 			if (err) {
@@ -281,6 +264,17 @@ var mainApp = async function (converted1, converted2, converted3){
 		} catch (e) {
 			console.error(e.message);
 		}	
+
+		//clear stuff out
+		song.author = ("*")
+		song.key = ("*")
+		song.lyrics = {}
+		song.metadata = []
+		song.lyrics.Verse = []
+		currentVerseId = 1
+		currentVerseLabel =''
+		currentVerse = {}
+		currentVerse.line = []
 	}
 	// we assume each line from each array is equivalent
 	var titleJustCaptured = false
@@ -311,10 +305,13 @@ var mainApp = async function (converted1, converted2, converted3){
 			let l = checkIsTitle(line1) // check if it is a title	
 			console.log(l)
 			if(l.isTitle){
+				// debugger thing here
+				writeToFile({index,line1, line2, line3}, "titlesTest")
 				// write old song to disk
 				closeSong(song,currentTitle)
 				titleJustCaptured = true
 				// start saving new data
+				currentTitle = line.slice(0,l.songNumberIndex); // this is the song 'number'
 				currentVerseLabel = line.slice(0,l.songNumberIndex); // this is the song 'number'
 				song.title = {CT:line1.slice(l.songNumberIndex, line1.length), // this is the song name in different languages
 								  KT:line2.slice(l.songNumberIndex, line2.length),
@@ -338,138 +335,10 @@ var mainApp = async function (converted1, converted2, converted3){
 			})
 		}
 	}
+
 	writeToFile({currentVerse}, "titlesTest")
-	return currentVerse
+
 }
 console.log(mainApp(converted1, converted2, converted3))
 
-// //this will parse XML file
-// function onSong2JSON(data1, data2, data3) {
 
-//   // go through each whole file
-//   // // save all songs from each file
-//   // // re-combine all songs
-  
-//   // each phrase from each file, output save of whole song
-//   // each verse from each file, output save of whole song
-//   //Every time there is a hindi-character number character at the start of a line, that is a new verse
-  
-//   // song from each file, output save of whole song
-
-//   try {
-//     var song = {};
-    
-//     var removeSpaces = /\s+,"-"/
-//     //str = str.trim().replaceAll("\\s+", " ");
-//     //song.id = filename.replace(/\s+/g, "_")
-//     //song.id = (filename)
-
-//     // Clean any un-needed characters
-//     function cleanString(input) {
-//       //  TODO strip out all '/t'
-//       var output = "";
-//       var output = input.replace(/([\t])/g, '');
-//       //for (var i=0; i<input.length; i++) {
-//       //  if (input.charCodeAt(i) <= 127) {
-//       //    output += input.charAt(i);
-//       //  }
-//       //}
-//       return output;
-//     }
-//     data = cleanString(data)
-  
-
-//     // select the first three lines
-//     // [0] is the whole dataset, first line is '1'
-//     var dataArray = data.split(/\r?\n/)
-//     //var getMetaLines = /(.*?)\n(.*?)\n(.*?)\n(.*)/
-//     // first line
-//     //song.title = (getMetaLines.exec(data)[1])
-//     currentTitle = dataArray[0] 
-//     song.title = ({"en":currentTitle})
-//     // second line
-//     //song.author = (getMetaLines.exec(data)[2])
-//     song.author = (dataArray[1])
-//     // third line skip "Key: " 
-//     var selectKey = /(?![Key: ])(.*)/
-//     //console.log(selectKey.exec("Key: G#")[0])
-//     //console.log(selectKey.exec("Key: C")[0])
-//     //song.key = (selectKey.exec(getMetaLines.exec(data)[3])[0])
-//     song.key = ('')
-
-    
-//     song.lyrics = {}
-//     song.lyrics.Verses = []
-
-//     // TODO I'm assuming data starts on 5th line
-//     let lyricsStart = 4
-//     // Make array of just lyrics
-//     var toBeParsed = dataArray.splice(lyricsStart)
-//     //console.log(lyrics)
-
-//     // A temporary variable that toBeParsed calls
-//     var currentVerse = {}
-//     currentVerse.lines = []
-//     // TODO use label, using a number for now
-//     var currentVerseLabel = 1
-//     currentVerse.label = ("verse " + currentVerseLabel.toString())
-//     // add a set of phrases (line) to the verse
-//     function addToVerse(currentLine){
-//       currentVerse.lines.push({phrases:currentLine})
-//     }
-
-//     // close the verse, push it to the song, and clear it
-//     function closeVerse(){
-      
-//       song.lyrics.Verses.push(currentVerse)
-//       currentVerseLabel++
-//       currentVerse = {}
-//       currentVerse.lines = []
-//       currentVerse.label = ("verse " + currentVerseLabel.toString())
-//     }
-    
-//     // parse each remaining line in the file
-//     toBeParsed.forEach(line => {
-//       if(line == ""){
-//         // If there's a totally blank line, new verse/chorus
-//         closeVerse()
-//       } else {
-//         var currentLine = []
-//         function addPhrase(phrase){
-//           currentLine.push({"chord":phrase[0], "en":phrase[1]})
-//         }
-
-//         var phrases = (line.split(/\r?\[/))
-//         phrases.forEach(phrase => {
-//           let currentPhrase = phrase.split(/\r?]/) // try splitting
-//           if(currentPhrase.length === 2){ // has chord                
-//             addPhrase(currentPhrase)
-//           } else if (currentPhrase.length === 1 && currentPhrase != ""){ // Just lyric
-//             addPhrase(['', currentPhrase[0]])
-//           }
-//         });
-//         // once all phrases have been split up, add the line
-//         addToVerse(currentLine)        
-//       }
-//     });
-//     if (currentVerse.length>0){
-//       closeVerse()
-//     }
-
-//     // print the file
-//     console.log(song)
-
-//     output = (`export default ${JSON.stringify(song)} ;`)
-
-//     // Output the file...
-//     fs.writeFile((`./json/${filename}.js`), output, function(err) {
-//       if (err) {
-//           console.log(err);
-//       }
-//     });
-
-//   } catch (e) {
-//     console.error(e.message);
-//   }
-// }
-// onSong2JSON(testData1, testData2, testData3)

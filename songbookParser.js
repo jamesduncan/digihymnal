@@ -10,14 +10,9 @@ var parseDir = function (path) {
   });
 };
 // opens file, returns array.
-async function openFile(path){
+function openFile(path){
 	//var fs = require('fs');
-	return Promise.resolve(
-		fs.readFile(path, 'ucs2', function(err, data) {
-				if (err) throw err;
-				return(stringToArray(data));
-		})
-	)
+	return fs.readFileSync(path, 'ucs2')
 }
 
 function resetFile(filename){
@@ -27,7 +22,7 @@ function resetFile(filename){
 	  // Output the file...
 	  fs.writeFile((`./${filename}.json`), output, function(err) {
 		 if (err) {
-			  console.err(err);
+			  console.log(err);
 		 }
 	  });
  
@@ -36,20 +31,13 @@ function resetFile(filename){
 	}
  }
 function writeToFile(data, filename){
-	console.log({'attempting to save': typeof data, 'as file': filename})
-  try{
-    output = (JSON.stringify(data))
+	// Output the file...
+	return fs.appendFile((`./json/${filename}.json`), JSON.stringify(data), function(err) {
+		if (err) {
+			console.log(err);
+		}
+	});
 
-    // Output the file...
-    fs.appendFile((`./json/${filename}.json`), output, function(err) {
-      if (err) {
-          console.err(err);
-      }
-    });
-
-  } catch (e) {
-    console.error(e.message);
-  }
 }
 // FEED ME YOUR    T E S T    D A T A
 //parseDir("D:/schubert.dev/parser/samples")
@@ -59,65 +47,67 @@ const MARKERCHARACTERS = ["S","A","1","2","3","4","5","6","7","8","9","༡","༢
 //var newVerseCue = ["1","2","3","4","5","6","7","8","9",10,11,12,13,14,15,16,17,18,19,20,21,"༡","༢","༣","༤","༥","༦","༧","༨","༨ ཁ","༩ ཀ","༡༠ ཁ"]
 
 // find out if the verse indicator takes up more than one character
-async function getVerseIndex(line,i){
+function getVerseIndex(line,i){
 	var newVerseCue = ["1","2","3","4","5","6","7","8","9","༡","༢","༣","༤","༥","༦","༧","༨","༨"," ","ཁ","༩","ཀ","༡","༠","ཁ"]
 	if(newVerseCue.includes(line[i])){ // new verse
-		checkIsVerse(line,++i)
+		return getVerseIndex(line,++i)
 	}else{
 		return i
 	}
 }
-async function checkIsTitle(line,i){
-  // console.log({"checking line":line, "at":i})
-  if(i>6){
-	  console.log("Returning false")
-	  return {isTitle:false}}
-  if(line[i] === '.'){
-    console.log("Returning true")
-	 return {isTitle:true,songNumberIndex:i}
-  }
-  if (MARKERCHARACTERS.includes(line[i])){
-	return checkIsTitle(line,++i)
-  }
+function checkTitle(line,i){
+	if(i>6){
+		//console.log("Returning false")
+ 	  return {isTitle:false}
+	}
+   if(line[i] == '.'){
+		//console.log("Returning true")
+		// console.log({"this is title":line, "at":i})
+   	return {isTitle:true,songNumberIndex:i}
+   }
+   //if (MARKERCHARACTERS.includes(line[i])){
+	return checkTitle(line,++i)
+   //}
 }
 
 // convert very long string into array
 // array of each new line
-async function stringToArray(longString){
+function stringToArray(longString){
     // Clean any un-needed characters
     function cleanString(input) {
       // TODO strip out all '/t'
-      var output = "";
-		var output = input.replace(/([\t])/g, '');
+		input = input.replace(/([\t])/g, '');
+		// this fixes the splitter, I don't know why
+		input = input.replace(/([\r])/g, '');
 		// TODO remove empty line? no idea if really working
-		output = output.replace(/^\s*[\r\n]/gm)
-      //for (var i=0; i<input.length; i++) {
+		input = input.replace(/^\s*[\r\n]/gm)
+		// var output = ''
+      // for (var i=0; i<input.length; i++) {
       //  if (input.charCodeAt(i) <= 127) {
       //    output += input.charAt(i);
       //  }
-      //}
-      return output;
-    }
-    longString = cleanString(longString)
-    console.log(longString)
-    return longString.split(/\r?\n/)
+      // }
+      // return output;
+		return input;
+ 	}
+  	longString = cleanString(longString)
+  	return longString.split(/\r?\n/)
 }
 
 // get real data from text files
-var converted1 = openFile("./samples/songbooks/AT.txt")
-var converted2 = openFile("./samples/songbooks/KT.txt")
-var converted3 = openFile("./samples/songbooks/CT.txt")
+var converted2 = stringToArray(openFile("./samples/songbooks/KT.txt"))
+var converted3 = stringToArray(openFile("./samples/songbooks/CT.txt"))
+var converted1 = stringToArray(openFile("./samples/songbooks/AT.txt"))
 
-console.log(converted1) // this is a promise
 // mark each array with location of verses and new songs?
-writeToFile({converted1}, "at")
-writeToFile({converted2}, "kt")
-writeToFile({converted3}, "ct")
-debugger;
+
 // iterate through each array
-var mainApp = async function (converted1, converted2, converted3){
-	console.log({"first variable is": typeof converted1})
-	var currentTitle = 'emptyRecord' 
+var mainApp = function (converted1, converted2, converted3){
+	// console.log({"first variable is": typeof converted1},
+	// 	{"second variable is": typeof converted2},
+	// 	{"third variable is": typeof converted3})
+	// make blank global-ish variables
+	var currentTitle = 'empty file' 
 	var song = {}
 	song.title = {}
 	song.author = ("*")
@@ -131,29 +121,25 @@ var mainApp = async function (converted1, converted2, converted3){
 	currentVerse.line = []
 
 	addToVerse = (currentLine) => {
-      currentVerse.line.push({phrase:currentLine})
+		// if (typeof(currentVerse.line) != Array){
+	   // 	currentVerse.line = [] ///////// WHY HAVE TO DO THIS?
+		// }
+      currentVerse.line.push([{phrase:currentLine}])
 	}
 	closeVerse = () => {
-		song.lyrics.Verse.push(currentVerse)
-		currentVerseId++
-		currentVerse = {}
-		currentVerse.lines = []
-		currentVerse.label = ("verse " + currentVerseLabel.toString())
-		currentVerse.id = (currentVerseId)
+ 		song.lyrics.Verse.push(currentVerse)
+ 		currentVerseId++
+ 		currentVerse = {}
+ 		currentVerse.line = []
+ 		currentVerse.label = ("verse " + currentVerseId.toString())
+ 		currentVerse.id = (currentVerseId)
 	}
 
 	// Output the file...
-	async function closeSong(output, filename){
+	function closeSong(output, filename){
+		closeVerse()
+		//console.log({"closing": filename})
 		writeToFile(output, filename)
-		try{
-	     fs.writeFile((`./json/${filename}.json`), output, function(err) {
-			if (err) {
-				console.log(err);
-			}
-		});
-		} catch (e) {
-			console.error(e.message);
-		}	
 
 		//clear stuff out
 		song.author = ("*")
@@ -161,14 +147,18 @@ var mainApp = async function (converted1, converted2, converted3){
 		song.lyrics = {}
 		song.metadata = []
 		song.lyrics.Verse = []
-		currentVerseId = 1
-		currentVerseLabel =''
 		currentVerse = {}
+		currentVerseId = 1
 		currentVerse.line = []
+ 		currentVerse.label = ("verse " + currentVerseId.toString())
+ 		currentVerse.id = (currentVerseId)
 	}
-	// we assume each line from each array is equivalent
+	// this variable means to check for meta-data
 	var titleJustCaptured = false
-	for (let index = 0; index < converted1.length; index++) {
+	var firstVerseAdded = false
+
+	//single iterate through all files
+	for (var index = 0; index < converted1.length; index++) {
 		const line1 = converted1[index];
 		const line2 = converted2[index];
 		const line3 = converted3[index];
@@ -177,58 +167,94 @@ var mainApp = async function (converted1, converted2, converted3){
 		// if line starts with "(" is meta data
 		// if next line starts with a numeral or (
 		if (titleJustCaptured){
-		  let metadataTokens = ["(","1","2","3"]
-		  if(metadataTokens.includes(line1[0])){ // if we got some meta data 
+		  let metadataTokens = ["(","(","1","2","3"]
+		  if(metadataTokens.includes(line1[0]) || metadataTokens.includes(line1[1])){ // if we got some meta data 
 			song.metadata.push({ // save the data
 					CT:line1,
 					KT:line2,
 					AT:line3
 				})
-			break; // exit the loop, data has been captured
+			continue; // exit the loop, data has been captured
 		  }else{
 			  titleJustCaptured = false
 		  }
 		}
 
-		// If there is a fancy marker
-		if(MARKERCHARACTERS.includes(line1[0])){
-			let l = checkIsTitle(line1) // check if it is a title	
-			console.log(l)
-			if(l.isTitle){
-				// debugger thing here
-				writeToFile({index,line1, line2, line3}, "titlesTest")
-				// write old song to disk
-				closeSong(song,currentTitle)
-				titleJustCaptured = true
-				// start saving new data
-				currentTitle = line.slice(0,l.songNumberIndex); // this is the song 'number'
-				currentVerseLabel = line.slice(0,l.songNumberIndex); // this is the song 'number'
-				song.title = {CT:line1.slice(l.songNumberIndex, line1.length), // this is the song name in different languages
-								  KT:line2.slice(l.songNumberIndex, line2.length),
-								  AT:line3.slice(l.songNumberIndex, line3.length)}
-			} else{// If it isn't a new song, it must be a new verse
-				let index = await getVerseIndex(line1,1)
-				closeVerse()// make new verse object
-				// start saving new data
-				currentVerseLabel = line1.slice(0,index); // this is the song 'number'
-				// this is the phrase - after the new-verse marker
-				addToVerse( {CT:line1.slice(index, line1.length),
-									KT:line2.slice(index, line2.length),
-									AT:line3.slice(index, line3.length)}
-								)
-			}
-		}else{ // if it has no special characters, it must be a normal line
-			addToVerse({
-				CT:line1,
-				KT:line2,
-				AT:line3
-			})
+		// If there is a "."
+		// it is a title -- I manually marked the data with them. 
+		var a, isTitle = false
+		if(line1[1] == "."){
+			a = 2
+			isTitle = true
+		}else if(line1[2] == "."){
+			a = 1
+			isTitle = true
+		}else if(line1[0] == "."){
+			a = 1
+			isTitle = true
 		}
+		if(isTitle){
+			closeSong(song,currentTitle)
+			let tData = checkTitle(line1,a) // check if it is a title	and clip out '.'
+			//console.log({"this is title":line1, "at":index})
+			// debugger thing here
+			let line1Default = line1.slice(a, line1[tData.songNumberIndex])
+			if(line1Default != line2.slice(0, line2[tData.songNumberIndex]) || line1Default !=line3.slice(0, line3[tData.songNumberIndex])){
+				console.log({'error data not matching at':index})
+				console.log({line1, line2, line3})
+			}
+			writeToFile({index,line1, line2, line3}, "titlesTest")
+
+			// write old song to disk
+			titleJustCaptured = true
+			firstVerseAdded = false
+			// start saving new data
+			currentTitle = (toString(index), ".", line1.slice(a,line1.length)); // this is the song 'number'
+			currentVerseLabel = "0"; // placeholder
+			song.title = {CT:line1.slice(a, line1.length), // this is the song name in different languages
+								KT:line2,
+								AT:line3}
+			continue;	
+		}
+
+		// if there are fancy characters, is verse
+		if(MARKERCHARACTERS.includes(line1[0]) || MARKERCHARACTERS.includes(line1[1])){// If it isn't a new song, it must be a new verse
+			if (firstVerseAdded){ // don't add a blank verse
+				closeVerse()// make new verse object
+			} else{
+				firstVerseAdded = true
+			}
+			// start saving new data
+			let index = getVerseIndex(line1,1) // this should be the symbol's location
+			currentVerseLabel = line1.slice(0,index); // this is the verse 'number'
+			// this is the phrase - after the new-verse marker
+			// if(typeof(line2) == 'undefined'){
+			// 	continue;
+			// }
+			addToVerse( {CT:line1.slice(index, line1.length),
+								KT:line2.slice(index, line2.length),
+								AT:line3.slice(index, line3.length)}
+							)
+			continue;
+		}
+		//else{ 
+		// if it has no special characters, it must be a normal line
+		addToVerse({
+			CT:line1,
+			KT:line2,
+			AT:line3
+		})
+		continue;
+		//}
 	}
 
+	// write last item
+	closeSong(song,currentTitle)
 	writeToFile({currentVerse}, "titlesTest")
 
 }
+
+// call the main function
 console.log(mainApp(converted1, converted2, converted3))
 
 

@@ -49,14 +49,38 @@ var converted1 = stringToArray(openFile("./samples/songbooks/AT.txt"))
 // iterate through each array
 var mainApp = function (converted1, converted2, converted3){
 
+	fs.writeFileSync(`./json/combined.json`, 'output', function(err) {
+		if (err) {
+			 console.log(err);
+		}
+	 });
 	//single iterate through all files
 	for (var index = 0; index < converted1.length; index++) {
 		var line1 = converted1[index];
 		var line2 = converted2[index];
 		var line3 = converted3[index];
 
+		// get rid of "undefined" at start of string
+		// caused by the deletion of a line in source data.
+		// easier to delete here than to fix regx
+		var annoyingString = ['undefined']
+		//console.log(typeof(line2))
+		if (line2 != undefined && line2 != undefined){
+			let letter = line2[0]
+			if (letter=="u"){
+				line2 = line2.slice(9, line2.length)
+			}
+			letter = line3[0]
+			if (letter=="u"){
+				line3 = line3.slice(9, line3.length)
+			}
+		}
+		var myTokens = ["1","2","3","4","5",'6','7','8','9']
+		if (myTokens.includes(line1[0])){
+			continue
+		}
 		
-		let metadataTokens = ["(","(","1","2","3"]
+		let metadataTokens = ["(","S","A","1","2","3","4","5","6","7","8","9","༡","༢","༣","༤","༥","༦","༧","༨","༨","༩","༡","༡"]
 		if(metadataTokens.includes(line1[0]) || metadataTokens.includes(line1[1])){ // if we got some meta data 
 			let line1Title = line1.slice(1, 2)
 			let line1Default = line1.slice(0, 1)
@@ -65,16 +89,16 @@ var mainApp = function (converted1, converted2, converted3){
 					continue
 				}
 				fs.appendFileSync((`./json/combined.json`), JSON.stringify({index,
-																						CT:line1,
+																						AT:line1,
 																						KT:line2,
-																						AT:line3}), 
+																						CT:line3}), 
 					function(err) {
 						if (err) {
 							console.log(err);
 						}
 				});
 			}
-			continue; // exit the loop, data has been captured
+			//break; // exit the loop, data has been captured
 		}		 
 
 		continue

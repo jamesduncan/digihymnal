@@ -32,7 +32,12 @@ function resetFile(filename){
  }
 function writeToFile(data, filename){
 	// Output the file...
-	return fs.appendFile((`./json/${filename}.json`), JSON.stringify(data), function(err) {
+	fs.appendFileSync((`./js/${filename}.js`), "export default", function(err) {
+		if (err) {
+			console.log(err);
+		}
+	})
+	return fs.appendFile((`./js/${filename}.js`), JSON.stringify(data), function(err) {
 		if (err) {
 			console.log(err);
 		}
@@ -95,9 +100,11 @@ function stringToArray(longString){
 }
 
 // get real data from text files
+var converted1 = stringToArray(openFile("./samples/songbooks/AT.txt"))
 var converted2 = stringToArray(openFile("./samples/songbooks/KT.txt"))
 var converted3 = stringToArray(openFile("./samples/songbooks/CT.txt"))
-var converted1 = stringToArray(openFile("./samples/songbooks/AT.txt"))
+
+var songIndex = 0
 
 // mark each array with location of verses and new songs?
 
@@ -109,28 +116,29 @@ var mainApp = function (converted1, converted2, converted3){
 	// make blank global-ish variables
 	var currentTitle = 'empty file' 
 	var song = {}
+	var id = 0
 	song.title = {}
 	song.author = ("*")
 	song.key = ("*")
 	song.lyrics = {}
 	song.metadata = []
-	song.lyrics.Verse = []
+	song.lyrics.verses = []
 	var currentVerseId = 1
 	var currentVerseLabel =''
 	var currentVerse = {}
-	currentVerse.line = []
+	currentVerse.lines = []
 
 	addToVerse = (currentLine) => {
 		// if (typeof(currentVerse.line) != Array){
 	   // 	currentVerse.line = [] ///////// WHY HAVE TO DO THIS?
 		// }
-      currentVerse.line.push([{phrase:currentLine}])
+      currentVerse.lines.push({phrases:[currentLine]})
 	}
 	closeVerse = () => {
- 		song.lyrics.Verse.push(currentVerse)
+ 		song.lyrics.verses.push(currentVerse)
  		currentVerseId++
  		currentVerse = {}
- 		currentVerse.line = []
+ 		currentVerse.lines = []
  		currentVerse.label = ("verse " + currentVerseId.toString())
  		currentVerse.id = (currentVerseId)
 	}
@@ -138,6 +146,7 @@ var mainApp = function (converted1, converted2, converted3){
 	// Output the file...
 	function closeSong(output, filename){
 		closeVerse()
+		
 		//console.log({"closing": filename})
 		writeToFile(output, filename)
 
@@ -146,10 +155,10 @@ var mainApp = function (converted1, converted2, converted3){
 		song.key = ("*")
 		song.lyrics = {}
 		song.metadata = []
-		song.lyrics.Verse = []
+		song.lyrics.verses = []
 		currentVerse = {}
 		currentVerseId = 1
-		currentVerse.line = []
+		currentVerse.lines = []
  		currentVerse.label = ("verse " + currentVerseId.toString())
  		currentVerse.id = (currentVerseId)
 	}
@@ -160,9 +169,25 @@ var mainApp = function (converted1, converted2, converted3){
 	//single iterate through all files
 	for (var index = 0; index < converted1.length; index++) {
 		const line1 = converted1[index];
-		const line2 = converted2[index];
-		const line3 = converted3[index];
+		var line2 = converted2[index];
+		var line3 = converted3[index];
 		
+		// get rid of "undefined" at start of string
+		// caused by the deletion of a line in source data.
+		// easier to delete here than to fix regx
+		// var annoyingString = ['undefined']
+		//console.log(typeof(line2))
+		if (line2 != undefined && line3 != undefined){
+			let letter = line2[0]
+			if (letter=="u"){
+				line2 = line2.slice(9, line2.length)
+			}
+			letter = line3[0]
+			if (letter=="u"){
+				line3 = line3.slice(9, line3.length)
+			}
+		}
+
 		// for one line after capturing title,
 		// if line starts with "(" is meta data
 		// if next line starts with a numeral or (
@@ -170,9 +195,9 @@ var mainApp = function (converted1, converted2, converted3){
 		  let metadataTokens = ["(","(","1","2","3"]
 		  if(metadataTokens.includes(line1[0]) || metadataTokens.includes(line1[1])){ // if we got some meta data 
 			song.metadata.push({ // save the data
-					CT:line1,
-					KT:line2,
-					AT:line3
+					at:line1,
+					kt:line2,
+					ct:line3
 				})
 			continue; // exit the loop, data has been captured
 		  }else{
@@ -200,20 +225,21 @@ var mainApp = function (converted1, converted2, converted3){
 			// debugger thing here
 			let line1Default = line1.slice(a, line1[tData.songNumberIndex])
 			if(line1Default != line2.slice(0, line2[tData.songNumberIndex]) || line1Default !=line3.slice(0, line3[tData.songNumberIndex])){
-				console.log({'error data not matching at':index})
-				console.log({line1, line2, line3})
+				console.log({'WARNING input data not matching at':index,'at':line1, 'kt':line2,'ct': line3})
 			}
-			writeToFile({index,line1, line2, line3}, "titlesTest")
+			//writeToFile({index,line1, line2, line3}, "titlesTest")
 
 			// write old song to disk
 			titleJustCaptured = true
 			firstVerseAdded = false
 			// start saving new data
 			currentTitle = (toString(index), ".", line1.slice(a,line1.length)); // this is the song 'number'
+			song.id = (`${songIndex}`)
+			songIndex += 1;
 			currentVerseLabel = "0"; // placeholder
-			song.title = {CT:line1.slice(a, line1.length), // this is the song name in different languages
-								KT:line2,
-								AT:line3}
+			song.title = {at:line1.slice(a, line1.length), // this is the song name in different languages
+								kt:line2,
+								ct:line3}
 			continue;	
 		}
 
@@ -231,18 +257,18 @@ var mainApp = function (converted1, converted2, converted3){
 			// if(typeof(line2) == 'undefined'){
 			// 	continue;
 			// }
-			addToVerse( {CT:line1.slice(index, line1.length),
-								KT:line2.slice(index, line2.length),
-								AT:line3.slice(index, line3.length)}
+			addToVerse( {at:line1.slice(index, line1.length),
+								kt:line2.slice(index, line2.length),
+								ct:line3.slice(index, line3.length)}
 							)
 			continue;
 		}
 		//else{ 
 		// if it has no special characters, it must be a normal line
 		addToVerse({
-			CT:line1,
-			KT:line2,
-			AT:line3
+			at:line1,
+			kt:line2,
+			ct:line3
 		})
 		continue;
 		//}

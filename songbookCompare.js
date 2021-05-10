@@ -1,14 +1,5 @@
 //const dirTree = require("directory-tree");
 var fs = require('fs');
-const { stringify } = require("querystring");
-var parseDir = function (path) {
-  // an npm module that makes a tree out of a dir
-  var currDir = dirTree(path);
-  //return currDir
-  currDir.children.forEach(element => {
-    openFile(element.path)
-  });
-};
 // opens file, returns array.
 function openFile(path){
 	//var fs = require('fs');
@@ -26,13 +17,6 @@ function stringToArray(longString){
 		input = input.replace(/([\r])/g, '');
 		// TODO remove empty line? no idea if really working
 		input = input.replace(/^\s*[\r\n]/gm)
-		// var output = ''
-      // for (var i=0; i<input.length; i++) {
-      //  if (input.charCodeAt(i) <= 127) {
-      //    output += input.charAt(i);
-      //  }
-      // }
-      // return output;
 		return input;
  	}
   	longString = cleanString(longString)
@@ -40,9 +24,9 @@ function stringToArray(longString){
 }
 
 // get real data from text files
+var converted1 = stringToArray(openFile("./samples/songbooks/AT.txt"))
 var converted2 = stringToArray(openFile("./samples/songbooks/KT.txt"))
 var converted3 = stringToArray(openFile("./samples/songbooks/CT.txt"))
-var converted1 = stringToArray(openFile("./samples/songbooks/AT.txt"))
 
 // mark each array with location of verses and new songs?
 
@@ -65,7 +49,7 @@ var mainApp = function (converted1, converted2, converted3){
 		// easier to delete here than to fix regx
 		var annoyingString = ['undefined']
 		//console.log(typeof(line2))
-		if (line2 != undefined && line2 != undefined){
+		if (line2 != undefined && line3 != undefined){
 			let letter = line2[0]
 			if (letter=="u"){
 				line2 = line2.slice(9, line2.length)

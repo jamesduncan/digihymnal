@@ -14,6 +14,11 @@ export default class Preference {
     }
 
     async getLanguage() {
-        return await this.db.getItem(LANGUAGE_KEY_NAME);
+        var lang = await this.db.getItem(LANGUAGE_KEY_NAME);
+        if (!lang) {
+            this.setLanguage("kt");
+            lang = "kt";
+        }
+        return lang;
     }
 }

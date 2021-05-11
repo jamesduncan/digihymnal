@@ -344,7 +344,7 @@ export default class SongCollection {
 
                     var found = false;
                     Object.keys(item.title).forEach((prop) => {
-                        console.log(prop, languageCode);
+                        //console.log(prop, languageCode);
                         if (prop == languageCode) {
                           item.title = item.title[prop];
                           found = true;

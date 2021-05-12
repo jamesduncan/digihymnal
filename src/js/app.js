@@ -35,7 +35,7 @@ var app = new Framework7({
   name: 'Digital Hymnal', // App name
   theme: 'auto', // Automatic theme detection
   panel: {
-    swipe: true,
+    swipe: true
   },
   autoDarkTheme: true,
   // App routes

@@ -9,7 +9,7 @@
                         <span class="if-not-md">{{#if loading}}Back{{else}}{{translate "Back"}}{{/if}}</span>
                     </a>
                 </div>
-                <div class="title">{{#if loading}}{{else}} {{song.title[lyric1]}} {{/if}}</div>
+                <div class="title">{{#if loading}}{{else}} {{song.title[defaultLanguage]}} {{/if}}</div>
             </div>
         </div>
         <div class="page-content hide-navbar-on-scroll">
@@ -29,7 +29,7 @@
                                 </div>
                             </a>
                             <!-- Stepper element -->
-                            <div class="stepper stepper-large stepper-fill" style="margin-left: auto; height: 40px;">
+                            <div class="stepper stepper-large stepper-fill" style="display: none; margin-left: auto; height: 40px;">
                                 <div class="stepper-button-minus"></div>
                                 <div class="stepper-input-wrap">
                                     <input type="text" value="{{transpose song.key @root.steps}}" readonly>
@@ -44,24 +44,17 @@
                                 </div>
                                 <div class="menu-dropdown menu-dropdown-right">
                                     <div class="menu-dropdown-content">
-                                        <a href="#" class="menu-dropdown-link menu-close">
-                                            <span>Language #1</span>
-                                            <i class="margin-left fas fa-check-circle"></i>
-                                        </a>
-                                        <a href="#" class="menu-dropdown-link menu-close">
-                                            <span>Language #2</span>
-                                        </a>
-                                        <a href="#" class="menu-dropdown-link menu-close">
-                                            <span>Language #3</span>
-                                        </a>
-                                        <a href="#" class="menu-dropdown-link menu-close">
-                                            <span>Language #4</span>
-                                        </a>
+                                        {{#each languages}}
+                                            <a href="#" @click="toggleLyrics" data-language="{{tag}}" class="menu-dropdown-link menu-close">
+                                                <span>{{#if local}}{{local}}{{else}}{{name}}{{/if}}</span>
+                                                <i id="checkBox_{{tag}}" class="langCheckboxes margin-left {{#if default}}text-color-blue fas fa-adjust fa-rotate-90{{else}}text-color-gray far fa-circle{{/if}}"></i>
+                                            </a>
+                                        {{/each}}
                                     </div>
                                 </div>
                             </div>
-                            <div class="menu-item menu-item-dropdown">
-                                <div class="menu-item-content icon-only">
+                            <div class="menu-item {{#js_if "this.song.key != '*'"}}menu-item-dropdown{{else}}icon-only{{/js_if}}">
+                                <div class="menu-item-content icon-only {{#js_if "this.song.key == '*'"}}bg-color-gray{{/js_if}}">
                                     <div class="menu-item-content">
                                         <i class="fa-bigger fas fa-music"></i>
                                     </div>
@@ -70,8 +63,8 @@
                                     <div class="menu-dropdown-content">
                                         <a @click="toggleChords" class="menu-dropdown-link menu-close menuChords">
                                             <span>{{translate "Chords"}}</span>
-                                            <i class="margin-left text-color-primary fas fa-check-square"></i>
-                                            <i style="display: none;" class="margin-left text-color-gray far fa-square"></i>
+                                            <i style="display: none;" class="margin-left text-color-primary fas fa-check-square"></i>
+                                            <i class="margin-left text-color-gray far fa-square"></i>
                                         </a>
                                         <a @click="toggleNumbers" class="menu-dropdown-link menu-close menuNumbers">
                                             <span>{{translate "Number Notation"}}</span>
@@ -92,7 +85,7 @@
                                     {{#each lines}}
                                         <div class="line">
                                             {{#each phrases}}
-                                                <div class="phrase noNumbers">
+                                                <div class="phrase {{#if @root.showNumber}}{{else}}noNumbers{{/if}} {{#if @root.showChord}}{{else}}noChords{{/if}}">
                                                     {{#if chord}}
                                                         {{#if @root.showChord}}
                                                             <div class="chord">{{transpose chord @root.steps}}</div>
@@ -171,7 +164,7 @@
                     </div>
                 </div>
                 <div class="block text-align-right text-color-gray" style="margin-top: 10px;">
-                    {{song.author[lyric1]}}
+                    {{song.author[defaultLanguage]}}
                 </div>
             {{/if}}
         </div>
@@ -235,6 +228,10 @@
         margin-top: 30px !important;
     }
 
+    .noNumbers.noChords {
+        margin-top: 10px !important;
+    }
+
     .noNumbers .chord,
     .noChords .chord {
         top: -30px;
@@ -244,6 +241,9 @@
   import Song from '../data/song';
   import Preference from "../data/preference";
   const preference = new Preference();
+  
+  // Import locales
+  const locale = require('../js/locales.js');
 
   const songCollection = new Song();
   // songCollection.initSample();
@@ -251,6 +251,7 @@
   var initScale = 1;
   var lyric1;
   var lyric2;
+  var defaultLanguage;
   var deviceWidth = window.innerWidth;
   if (deviceWidth >= 700) {
     initScale = 2;
@@ -266,7 +267,7 @@
       return {
         loading: true,
         showNumber: false,
-        showChord: true,
+        showChord: false
       }
     },
     // Page Events
@@ -278,12 +279,26 @@
 
         preference.getLanguage().then((languageCode) => {
           lyric1 = languageCode;
+          defaultLanguage = languageCode;
           console.log('current lang: ' + lyric1);
           songCollection.get(songId).then(result => {
+            let languages = [];
+            var translationLangs = Object.keys(result.title);
+            locale.customLocales.forEach((item) => {
+              if (translationLangs.indexOf(item.tag) > -1) {
+                if (item.tag == lyric1) {
+                  item.default = true;
+                }
+                languages.push(item)
+              }
+            });
+
             self.$setState({
               loading: false,
               song: result,
-              steps: steps
+              steps: steps,
+              languages: languages,
+              defaultLanguage: defaultLanguage
             }, () => {
               self.$(".song")[0].style.transform = "scale("+initScale+")";
               self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
@@ -360,6 +375,37 @@
           this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
         }
       },
+      toggleLyrics: function(e) {
+        // get the language tag from the item tapped
+        var languageTapped = e.currentTarget.dataset.language;
+        
+        // if the user tapped the language that is currently the default unset it
+        if (lyric1 == languageTapped) {
+          lyric1 = "";
+        } else if (lyric2 == languageTapped) {
+          lyric2 = ""; // if the user tapped the language that is currently the seconddary language unset it
+        } else if (lyric1 != languageTapped && lyric2 != languageTapped) {
+          // if the user tapped a language that isn't displayed 
+          // set it to lyric1 if it isn't set anymore...otherwise set it as the secondary
+          if (lyric1 == "") {
+            lyric1 = languageTapped;
+          } else {
+            lyric2 = languageTapped;
+          }
+        }
+        
+        this.$(".langCheckboxes").removeClass("text-color-blue fas fa-adjust fa-rotate-90 fa-rotate-270").addClass("text-color-gray far fa-circle");
+        this.$("#checkBox_"+lyric1).removeClass("text-color-gray far fa-circle").addClass("text-color-blue fas fa-adjust fa-rotate-90");
+        this.$("#checkBox_"+lyric2).removeClass("text-color-gray far fa-circle").addClass("text-color-blue fas fa-adjust fa-rotate-270");
+        
+        // is there a secondary language set?
+        let showLyric2 = (lyric2 !== "") ? true : false;
+        this.$setState({
+          lyric1: lyric1,
+          lyric2: lyric2,
+          showLyric2: showLyric2
+        });
+      }
     }
   }
 </script>

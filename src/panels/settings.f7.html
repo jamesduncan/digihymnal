@@ -1,32 +1,32 @@
 <template>
-  <div class="panel panel-right panel-reveal theme-dark">
-    <div class="view">
-      <div class="page">
-        <div class="navbar">
-          <div class="navbar-bg"></div>
-          <div class="navbar-inner">
-            <div class="title">{{#if loading}}Choose a language{{else}}{{translate "Choose a language"}}{{/if}}</div>
-          </div>
-        </div>
-        <div class="page-content">
-          <div class="list">
-            <ul>
-              {{#each languages}}
-                <li>
-                  <a @click="changeLanguage" data-languageCode="{{tag}}" class="item-content">
-                    <div class="item-inner">
-                      <div class="item-title text-color-gray">{{#if local}}{{local}}{{else}}{{name}}{{/if}}</div>
-                      <div class="item-after text-color-primary">{{#if default}}<i class="fas fa-check-circle"></i>{{else}}<i class="far fa-circle">{{/if}}</div>
+    <div class="panel panel-right panel-reveal theme-dark">
+        <div class="view">
+            <div class="page">
+                <div class="navbar">
+                    <div class="navbar-bg"></div>
+                    <div class="navbar-inner">
+                        <div class="title">{{#if loading}}Choose a language{{else}}{{translate "Choose a language"}}{{/if}}</div>
                     </div>
-                  </a>
-                </li>
-              {{/each}}
-            </ul>
-          </div>
+                </div>
+                <div class="page-content">
+                    <div class="list">
+                        <ul>
+                            {{#each languages}}
+                                <li>
+                                    <a @click="changeLanguage" data-languageCode="{{tag}}" class="item-content">
+                                        <div class="item-inner">
+                                            <div class="item-title text-color-gray">{{#if local}}{{local}}{{else}}{{name}}{{/if}}</div>
+                                            <div class="item-after text-color-primary">{{#if default}}<i class="fas fa-check-circle"></i>{{else}}<i class="far fa-circle">{{/if}}</div>
+                                        </div>
+                                    </a>
+                                </li>
+                            {{/each}}
+                        </ul>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </template>
 <script>
 

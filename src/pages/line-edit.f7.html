@@ -36,23 +36,6 @@
                                 </div>
                                 <div class="stepper-button-plus"></div>
                             </div>
-                            <div style="margin-left: auto" class="menu-item menu-item-dropdown">
-                                <div class="menu-item-content icon-only">
-                                    <div class="menu-item-content">
-                                        <i class="fa-bigger fas fa-language"></i>
-                                    </div>
-                                </div>
-                                <div class="menu-dropdown menu-dropdown-right">
-                                    <div class="menu-dropdown-content">
-                                        {{#each languages}}
-                                            <a href="#" @click="toggleLyrics" data-language="{{tag}}" class="menu-dropdown-link menu-close">
-                                                <span>{{#if local}}{{local}}{{else}}{{name}}{{/if}}</span>
-                                                <i id="checkBox_{{tag}}" class="langCheckboxes margin-left {{#if default}}text-color-blue fas fa-adjust fa-rotate-90{{else}}text-color-gray far fa-circle{{/if}}"></i>
-                                            </a>
-                                        {{/each}}
-                                    </div>
-                                </div>
-                            </div>
                             <div class="menu-item {{#js_if "this.song.key != '*'"}}menu-item-dropdown{{else}}icon-only{{/js_if}}">
                                 <div class="menu-item-content icon-only {{#js_if "this.song.key == '*'"}}bg-color-gray{{/js_if}}">
                                     <div class="menu-item-content">
@@ -86,61 +69,6 @@
                                         <div class="line">
                                             {{#each phrases}}
                                                 <div class="phrase {{#if @root.showNumber}}{{else}}noNumbers{{/if}} {{#if @root.showChord}}{{else}}noChords{{/if}}">
-                                                    {{#if chord}}
-                                                        {{#if @root.showChord}}
-                                                            <div class="chord">{{transpose chord @root.steps}}</div>
-                                                        {{/if}}
-                                                    {{/if}}
-                                                    {{#if number}}
-                                                        {{#if @root.showNumber}}
-                                                            <div class="number">{{number}}</div>
-                                                        {{/if}}
-                                                    {{/if}}
-                                                    <div class="lyric">{{this[lyric1]}}&nbsp;</div>
-                                                    {{#if @root.showLyric2}}
-                                                        <div class="lyric">{{this[lyric2]}}&nbsp;</div>
-                                                    {{/if}}
-                                                </div>
-                                            {{/each}}
-                                        <a href="/song/line/edit/{{ @root.songId}}/{{ ../@index }}/{{@index}}/" class="col button button-small button-round button-fill item-link"></a>
-                                        </div>
-                                    {{/each}}
-                                {{/each}}
-                            </div>
-                            <div class="chorus">
-                                {{#each song.lyrics.Chorus}}
-                                    <h3>{{#if label}}{{translate label}}{{else}}<br />{{/if}}</h3>
-                                    {{#each lines}}
-                                        <div class="line">
-                                            {{#each phrases}}
-                                                <div class="phrase noNumbers">
-                                                    {{#if chord}}
-                                                        {{#if @root.showChord}}
-                                                            <div class="chord">{{transpose chord @root.steps}}</div>
-                                                        {{/if}}
-                                                    {{/if}}
-                                                    {{#if number}}
-                                                        {{#if @root.showNumber}}
-                                                            <div class="number">{{number}}</div>
-                                                        {{/if}}
-                                                    {{/if}}
-                                                    <div class="lyric">{{this[lyric1]}}&nbsp;</div>
-                                                    {{#if @root.showLyric2}}
-                                                        <div class="lyric">{{this[lyric2]}}&nbsp;</div>
-                                                    {{/if}}
-                                                </div>
-                                            {{/each}}
-                                        </div>
-                                    {{/each}}
-                                {{/each}}
-                            </div>
-                            <div class="bridge">
-                                {{#each song.lyrics.Bridge}}
-                                    <h3>{{#if label}}{{translate label}}{{else}}<br />{{/if}}</h3>
-                                    {{#each lines}}
-                                        <div class="line">
-                                            {{#each phrases}}
-                                                <div class="phrase noNumbers">
                                                     {{#if chord}}
                                                         {{#if @root.showChord}}
                                                             <div class="chord">{{transpose chord @root.steps}}</div>
@@ -239,11 +167,12 @@
     }
 </style>
 <script>
-  self = this
   var songId
-  var song
-  console.log(songId)
+  var verseId
+  var lineId
   import Song from '../data/song';
+  // const Song = Song;
+  // import Line from '../data/song';
   import Preference from "../data/preference";
   const preference = new Preference();
   
@@ -280,9 +209,18 @@
       pageInit: function(e, page) {
         var self = this;
         var app = self.$app;
+
         songId = this.$route.params.songId;
-        this.songId = songId
         console.log(songId)
+        
+        verseId = this.$route.params.verseId;
+        console.log(verseId)
+
+        lineId = this.$route.params.lineId;
+        console.log(lineId)
+        
+        
+        debugger;
 
         preference.getLanguage().then((languageCode) => {
           lyric1 = languageCode;

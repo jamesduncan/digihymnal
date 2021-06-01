@@ -42,20 +42,16 @@
                                         <i class="fa-bigger fas fa-music"></i>
                                     </div>
                                 </div>
-                                <div class="menu-dropdown menu-dropdown-right">
-                                    <div class="menu-dropdown-content">
-                                        <a @click="toggleChords" class="menu-dropdown-link menu-close menuChords">
-                                            <span>{{translate "Chords"}}</span>
-                                            <i style="display: none;" class="margin-left text-color-primary fas fa-check-square"></i>
-                                            <i class="margin-left text-color-gray far fa-square"></i>
-                                        </a>
-                                        <a @click="toggleNumbers" class="menu-dropdown-link menu-close menuNumbers">
-                                            <span>{{translate "Number Notation"}}</span>
-                                            <i style="display: none;" class="margin-left text-color-blue fas fa-check-circle"></i>
-                                            <i class="margin-left text-color-gray far fa-circle"></i>
-                                        </a>
-                                    </div>
-                                </div>
+                              </div>
+                            <div>
+                              <div class="menu-item-content icon-only">
+                                  <div class="menu-item-content">
+                                      <a @click="save" class="col button button-small button-round button-fill">
+                                          <span>{{translate "Save"}}</span>
+                                          <i class="margin-left text-color-gray far fa-circle"></i>
+                                      </a>
+                                  </div>
+                              </div>
                             </div>
                         </div>
                     </div>
@@ -63,11 +59,10 @@
                     <div class="sheet">
                         <div class="song">
                             <div class="verse">
-                                {{#each song.lyrics.verses}}
                                     <h3>{{#if label}}{{translate label}}{{else}}<br />{{/if}}</h3>
-                                    {{#each lines}}
+          
                                         <div class="line">
-                                            {{#each phrases}}
+                                            {{#each line.phrases}}
                                                 <div class="phrase {{#if @root.showNumber}}{{else}}noNumbers{{/if}} {{#if @root.showChord}}{{else}}noChords{{/if}}">
                                                     {{#if chord}}
                                                         {{#if @root.showChord}}
@@ -86,8 +81,6 @@
                                                 </div>
                                             {{/each}}
                                         </div>
-                                    {{/each}}
-                                {{/each}}
                             </div>
                         </div>
                     </div>
@@ -211,16 +204,11 @@
         var app = self.$app;
 
         songId = this.$route.params.songId;
-        console.log(songId)
-        
+        // console.log(songId)
         verseId = this.$route.params.verseId;
-        console.log(verseId)
-
+        // console.log(verseId)
         lineId = this.$route.params.lineId;
-        console.log(lineId)
-        
-        
-        debugger;
+        // console.log(lineId)
 
         preference.getLanguage().then((languageCode) => {
           lyric1 = languageCode;
@@ -241,12 +229,15 @@
             self.$setState({
               loading: false,
               song: result,
+              // verse: result.verse[verseId],
+              line: result.lyrics.verses[verseId].lines[lineId],
               steps: steps,
               languages: languages,
               defaultLanguage: defaultLanguage
             }, () => {
               self.$(".song")[0].style.transform = "scale("+initScale+")";
               self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+              console.log(result.lyrics.verses[verseId].lines[lineId])
               var stepper = app.stepper.create({
                 el: '.stepper',
                 value: steps,
@@ -272,13 +263,11 @@
         initScale += 0.05;
         this.$(".song")[0].style.transform = "scale("+initScale+")";
         this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
-        // debugger;
       },
       zoomOut: function(e) {
         initScale -= 0.05;
         this.$(".song")[0].style.transform = "scale("+initScale+")";
         this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
-        // debugger;
       },
       toggleChords: function(e) {
         if (this.$(".menuChords .fa-check-square")[0].style.display == "") {
@@ -319,6 +308,39 @@
           this.$(".phrase").removeClass("noNumbers");
           this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
         }
+      },
+      save: function(e) {
+        console.log(songId,verseId,lineId)
+        debugger
+
+          preference.getLanguage().then((languageCode) => {
+            lyric1 = languageCode;
+            defaultLanguage = languageCode;
+            console.log('current lang: ' + lyric1);
+            songCollection.get(songId).then(result => {
+              var translationLangs = Object.keys(result.title);
+              // 
+              let newData = result
+              // get this data from the dom somehow
+              newData.lyrics.verses[verseId].lines[lineId].phrases[0][languageCode] = "THIS HAS BEEN SET BY CLICKING THE BUTTON"
+              debugger
+              songCollection.db.setItem(songId, newData)
+
+              self.$setState({
+                loading: false,
+                song: result,
+                line: result.lyrics.verses[verseId].lines[lineId],
+                steps: steps,
+                languages: languages,
+                defaultLanguage: defaultLanguage
+              }, () => {
+                self.$(".song")[0].style.transform = "scale("+initScale+")";
+                self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+                console.log(result.lyrics.verses[verseId].lines[lineId])
+              });
+            });
+          });
+
       },
       toggleLyrics: function(e) {
         // get the language tag from the item tapped

@@ -59,28 +59,10 @@
                     <div class="sheet">
                         <div class="song">
                             <div class="verse">
-                                    <h3>{{#if label}}{{translate label}}{{else}}<br />{{/if}}</h3>
-          
-                                        <div class="line">
-                                            {{#each line.phrases}}
-                                                <div class="phrase {{#if @root.showNumber}}{{else}}noNumbers{{/if}} {{#if @root.showChord}}{{else}}noChords{{/if}}">
-                                                    {{#if chord}}
-                                                        {{#if @root.showChord}}
-                                                            <div class="chord">{{transpose chord @root.steps}}</div>
-                                                        {{/if}}
-                                                    {{/if}}
-                                                    {{#if number}}
-                                                        {{#if @root.showNumber}}
-                                                            <div class="number">{{number}}</div>
-                                                        {{/if}}
-                                                    {{/if}}
-                                                    <div class="lyric">{{this[lyric1]}}&nbsp;</div>
-                                                    {{#if @root.showLyric2}}
-                                                        <div class="lyric">{{this[lyric2]}}&nbsp;</div>
-                                                    {{/if}}
-                                                </div>
-                                            {{/each}}
-                                        </div>
+                              <h3>{{#if label}}{{translate label}}{{else}}<br />{{/if}}</h3>
+                              <div class="line">
+                                {{ printLyric @root.line @root.showChord @root.showNumber}}
+                              </div>
                             </div>
                         </div>
                     </div>
@@ -163,6 +145,9 @@
   var songId
   var verseId
   var lineId
+  var languages
+  var lyricList
+  var line
   import Song from '../data/song';
   // const Song = Song;
   // import Line from '../data/song';
@@ -215,7 +200,8 @@
           defaultLanguage = languageCode;
           console.log('current lang: ' + lyric1);
           songCollection.get(songId).then(result => {
-            let languages = [];
+            languages = [];
+            lyricList = []
             var translationLangs = Object.keys(result.title);
             locale.customLocales.forEach((item) => {
               if (translationLangs.indexOf(item.tag) > -1) {
@@ -225,6 +211,7 @@
                 languages.push(item)
               }
             });
+            line = result.lyrics.verses[verseId].lines[lineId]
 
             self.$setState({
               loading: false,
@@ -233,11 +220,21 @@
               line: result.lyrics.verses[verseId].lines[lineId],
               steps: steps,
               languages: languages,
+              lyricList: lyricList,
               defaultLanguage: defaultLanguage
             }, () => {
               self.$(".song")[0].style.transform = "scale("+initScale+")";
               self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+
+              languages.forEach(lang => {
+                console.log(lang.tag)
+                line.phrases.forEach(phrase => {
+                  console.log(phrase[lang.tag])
+                  lyricList.push({"tag":lang.tag,"lyric":line[lang.tag]})
+                });
+              });
               console.log(result.lyrics.verses[verseId].lines[lineId])
+
               var stepper = app.stepper.create({
                 el: '.stepper',
                 value: steps,
@@ -311,7 +308,6 @@
       },
       save: function(e) {
         console.log(songId,verseId,lineId)
-        debugger
 
           preference.getLanguage().then((languageCode) => {
             lyric1 = languageCode;

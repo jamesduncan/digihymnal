@@ -12,7 +12,6 @@ import 'framework7/css/framework7.bundle.css';
 import '../css/app.css';
 
 // Import FontAwesome Icons
-
 import '../../node_modules/@fortawesome/fontawesome-free/css/all.min.css';
 
 // Import Routes
@@ -27,6 +26,45 @@ Template7.registerHelper('transpose', transpose);
 // Import translation tool
 import { translate } from "./translate";
 Template7.registerHelper('translate', translate);
+
+// get lyric by ID
+// (this.tag, parentObject)
+Template7.registerHelper('getKeyInParent', function (parent,keyArr){
+  return 'ra';
+})
+// print all lyrics
+// (parentObject)
+Template7.registerHelper('printLyric', function (line, showChord, showNumber){
+  console.log(line)
+  // <div class="phrase {{#if @root.showNumber}}{{else}}noNumbers{{/if}} {{#if @root.showChord}}{{else}}noChords{{/if}}">
+  var results = '<div class="line">'
+  
+  line.phrases.forEach(phrase => {
+    results = results.concat(`<div class="phrase"> `)
+    for (const key in phrase) {
+      if(phrase["chord"]){
+        results = results.concat(`<div class="chord"><div class="item-input-wrap"><input type="text" value="${phrase["chord"]}"></div></div>`)
+      } else {
+        //results = results.concat(`<div class="chord item-input-wrap"><input type="text" placeholder="*"></div>`)
+        results = results.concat(`<div class="chord"><div class="item-input-wrap"><input type="text" placeholder="*"></div></div>`)
+        //results = results.concat(`<div class="chord">*</div>`)
+      }
+      if(phrase["number"]){
+        results = results.concat(`<div class="number"><div class="item-input-wrap"><input type="number" value="${phrase["number"]}"></div></div>`)
+      }else {
+        results = results.concat(`<div class="number"><div class="item-input-wrap"><input type="number" placeholder="*"></div></div>`)
+      }
+      if (Object.hasOwnProperty.call(phrase, key)) {
+        const element = phrase[key];
+        if(key != "chord" && key != "number"){
+          results = results.concat(`<div class="lyrics ${key}"><div class="item-input-wrap"><input type="text" value="${element}&nbsp;"></div></div>`)
+        }
+      }
+    }
+    results = results.concat('</div>')
+  });
+  return results.concat('</div>');
+})
 
 var app = new Framework7({
   root: '#app', // App root element

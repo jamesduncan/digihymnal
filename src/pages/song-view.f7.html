@@ -83,9 +83,9 @@
                                 {{#each song.lyrics.verses}}
                                     <h3>{{#if label}}{{translate label}}{{else}}<br />{{/if}}</h3>
                                     {{#each lines}}
-                                        <div class="line">
+                                        <div class="line" style="width: 50%; clear: both;">
                                             {{#each phrases}}
-                                                <div class="phrase {{#if @root.showNumber}}{{else}}noNumbers{{/if}} {{#if @root.showChord}}{{else}}noChords{{/if}}">
+                                                <div class="phrase {{#if @root.showNumber}}{{else}}noNumbers{{/if}} {{#if @root.showChord}}{{else}}noChords{{/if}}" style="float: left;">
                                                     {{#if chord}}
                                                         {{#if @root.showChord}}
                                                             <div class="chord">{{transpose chord @root.steps}}</div>
@@ -102,7 +102,9 @@
                                                     {{/if}}
                                                 </div>
                                             {{/each}}
-                                        <a href="/song/line/edit/{{ @root.songId}}/{{ ../@index }}/{{@index}}/" class="col button button-small button-round button-fill item-link"></a>
+                                        <div style="float: right; padding: 5px;height:15px; width:50px;">
+                                          <a href="/song/line/edit/{{ @root.songId}}/{{ ../@index }}/{{@index}}/" class="col button button-small button-round button-fill item-link" ></a>
+                                        </div>
                                         </div>
                                     {{/each}}
                                 {{/each}}
@@ -188,6 +190,16 @@
     .line {
         margin-bottom: 20px;
     }
+    
+    input {
+        width:100%;
+        float: left;
+        display: table;
+    }
+
+    .lyrics {
+        display: table;
+    }
 
     .phrase {
         position: relative;
@@ -202,6 +214,7 @@
         background: var(--f7-theme-color);
         border-radius: 3px;
         min-width: 20px;
+        max-width: 30px;
         height: 20px;
         line-height: 20px;
         text-align: center;
@@ -309,6 +322,7 @@
             }, () => {
               self.$(".song")[0].style.transform = "scale("+initScale+")";
               self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+              console.log(languages)
               var stepper = app.stepper.create({
                 el: '.stepper',
                 value: steps,

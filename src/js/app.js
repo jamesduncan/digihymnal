@@ -40,19 +40,25 @@ Template7.registerHelper('printLyric', function (line, showChord, showNumber){
   var results = '<div class="line">'
   
   line.phrases.forEach(phrase => {
+    ///
+    // Validators
+    const validateChords = `required pattern='[ABCDEFG]|[ABCDEFG]m|[ABCDEFG]#|[ABCDEFG]b|[ABCDEFG]#m|[ABCDEFG]bm|[ABCDEFG]7|[ABCDEFG]sus|[ABCDEFG]#7|[ABCDEFG]#sus|[ABCDEFG]b7|[ABCDEFG]bsus'`
+    const validateNumber = `required pattern='1|2|3|4|5|6|7|8|9|10|11|12'`
+    ///
+
     results = results.concat(`<div class="phrase"> `)
     for (const key in phrase) {
       if(phrase["chord"]){
-        results = results.concat(`<div class="chord"><div class="item-input-wrap"><input type="text" value="${phrase["chord"]}"></div></div>`)
+        results = results.concat(`<div class="chord"><div class="item-input-wrap"><input type="text" value="${phrase["chord"]} ${validateChords}"></div></div>`)
       } else {
         //results = results.concat(`<div class="chord item-input-wrap"><input type="text" placeholder="*"></div>`)
-        results = results.concat(`<div class="chord"><div class="item-input-wrap"><input type="text" placeholder="*"></div></div>`)
+        results = results.concat(`<div class="chord"><div class="item-input-wrap"><input type="text" ${validateChords} placeholder="*"></div></div>`)
         //results = results.concat(`<div class="chord">*</div>`)
       }
       if(phrase["number"]){
-        results = results.concat(`<div class="number"><div class="item-input-wrap"><input type="number" value="${phrase["number"]}"></div></div>`)
+        results = results.concat(`<div class="number"><div class="item-input-wrap"><input type="text" ${validateNumber}value="${phrase["number"]}"></div></div>`)
       }else {
-        results = results.concat(`<div class="number"><div class="item-input-wrap"><input type="number" placeholder="*"></div></div>`)
+        results = results.concat(`<div class="number"><div class="item-input-wrap"><input type="text" ${validateNumber}placeholder="*"></div></div>`)
       }
       if (Object.hasOwnProperty.call(phrase, key)) {
         const element = phrase[key];
@@ -64,6 +70,44 @@ Template7.registerHelper('printLyric', function (line, showChord, showNumber){
     results = results.concat('</div>')
   });
   return results.concat('</div>');
+})
+// print all lyrics
+// (parentObject)
+Template7.registerHelper('printEachPhrase', function (line, languages){
+  console.log(line, languages)
+  //debugger;
+  var results = ''
+  const validateChords = `required pattern='[ABCDEFG]|[ABCDEFG]m|[ABCDEFG]#|[ABCDEFG]b|[ABCDEFG]#m|[ABCDEFG]bm|[ABCDEFG]7|[ABCDEFG]sus|[ABCDEFG]#7|[ABCDEFG]#sus|[ABCDEFG]b7|[ABCDEFG]bsus'`
+  const validateNumber = `required pattern='1|2|3|4|5|6|7|8|9|10|11|12'`
+  //
+  languages.forEach(language => {
+    results = results.concat(`<div class="line ${language}">`)
+    line.phrases.forEach(phrase => {
+      results = results.concat(`<div class="phrase ${language}"> `)
+
+        if(phrase["chord"]){
+          results = results.concat(`<div class="chord"><div class="item-input-wrap"><input type="text" value="${phrase["chord"]} ${validateChords}"></div></div>`)
+        } else {
+          results = results.concat(`<div class="chord"><div class="item-input-wrap"><input type="text" ${validateChords} placeholder="*"></div></div>`)
+        }
+        if(phrase["number"]){
+          results = results.concat(`<div class="number"><div class="item-input-wrap"><input type="text" ${validateNumber}value="${phrase["number"]}"></div></div>`)
+        }else {
+          results = results.concat(`<div class="number"><div class="item-input-wrap"><input type="text" ${validateNumber}placeholder="*"></div></div>`)
+        }
+        if(phrase[language]){
+          results = results.concat(`<div class="lyrics ${language}"><div class="item-input-wrap"><input type="text" value="${phrase[language]}&nbsp;"></div></div>`)
+        }else{
+          results = results.concat(`<div class="lyrics ${language}"><div class="item-input-wrap"><input type="text" value="*"></div></div>`)
+        }
+
+      
+      results = results.concat('</div>')
+    });
+    results = results.concat('</div>');
+  });
+  
+  return results;
 })
 
 var app = new Framework7({

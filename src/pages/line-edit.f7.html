@@ -18,16 +18,6 @@
                 <div class="block block-strong" style="margin-bottom: 10px; overflow: hidden;">
                     <div class="menu">
                         <div class="menu-inner no-margin-padding">
-                            <a @click="zoomOut" class="menu-item icon-only">
-                                <div class="menu-item-content">
-                                    <i class="fa-bigger fas fa-search-minus"></i>
-                                </div>
-                            </a>
-                            <a @click="zoomIn" class="menu-item icon-only">
-                                <div class="menu-item-content">
-                                    <i class="fa-bigger fas fa-search-plus"></i>
-                                </div>
-                            </a>
                             <!-- Stepper element -->
                             <div class="stepper stepper-large stepper-fill" style="display: none; margin-left: auto; height: 40px;">
                                 <div class="stepper-button-minus"></div>
@@ -44,11 +34,40 @@
                                 </div>
                               </div>
                             <div>
+                            <div class="menu-item">
+                              <div class="menu-item-content icon-only">
+                                <div class="menu-item-content">
+                                    <a @click="save" class="col button button-fill">
+                                        <i class="text-color-gray fa-bigger fas fa-save"></i>
+                                    </a>
+                                </div>
+                              </div>
+                            </div>
+                            </div>
+                            <div class="menu-item">
                               <div class="menu-item-content icon-only">
                                   <div class="menu-item-content">
-                                      <a @click="save" class="col button button-small button-round button-fill">
-                                          <span>{{translate "Save"}}</span>
-                                          <i class="margin-left text-color-gray far fa-circle"></i>
+                                      <a @click="prevLine" class="col button button-fill">
+                                          <i class="text-color-gray fas fa-bigger fa-arrow-left"></i>
+                                      </a>
+                                  </div>
+                              </div>
+                            </div>
+                            <div class="menu-item">
+                              <div class="menu-item-content icon-only">
+                                  <div class="menu-item-content">
+                                      <a @click="nextLine" class="col button button-fill">
+                                          <i class="text-color-gray fa-bigger fas fa-arrow-right"></i>
+                                      </a>
+                                  </div>
+                              </div>
+                            </div>
+                            
+                            <div class="menu-item">
+                              <div class="menu-item-content icon-only">
+                                  <div class="menu-item-content">
+                                      <a @click="deleteLine" class="col button button-fill">
+                                          <i class="text-color-gray fa-bigger fas fa-trash"></i>
                                       </a>
                                   </div>
                               </div>
@@ -56,12 +75,22 @@
                         </div>
                     </div>
 
-                    <div class="sheet">
+                    <!--<div class="sheet">
                         <div class="song">
                             <div class="verse">
                               <h3>{{#if label}}{{translate label}}{{else}}<br />{{/if}}</h3>
                               <div class="line">
                                 {{ printLyric @root.line @root.showChord @root.showNumber}}
+                              </div>
+                            </div>
+                        </div>
+                    </div>-->
+                    <div class="sheet">
+                        <div class="song">
+                            <div class="verse">
+                              <h3>{{#if label}}{{translate label}}{{else}}<br />{{/if}}</h3>
+                              <div class="line">
+                                {{ printEachPhrase @root.line @root.languages }}
                               </div>
                             </div>
                         </div>
@@ -148,6 +177,7 @@
   var languages
   var lyricList
   var line
+  var song
   import Song from '../data/song';
   // const Song = Song;
   // import Line from '../data/song';
@@ -165,6 +195,7 @@
   var lyric2;
   var defaultLanguage;
   var deviceWidth = window.innerWidth;
+  var self = this;
   if (deviceWidth >= 700) {
     initScale = 2;
   } else if (deviceWidth >= 500) {
@@ -185,7 +216,7 @@
     // Page Events
     on: {
       pageInit: function(e, page) {
-        var self = this;
+        self = this;
         var app = self.$app;
 
         songId = this.$route.params.songId;
@@ -208,10 +239,12 @@
                 if (item.tag == lyric1) {
                   item.default = true;
                 }
-                languages.push(item)
+                languages.push(item.tag)
               }
             });
             line = result.lyrics.verses[verseId].lines[lineId]
+            // song is used to get next line
+            song = result
 
             self.$setState({
               loading: false,
@@ -338,35 +371,67 @@
           });
 
       },
-      toggleLyrics: function(e) {
-        // get the language tag from the item tapped
-        var languageTapped = e.currentTarget.dataset.language;
-        
-        // if the user tapped the language that is currently the default unset it
-        if (lyric1 == languageTapped) {
-          lyric1 = "";
-        } else if (lyric2 == languageTapped) {
-          lyric2 = ""; // if the user tapped the language that is currently the seconddary language unset it
-        } else if (lyric1 != languageTapped && lyric2 != languageTapped) {
-          // if the user tapped a language that isn't displayed 
-          // set it to lyric1 if it isn't set anymore...otherwise set it as the secondary
-          if (lyric1 == "") {
-            lyric1 = languageTapped;
-          } else {
-            lyric2 = languageTapped;
+      nextLine: function(e) {
+        // only get index forward if it exists in song
+        if(!(song.lyrics.verses[verseId].lines[++lineId])){
+          // see if there is a next verse
+          if(!(song.lyrics.verses[++verseId].lines[lineId])){
+            --verseId;
+            --lineId
+            console.log("Out of lines in this song...")
           }
         }
-        
-        this.$(".langCheckboxes").removeClass("text-color-blue fas fa-adjust fa-rotate-90 fa-rotate-270").addClass("text-color-gray far fa-circle");
-        this.$("#checkBox_"+lyric1).removeClass("text-color-gray far fa-circle").addClass("text-color-blue fas fa-adjust fa-rotate-90");
-        this.$("#checkBox_"+lyric2).removeClass("text-color-gray far fa-circle").addClass("text-color-blue fas fa-adjust fa-rotate-270");
-        
-        // is there a secondary language set?
-        let showLyric2 = (lyric2 !== "") ? true : false;
-        this.$setState({
-          lyric1: lyric1,
-          lyric2: lyric2,
-          showLyric2: showLyric2
+        // update variable
+        self.$setState({
+          loading: false,
+          line: song.lyrics.verses[verseId].lines[lineId]
+        }, () => {
+          console.log(song.lyrics.verses[verseId].lines[lineId])
+        });
+      },
+      prevLine: function(e) {
+        // only change if it exists
+        if(!(song.lyrics.verses[verseId].lines[--lineId])){
+          if(!(song.lyrics.verses[--verseId].lines[lineId])){
+            ++lineId
+            ++verseId
+            console.log("Out of lines in this song...")
+          }
+        }
+        // update variable
+        self.$setState({
+          loading: false,
+          line: song.lyrics.verses[verseId].lines[lineId]
+        }, () => {
+          console.log(song.lyrics.verses[verseId].lines[lineId])
+        });
+      },
+      deleteLine: function(e) {
+        console.log(songId,verseId,lineId);
+        // TODO pre-delete confirmation prompt
+        songCollection.get(songId).then(result => {
+          let newData = result
+          // At index, remove one element
+          // debugger;
+          let deletedLine = newData.lyrics.verses[verseId].lines.splice(lineId, 1)
+          console.log({"removing" : deletedLine }) 
+          songCollection.db.setItem(songId, newData)
+
+          // set lineId to an existing line
+          if(!(newData.lyrics.verses[verseId].lines[lineId]) && (newData.lyrics.verses[verseId].lines[lineId-1])){ 
+            --lineId;
+          } else {
+            ++lineId
+          }
+
+          self.$setState({
+            loading: false,
+            song: newData,
+            line: newData.lyrics.verses[verseId].lines[lineId]
+          }, () => {
+            console.log(newData.lyrics.verses[verseId].lines[lineId]);
+            // TODO reload previous song page
+          });
         });
       }
     }

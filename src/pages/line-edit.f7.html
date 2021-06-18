@@ -89,7 +89,7 @@
                         <div class="song">
                             <div class="verse">
                               <h3>{{#if label}}{{translate label}}{{else}}<br />{{/if}}</h3>
-                              <div class="line">
+                              <div class="line" id="edit-line">
                                 {{ printEachPhrase @root.line @root.languages }}
                               </div>
                             </div>
@@ -178,6 +178,7 @@
   var lyricList
   var line
   var song
+  var app
   import Song from '../data/song';
   // const Song = Song;
   // import Line from '../data/song';
@@ -217,7 +218,8 @@
     on: {
       pageInit: function(e, page) {
         self = this;
-        var app = self.$app;
+        app = self.$app;
+        var $form = this.$('#edit-line')
 
         songId = this.$route.params.songId;
         // console.log(songId)
@@ -341,36 +343,88 @@
       },
       save: function(e) {
         console.log(songId,verseId,lineId)
+        var $form = $('#edit-line')
+        var $ = $form.find("select[name='']") //relation
+        if (!self.$app.input.validateInputs('#edit-line')) {
+          throw new Error('<t>Please correct your entries.</t>')
+        }
 
-          preference.getLanguage().then((languageCode) => {
-            lyric1 = languageCode;
-            defaultLanguage = languageCode;
-            console.log('current lang: ' + lyric1);
-            songCollection.get(songId).then(result => {
-              var translationLangs = Object.keys(result.title);
-              // 
-              let newData = result
-              // get this data from the dom somehow
-              newData.lyrics.verses[verseId].lines[lineId].phrases[0][languageCode] = "THIS HAS BEEN SET BY CLICKING THE BUTTON"
-              debugger
-              songCollection.db.setItem(songId, newData)
-
-              self.$setState({
-                loading: false,
-                song: result,
-                line: result.lyrics.verses[verseId].lines[lineId],
-                steps: steps,
-                languages: languages,
-                defaultLanguage: defaultLanguage
-              }, () => {
-                self.$(".song")[0].style.transform = "scale("+initScale+")";
-                self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
-                console.log(result.lyrics.verses[verseId].lines[lineId])
-              });
+        songCollection.get(songId).then(result => {
+          // 
+          let newData = result
+          newData.lyrics.verses[verseId].lines[lineId].phrases[0][languageCode] = "THIS HAS BEEN SET BY CLICKING THE BUTTON"
+          
+          debugger
+          // get this data from the dom somehow
+          var listOfLines = this.$('#edit-line').children
+          // iterate horizontally
+          listOfLines.forEach(lineElement => {
+            var tag = ""
+            if(lineElement.classList.value.includes("metadata")){
+              // is chords/nums
+            } else {
+              // at, kt etc...
+              tag = lineElement.classList.value
+            }
+            lineElement.children.forEach(phraseElement=> { 
+              console.log(phraseElement.children[1].children[0].children[0].value)
             });
+            
+          });
+          
+
+
+
+          var userEdits = newData.lyrics.verses[verseId].lines[lineId]
+
+          //
+          this.$line
+          //
+
+          // check through existing item
+          for (const phraseKey in userEdits) {
+            if (Object.hasOwnProperty.call(userEdits, phraseKeyey)) {
+              const element = userEdits[phraseKey];
+              
+            }
+          }
+          // check through the dom
+          var saveLine = {}
+          phrases.forEach(phrase => {
+            let savedPhrase = {}
+            phrase.forEach(element => {
+              //savedPhrase.push({element.id: element.value()})
+              console.log(element)
+            });
+            saveLine.push(savedPhrase)
           });
 
-      },
+          // { lines: [
+          //   {
+          //     phrases: [
+          //       {
+          //         "at": "ྱེ། མི་རིགས་ཀུན་ཡ་ཝཱེར་བསྟོད་སྔོགས་ཤིག",
+          //         "kt": "ཀྱེ། མི་རིགས་ཀུན་ཡ་ཝཱེར་བསྟོད་སྔོགས་ཤིག ",
+          //         "ct": "ྱེ། མི་རིགས་ཀུན་ཡ་ཝེར་བསྟོད་སྔོགས་ཤིག"
+          //       }
+          //     ]
+          //   }
+          // ]}
+
+
+          newData.lyrics.verses[verseId].lines[lineId] = userEdits
+
+          // save
+          songCollection.db.setItem(songId, newData)
+          self.$setState({
+            loading: false,
+            song: newData,
+            line: newData.lyrics.verses[verseId].lines[lineId]
+          }, () => {
+            console.log(newData.lyrics.verses[verseId].lines[lineId])
+          });
+        }); 
+  },
       nextLine: function(e) {
         // only get index forward if it exists in song
         if(!(song.lyrics.verses[verseId].lines[++lineId])){

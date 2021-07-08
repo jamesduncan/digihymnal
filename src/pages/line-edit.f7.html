@@ -343,78 +343,70 @@
       },
       save: function(e) {
         console.log(songId,verseId,lineId)
-        var $form = $('#edit-line')
+        var $form = this.$('#edit-line')
         var $ = $form.find("select[name='']") //relation
         if (!self.$app.input.validateInputs('#edit-line')) {
-          throw new Error('<t>Please correct your entries.</t>')
-        }
+          // TODO make this say what the error is
+          self.$app.dialog.alert('Please correct your entries.');
+          console.error('<t>Please correct your entries.</t>');
+        } else {
 
+        
         songCollection.get(songId).then(result => {
           // 
           let newData = result
-          newData.lyrics.verses[verseId].lines[lineId].phrases[0][languageCode] = "THIS HAS BEEN SET BY CLICKING THE BUTTON"
+          // newData.lyrics.verses[verseId].lines[lineId].phrases[0][languageCode] = "THIS HAS BEEN SET BY CLICKING THE BUTTON"
+          newData.lyrics.verses[verseId].lines[lineId].phrases
           
-          debugger
-          // get this data from the dom somehow
-          var listOfLines = this.$('#edit-line').children
+          // get data from the dom
+          var listOfLines = Array.from(this.$('#edit-line')[0].children)
           // iterate horizontally
+          // each chord, number, and language
           listOfLines.forEach(lineElement => {
             var tag = ""
+            // find out what the tag is
             if(lineElement.classList.value.includes("metadata")){
-              // is chords/nums
+              // is chords/nums, both chords and nums are in same place in dom.
+              // chords = _this.$('#edit-line')[0].children[0].children[X].children[0].children[0].children[0].value
+              // number = _this.$('#edit-line')[0].children[0].children[X].children[1].children[0].children[0].value
+              tag = 'metadata'
             } else {
               // at, kt etc...
               tag = lineElement.classList.value
             }
-            lineElement.children.forEach(phraseElement=> { 
-              console.log(phraseElement.children[1].children[0].children[0].value)
-            });
-            
+            // now, we have "chords": ['a','b','c']
+            let elementChildrenArray = Array.from(lineElement.children)
+
+            // elementChildrenArray.forEach(phraseElement=> { 
+            //   // this gives us '1'
+            //   console.log(phraseElement.children[1].children[0].children[0].value)
+            // });
+
+            // look into phrase at similar index
+            var i = 0
+            while (i < elementChildrenArray.length) {
+              if(tag === "metadata"){
+                // ----------------------------------------- Special phrase-metaData setter ------------------------------------------------------------- //
+                // split it....
+                // setting chord
+                console.log(elementChildrenArray[i].children[0].children[0].children[0].value)
+                newData.lyrics.verses[verseId].lines[lineId].phrases[i]['chord'] = elementChildrenArray[i].children[0].children[0].children[0].value
+                // setting number
+                console.log(elementChildrenArray[i].children[1].children[0].children[0].value)
+                newData.lyrics.verses[verseId].lines[lineId].phrases[i]['number'] = elementChildrenArray[i].children[1].children[0].children[0].value
+                // -------------------------------------------------------------------------------------------------------------------------------------- //
+              } else {
+                console.log(elementChildrenArray[i].children[1].children[0].children[0].value) // needs to skip the first element
+                // update song to match
+                newData.lyrics.verses[verseId].lines[lineId].phrases[i][tag] = elementChildrenArray[i].children[1].children[0].children[0].value
+              }
+              i++;
+            }    
           });
-          
-
-
-
-          var userEdits = newData.lyrics.verses[verseId].lines[lineId]
-
-          //
-          this.$line
-          //
-
-          // check through existing item
-          for (const phraseKey in userEdits) {
-            if (Object.hasOwnProperty.call(userEdits, phraseKeyey)) {
-              const element = userEdits[phraseKey];
-              
-            }
-          }
-          // check through the dom
-          var saveLine = {}
-          phrases.forEach(phrase => {
-            let savedPhrase = {}
-            phrase.forEach(element => {
-              //savedPhrase.push({element.id: element.value()})
-              console.log(element)
-            });
-            saveLine.push(savedPhrase)
-          });
-
-          // { lines: [
-          //   {
-          //     phrases: [
-          //       {
-          //         "at": "ྱེ། མི་རིགས་ཀུན་ཡ་ཝཱེར་བསྟོད་སྔོགས་ཤིག",
-          //         "kt": "ཀྱེ། མི་རིགས་ཀུན་ཡ་ཝཱེར་བསྟོད་སྔོགས་ཤིག ",
-          //         "ct": "ྱེ། མི་རིགས་ཀུན་ཡ་ཝེར་བསྟོད་སྔོགས་ཤིག"
-          //       }
-          //     ]
-          //   }
-          // ]}
-
-
-          newData.lyrics.verses[verseId].lines[lineId] = userEdits
-
           // save
+          //songCollection.db.setItem(songId, newData)
+          console.log(newData);
+          debugger;
           songCollection.db.setItem(songId, newData)
           self.$setState({
             loading: false,
@@ -423,7 +415,18 @@
           }, () => {
             console.log(newData.lyrics.verses[verseId].lines[lineId])
           });
-        }); 
+          // TODO @pong send changes to server
+
+          // something like this???
+          // $.post('/jquery/submitData',  
+          // { myData: newData }, 
+          // function(data, status, xhr) {
+          //     $('p').append('status: ' + status + ', data: ' + data);
+          // }).done(function() { alert('Request done!'); })
+          // .fail(function(jqxhr, settings, ex) { alert('failed, ' + ex); });
+
+          }); 
+      }
   },
       nextLine: function(e) {
         // only get index forward if it exists in song

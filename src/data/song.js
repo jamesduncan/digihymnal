@@ -367,6 +367,13 @@ export default class SongCollection {
     async get(id) {
         return await this.db.getItem(id);
     }
+    
+    async set(id, data) {
+        console.log({"id":id, "data":data})
+        return await this.db.setItem(id, data, function() {
+            console.log({"it worked!":id})
+          });
+    }
 
     async languages(id) {
         let song = await this.get(id);

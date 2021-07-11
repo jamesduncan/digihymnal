@@ -551,7 +551,6 @@
       deletePhrase: function(e) {
         console.log(songId,verseId,lineId);
         songCollection.get(songId).then(result => {
-          debugger
           let newData = result
 
           var workingIndex = (newData.lyrics.verses[verseId].lines[lineId].phrases).length-1;

@@ -1,367 +1,318 @@
 <template>
-    <div class="page">
-        <div class="navbar">
-            <div class="navbar-bg"></div>
-            <div class="navbar-inner sliding">
-                <div class="left">
-                    <a href="#" class="link back">
-                        <i class="icon icon-back"></i>
-                        <span class="if-not-md">{{#if loading}}Back{{else}}{{translate "Back"}}{{/if}}</span>
-                    </a>
-                </div>
-                <div class="title">{{#if loading}}{{else}} {{song.title[defaultLanguage]}} {{/if}}</div>
-            </div>
-        </div>
-        <div class="page-content hide-navbar-on-scroll">
-            {{#if loading}}
-            {{else}}
-                <div class="block block-strong" style="margin-bottom: 10px; overflow: hidden;">
-                    <div class="menu">
-                        <div class="menu-inner no-margin-padding">
-                            <a @click="zoomOut" class="menu-item icon-only">
-                                <div class="menu-item-content">
-                                    <i class="fa-bigger fas fa-search-minus"></i>
-                                </div>
-                            </a>
-                            <a @click="zoomIn" class="menu-item icon-only">
-                                <div class="menu-item-content">
-                                    <i class="fa-bigger fas fa-search-plus"></i>
-                                </div>
-                            </a>
-                            <!-- Stepper element -->
-                            <div class="stepper stepper-large stepper-fill" style="display: none; margin-left: auto; height: 40px;">
-                                <div class="stepper-button-minus"></div>
-                                <div class="stepper-input-wrap">
-                                    <input type="text" value="{{transpose song.key @root.steps}}" readonly>
-                                </div>
-                                <div class="stepper-button-plus"></div>
+  <div class="page">
+      <div class="navbar">
+          <div class="navbar-bg"></div>
+          <div class="navbar-inner sliding">
+              <div class="left">
+                  <a href="#" class="link back">
+                      <i class="icon icon-back"></i>
+                      <span class="if-not-md">{{#if loading}}Back{{else}}{{translate "Back"}}{{/if}}</span>
+                  </a>
+              </div>
+              <div class="title">{{#if loading}}{{else}} {{song.title[defaultLanguage]}} {{/if}}</div>
+          </div>
+      </div>
+      <div class="page-content hide-navbar-on-scroll">
+          {{#if loading}}
+          {{else}}
+              <div class="block block-strong" style="margin-bottom: 10px; overflow: hidden;">
+                  <div class="menu">
+                      <div class="menu-inner no-margin-padding">
+                        <div>
+                          <div class="menu-item">
+                            <div class="menu-item-content icon-only">
+                              <div class="menu-item-content">
+                                  <a @click="save" class="col button button-fill">
+                                      <i class="text-color-gray fa-bigger fas fa-save"></i>
+                                  </a>
+                              </div>
                             </div>
-                            <div style="margin-left: auto" class="menu-item menu-item-dropdown">
-                                <div class="menu-item-content icon-only">
-                                    <div class="menu-item-content">
-                                        <i class="fa-bigger fas fa-language"></i>
-                                    </div>
-                                </div>
-                                <div class="menu-dropdown menu-dropdown-right">
-                                    <div class="menu-dropdown-content">
-                                        {{#each languages}}
-                                            <a href="#" @click="toggleLyrics" data-language="{{tag}}" class="menu-dropdown-link menu-close">
-                                                <span>{{#if local}}{{local}}{{else}}{{name}}{{/if}}</span>
-                                                <i id="checkBox_{{tag}}" class="langCheckboxes margin-left {{#if default}}text-color-blue fas fa-adjust fa-rotate-90{{else}}text-color-gray far fa-circle{{/if}}"></i>
-                                            </a>
-                                        {{/each}}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="menu-item {{#js_if "this.song.key != '*'"}}menu-item-dropdown{{else}}icon-only{{/js_if}}">
-                                <div class="menu-item-content icon-only {{#js_if "this.song.key == '*'"}}bg-color-gray{{/js_if}}">
-                                    <div class="menu-item-content">
-                                        <i class="fa-bigger fas fa-music"></i>
-                                    </div>
-                                </div>
-                                <div class="menu-dropdown menu-dropdown-right">
-                                    <div class="menu-dropdown-content">
-                                        <a @click="toggleChords" class="menu-dropdown-link menu-close menuChords">
-                                            <span>{{translate "Chords"}}</span>
-                                            <i style="display: none;" class="margin-left text-color-primary fas fa-check-square"></i>
-                                            <i class="margin-left text-color-gray far fa-square"></i>
-                                        </a>
-                                        <a @click="toggleNumbers" class="menu-dropdown-link menu-close menuNumbers">
-                                            <span>{{translate "Number Notation"}}</span>
-                                            <i style="display: none;" class="margin-left text-color-blue fas fa-check-circle"></i>
-                                            <i class="margin-left text-color-gray far fa-circle"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
+                          </div>
                         </div>
-                    </div>
-
-                    <div class="sheet">
-                        <div class="song">
-                            <div class="verse">
-                                {{#each song.lyrics.verses}}
-                                    <h3>{{#if label}}{{translate label}}{{else}}<br />{{/if}}</h3>
-                                {{/each}}
+                      </div>
+                  </div>
+                  <div class="sheet">
+                      <div class="song">
+                          <div class="songMetaData">
+                            <div class="author" id="edit-author">
+                              <div class="item-title item-label">
+                                <t>Author</t>
+                              </div>
+                              <div class="item-input-wrap"><input type="text" value="{{author}}"></div>
                             </div>
-                            <div class="chorus">
-                                {{#each song.lyrics.Chorus}}
-                                    <h3>{{#if label}}{{translate label}}{{else}}<br />{{/if}}</h3>
-                                {{/each}}
+                            <div class="key" id="edit-key">
+                              <div class="item-title item-label">
+                                <t>Key</t>
+                              </div>
+                              <div class="item-input-wrap"><input type="text" value="{{key}}"></div>
                             </div>
-                            <div class="bridge">
-                                {{#each song.lyrics.Bridge}}
-                                    <h3>{{#if label}}{{translate label}}{{else}}<br />{{/if}}</h3>
-                                {{/each}}
+                            <div class="title" id="edit-title">
+                              <div class="item-title item-label">
+                                <t>Title(s)</t>
+                              </div>
+                              {{ printEachLanguage @root.title @root.languages "title"}}
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="block text-align-right text-color-gray" style="margin-top: 10px;">
-                    {{song.author[defaultLanguage]}}
-                </div>
-                <!-- TODO editable -->
-                <div class="block text-align-right text-color-gray" style="margin-top: 10px;">
-                    {{song.metadata[defaultLanguage]}}
-                </div>
-            {{/if}}
-        </div>
-    </div>
+                            <div class="metadata" id="edit-metadata">
+                              <div class="item-title item-label">
+                                <t>Metadata</t>
+                              </div>
+                              {{ printEachLanguage @root.metadata @root.languages "metadata"}}
+                            </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          {{/if}}
+      </div>
+  </div>
 </template>
 <style>
-    .no-margin-padding {
-        margin: 0;
-        padding: 0;
-    }
+  .no-margin-padding {
+      margin: 0;
+      padding: 0;
+  }
 
-    .fa-bigger {
-        font-size: larger;
-    }
+  .fa-bigger {
+      font-size: larger;
+  }
 
-    .song {
-        transform-origin: left top;
-    }
+  .song {
+      transform-origin: left top;
+  }
 
-    .line {
-        margin-bottom: 20px;
-    }
-    
-    input {
-        width:100%;
-        float: left;
-        display: table;
-    }
+  .line {
+      margin-bottom: 20px;
+  }
 
-    .lyrics {
-        display: table;
-    }
+  .phrase {
+      position: relative;
+      display: inline-block;
+      margin: 55px 10px 0 0;
+      min-width: 20px;
+  }
 
-    .phrase {
-        position: relative;
-        display: inline-block;
-        margin: 55px 10px 0 0;
-        min-width: 20px;
-    }
+  .chord,
+  .number {
+      top: -55px;
+      background: var(--f7-theme-color);
+      border-radius: 3px;
+      min-width: 20px;
+      height: 20px;
+      line-height: 20px;
+      text-align: center;
+      color: white;
+      font-weight: bold;
+      display: inline-block;
+      padding: 0 2px;
+      margin-right: 5px;
+      position: absolute;
+      padding: 2px;
+  }
 
-    .chord,
-    .number {
-        top: -55px;
-        background: var(--f7-theme-color);
-        border-radius: 3px;
-        min-width: 20px;
-        max-width: 30px;
-        height: 20px;
-        line-height: 20px;
-        text-align: center;
-        color: white;
-        font-weight: bold;
-        display: inline-block;
-        padding: 0 2px;
-        margin-right: 5px;
-        position: absolute;
-        padding: 2px;
-    }
+  .number {
+      top: -25px;
+      border-radius: 100%;
+      width: 20px;
+      height: 20px;
+      padding: 2px;
+      background: var(--f7-color-blue);
+      font-family: 'Notes', monospace;
+  }
 
-    .number {
-        top: -25px;
-        border-radius: 100%;
-        width: 20px;
-        height: 20px;
-        padding: 2px;
-        background: var(--f7-color-blue);
-        font-family: 'Notes', monospace;
-    }
+  .noNumbers,
+  .noChords {
+      margin-top: 30px !important;
+  }
 
-    .noNumbers,
-    .noChords {
-        margin-top: 30px !important;
-    }
+  .noNumbers.noChords {
+      margin-top: 10px !important;
+  }
 
-    .noNumbers.noChords {
-        margin-top: 10px !important;
-    }
-
-    .noNumbers .chord,
-    .noChords .chord {
-        top: -30px;
-    }
+  .noNumbers .chord,
+  .noChords .chord {
+      top: -30px;
+  }
 </style>
 <script>
-  self = this
-  var songId
-  var song
-  console.log(songId)
-  import Song from '../data/song';
-  import Preference from "../data/preference";
-  const preference = new Preference();
-  
-  // Import locales
-  const locale = require('../js/locales.js');
+var songId
+var languages
+var line
+var song
+var app
+import Song from '../data/song';
+import Preference from "../data/preference";
+const preference = new Preference();
 
-  const songCollection = new Song();
-  // songCollection.initSample();
+// Import locales
+const locale = require('../js/locales.js');
 
-  var initScale = 1;
-  var lyric1;
-  var lyric2;
-  var defaultLanguage;
-  var deviceWidth = window.innerWidth;
-  if (deviceWidth >= 700) {
-    initScale = 2;
-  } else if (deviceWidth >= 500) {
-    initScale = 1.5;
-  }
-  var steps = 0;
+const songCollection = new Song();
 
-  export default {
-    // Component Data
-    data: function () {
-      // Must return an object
-      return {
-        loading: true,
-        showNumber: false,
-        showChord: false
-      }
-    },
-    // Page Events
-    on: {
-      pageInit: function(e, page) {
-        var self = this;
-        var app = self.$app;
-        songId = this.$route.params.songId;
-        this.songId = songId
-        console.log(songId)
 
-        preference.getLanguage().then((languageCode) => {
-          lyric1 = languageCode;
-          defaultLanguage = languageCode;
-          console.log('current lang: ' + lyric1);
-          songCollection.get(songId).then(result => {
-            let languages = [];
-            var translationLangs = Object.keys(result.title);
-            locale.customLocales.forEach((item) => {
-              if (translationLangs.indexOf(item.tag) > -1) {
-                if (item.tag == lyric1) {
-                  item.default = true;
-                }
-                languages.push(item)
-              }
-            });
+var initScale = 1;
 
-            self.$setState({
-              loading: false,
-              song: result,
-              steps: steps,
-              languages: languages,
-              defaultLanguage: defaultLanguage
-            }, () => {
-              self.$(".song")[0].style.transform = "scale("+initScale+")";
-              self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
-              console.log(languages)
-              var stepper = app.stepper.create({
-                el: '.stepper',
-                value: steps,
-                min: 0,
-                max: 11,
-                wraps: true,
-                on: {
-                  change: function (e) {
-                    steps = e.value;
-                    self.$setState({
-                      steps: steps,
-                    });
-                  }
-                }
-              });
-            });
-          });
-        });
-      },
-    },
-    methods: {
-      zoomIn: function(e) {
-        initScale += 0.05;
-        this.$(".song")[0].style.transform = "scale("+initScale+")";
-        this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
-        // debugger;
-      },
-      zoomOut: function(e) {
-        initScale -= 0.05;
-        this.$(".song")[0].style.transform = "scale("+initScale+")";
-        this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
-        // debugger;
-      },
-      toggleChords: function(e) {
-        if (this.$(".menuChords .fa-check-square")[0].style.display == "") {
-          this.$setState({
-            showChord: false
-          });
-          this.$(".menuChords .fa-square")[0].style.display = "";
-          this.$(".menuChords .fa-check-square")[0].style.display = "none";
-          this.$(".phrase").addClass("noChords");
-          this.$(".stepper")[0].style.display = "none";
-          this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
-        } else {
-          this.$setState({
-            showChord: true
-          });
-          this.$(".menuChords .fa-check-square")[0].style.display = "";
-          this.$(".menuChords .fa-square")[0].style.display = "none";
-          this.$(".phrase").removeClass("noChords");
-          this.$(".stepper")[0].style.display = "";
-          this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
-        }
-      },
-      toggleNumbers: function(e) {
-        if (this.$(".menuNumbers .fa-check-circle")[0].style.display == "") {
-          this.$setState({
-            showNumber: false
-          });
-          this.$(".menuNumbers .fa-circle")[0].style.display = "";
-          this.$(".menuNumbers .fa-check-circle")[0].style.display = "none";
-          this.$(".phrase").addClass("noNumbers");
-          this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
-        } else {
-          this.$setState({
-            showNumber: true
-          });
-          this.$(".menuNumbers .fa-check-circle")[0].style.display = "";
-          this.$(".menuNumbers .fa-circle")[0].style.display = "none";
-          this.$(".phrase").removeClass("noNumbers");
-          this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
-        }
-      },
-      toggleLyrics: function(e) {
-        // get the language tag from the item tapped
-        var languageTapped = e.currentTarget.dataset.language;
-        
-        // if the user tapped the language that is currently the default unset it
-        if (lyric1 == languageTapped) {
-          lyric1 = "";
-        } else if (lyric2 == languageTapped) {
-          lyric2 = ""; // if the user tapped the language that is currently the seconddary language unset it
-        } else if (lyric1 != languageTapped && lyric2 != languageTapped) {
-          // if the user tapped a language that isn't displayed 
-          // set it to lyric1 if it isn't set anymore...otherwise set it as the secondary
-          if (lyric1 == "") {
-            lyric1 = languageTapped;
-          } else {
-            lyric2 = languageTapped;
-          }
-        }
-        
-        this.$(".langCheckboxes").removeClass("text-color-blue fas fa-adjust fa-rotate-90 fa-rotate-270").addClass("text-color-gray far fa-circle");
-        this.$("#checkBox_"+lyric1).removeClass("text-color-gray far fa-circle").addClass("text-color-blue fas fa-adjust fa-rotate-90");
-        this.$("#checkBox_"+lyric2).removeClass("text-color-gray far fa-circle").addClass("text-color-blue fas fa-adjust fa-rotate-270");
-        
-        // is there a secondary language set?
-        let showLyric2 = (lyric2 !== "") ? true : false;
-        this.$setState({
-          lyric1: lyric1,
-          lyric2: lyric2,
-          showLyric2: showLyric2
-        });
-      }
+var defaultLanguage;
+var lyric1;
+var author;
+var key;
+var deviceWidth = window.innerWidth;
+var self = this;
+if (deviceWidth >= 700) {
+  initScale = 2;
+} else if (deviceWidth >= 500) {
+  initScale = 1.5;
+}
+var steps = 0;
+
+export default {
+  // Component Data
+  data: function () {
+    // Must return an object
+    return {
+      loading: true
     }
+  },
+  // Page Events
+  on: {
+    pageInit: function(e, page) {
+      self = this;
+      app = self.$app;
+      var $form = this.$('#edit-SongMetadata')
+
+      songId = this.$route.params.songId;
+      // console.log(songId)
+
+      preference.getLanguage().then((languageCode) => {
+        lyric1 = languageCode;
+        defaultLanguage = languageCode;
+        console.log('current lang: ' + lyric1);
+        songCollection.get(songId).then(result => {
+          languages = [];
+          var translationLangs = Object.keys(result.title);
+          locale.customLocales.forEach((item) => {
+            if (translationLangs.indexOf(item.tag) > -1) {
+              if (item.tag == lyric1) {
+                item.default = true;
+              }
+              languages.push(item.tag)
+            }
+          });
+          // song is used to get next line
+          song = result
+
+          self.$setState({
+            loading: false,
+            song: result,
+            author: result.author, // string
+            key: result.key,// string
+            title: result.title, // obj
+            metadata: result.metadata,// obj
+            languages: languages
+          }, () => {
+            $form.author
+            self.$(".song")[0].style.transform = "scale("+initScale+")";
+            self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+
+            console.log(result)            
+          });
+        });
+      });
+    },
+  },
+  methods: {
+    save: function(e) {
+      console.log(songId)
+    //   var $form = this.$('#edit-line')
+    //   var $ = $form.find("select[name='']") //relation
+    //   if (!self.$app.input.validateInputs('#edit-line')) {
+    //     // TODO make this say what the error is
+    //     self.$app.dialog.alert('Please correct your entries.');
+    //     console.error('<t>Please correct your entries.</t>');
+    //   } else {
+
+      
+    //   songCollection.get(songId).then(result => {
+    //     // 
+    //     let newData = result
+    //     // newData.lyrics.verses[verseId].lines[lineId].phrases[0][languageCode] = "THIS HAS BEEN SET BY CLICKING THE BUTTON"
+    //     newData.lyrics.verses[verseId].lines[lineId].phrases
+        
+    //     // get data from the dom
+    //     var listOfLines = Array.from(this.$('#edit-line')[0].children)
+    //     // iterate horizontally
+    //     // each chord, number, and language
+    //     listOfLines.forEach(lineElement => {
+    //       var tag = ""
+    //       // find out what the tag is
+    //       if(lineElement.classList.value.includes("metadata")){
+    //         // is chords/nums, both chords and nums are in same place in dom.
+    //         // chords = _this.$('#edit-line')[0].children[0].children[X].children[0].children[0].children[0].value
+    //         // number = _this.$('#edit-line')[0].children[0].children[X].children[1].children[0].children[0].value
+    //         tag = 'metadata'
+    //       } else {
+    //         // at, kt etc...
+    //         tag = lineElement.classList.value
+    //       }
+    //       // now, we have "chords": ['a','b','c']
+    //       let elementChildrenArray = Array.from(lineElement.children)
+
+    //       // elementChildrenArray.forEach(phraseElement=> { 
+    //       //   // this gives us '1'
+    //       //   console.log(phraseElement.children[1].children[0].children[0].value)
+    //       // });
+
+    //       // look into phrase at similar index
+    //       var i = 0
+    //       while (i < elementChildrenArray.length) {
+    //         if(tag === "metadata"){
+    //           // ----------------------------------------- Special phrase-metaData setter ------------------------------------------------------------- //
+    //           // split it....
+    //           // setting chord
+    //           console.log(elementChildrenArray[i].children[0].children[0].children[0].value)
+    //           newData.lyrics.verses[verseId].lines[lineId].phrases[i]['chord'] = elementChildrenArray[i].children[0].children[0].children[0].value
+    //           // setting number
+    //           console.log(elementChildrenArray[i].children[1].children[0].children[0].value)
+    //           newData.lyrics.verses[verseId].lines[lineId].phrases[i]['number'] = elementChildrenArray[i].children[1].children[0].children[0].value
+    //           // -------------------------------------------------------------------------------------------------------------------------------------- //
+    //         } else {
+    //           console.log(elementChildrenArray[i].children[1].children[0].children[0].value) // needs to skip the first element
+    //           // update song to match
+    //           newData.lyrics.verses[verseId].lines[lineId].phrases[i][tag] = elementChildrenArray[i].children[1].children[0].children[0].value
+    //         }
+    //         i++;
+    //       }    
+    //     });
+    //     // save
+    //     //songCollection.db.setItem(songId, newData)
+    //     console.log(newData);
+    //     debugger;
+    //     songCollection.db.setItem(songId, newData)
+    //     self.$setState({
+    //       loading: false,
+    //       song: newData,
+    //       line: newData.lyrics.verses[verseId].lines[lineId]
+    //     }, () => {
+    //       console.log(newData.lyrics.verses[verseId].lines[lineId])
+    //     });
+    //     // TODO send changes to server
+    //     // TODO send a password
+    //     //send songdata to server
+    //     var http = new XMLHttpRequest();
+    //     var url = 'http://localhost:8081';
+    //     var password = 'password'
+    //     var params = JSON.stringify({"songId":songId,"data":newData,"password":password});
+    //     http.open('POST', url, true);
+    //     //Send the proper header information along with the request
+    //     http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    //     http.onreadystatechange = function() {//Call a function when the state changes.
+    //         if(http.readyState == 4 && http.status == 200) {
+    //             alert(http.responseText);
+    //         }
+    //     }
+    //     http.send(params);
+    //     }); 
+    // }
+  },
   }
+}
 </script>

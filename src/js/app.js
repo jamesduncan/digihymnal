@@ -115,6 +115,22 @@ Template7.registerHelper('printEachPhrase', function (line, languages){
   
   return results;
 })
+// print all languages for passed div
+// (parentObject)
+Template7.registerHelper('printEachLanguage', function (dataArray, languages, name){
+  console.log(dataArray, languages, name)
+  var results = ''
+  languages.forEach(language => {
+    results = results.concat(`<div class="${language}"><div class="item-title item-label"><t>${language}</t></div>`)
+    if(dataArray[language]){
+      results = results.concat(`<div class="${name}, ${language}"><div class="item-input-wrap"><input type="text" value="${dataArray[language]}&nbsp;"></div></div>`)
+    }else{
+      results = results.concat(`<div class="${name}, ${language}"><div class="item-input-wrap"><input type="text" value="*"></div></div>`)
+    }
+  });
+  
+  return results;
+})
 
 var app = new Framework7({
   root: '#app', // App root element

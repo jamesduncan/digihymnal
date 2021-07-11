@@ -415,12 +415,20 @@
           }, () => {
             console.log(newData.lyrics.verses[verseId].lines[lineId])
           });
-          // TODO @pong send changes to server
+          // TODO send changes to server
+
+          // TODO send a password
+          
+          //get filename
+
+          //send songdata to server
 
           // something like this???
           var http = new XMLHttpRequest();
           var url = 'http://localhost:8081';
-          var params = JSON.stringify(newData);
+          var password = 'password'
+          //songId
+          var params = JSON.stringify({"songId":songId,"data":newData,"password":password});
           http.open('POST', url, true);
 
           //Send the proper header information along with the request

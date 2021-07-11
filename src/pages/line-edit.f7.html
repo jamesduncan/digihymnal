@@ -550,22 +550,14 @@
       },
       deletePhrase: function(e) {
         console.log(songId,verseId,lineId);
-        debugger;
-        // TODO pre-delete confirmation prompt
         songCollection.get(songId).then(result => {
+          debugger
           let newData = result
-          // At index, remove one element
-          // debugger;
-          let deletedLine = newData.lyrics.verses[verseId].lines.splice(lineId, 1)
-          console.log({"removing" : deletedLine }) 
-          songCollection.db.setItem(songId, newData)
 
-          // set lineId to an existing line
-          if(!(newData.lyrics.verses[verseId].lines[lineId]) && (newData.lyrics.verses[verseId].lines[lineId-1])){ 
-            --lineId;
-          } else {
-            ++lineId
-          }
+          var workingIndex = (newData.lyrics.verses[verseId].lines[lineId].phrases).length-1;
+          let deletedPhrase = newData.lyrics.verses[verseId].lines[lineId].phrases.splice(workingIndex, 1)
+          console.log({"removing" : deletedPhrase }) 
+          songCollection.db.setItem(songId, newData)
 
           self.$setState({
             loading: false,

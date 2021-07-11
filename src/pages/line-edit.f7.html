@@ -26,13 +26,6 @@
                                 </div>
                                 <div class="stepper-button-plus"></div>
                             </div>
-                            <div class="menu-item {{#js_if "this.song.key != '*'"}}menu-item-dropdown{{else}}icon-only{{/js_if}}">
-                                <div class="menu-item-content icon-only {{#js_if "this.song.key == '*'"}}bg-color-gray{{/js_if}}">
-                                    <div class="menu-item-content">
-                                        <i class="fa-bigger fas fa-music"></i>
-                                    </div>
-                                </div>
-                              </div>
                             <div>
                             <div class="menu-item">
                               <div class="menu-item-content icon-only">
@@ -67,6 +60,30 @@
                               <div class="menu-item-content icon-only">
                                   <div class="menu-item-content">
                                       <a @click="deleteLine" class="col button button-fill">
+                                          <i class="text-color-gray fa-bigger fas fa-trash"></i>
+                                      </a>
+                                  </div>
+                              </div>
+                            </div>
+                            <!--
+                              Add phrase
+                            -->
+                            <div class="menu-item">
+                              <div class="menu-item-content icon-only">
+                                  <div class="menu-item-content">
+                                      <a @click="addPhrase" class="col button button-fill">
+                                          <i class="text-color-gray fa-bigger fas fa-plus"></i>
+                                      </a>
+                                  </div>
+                              </div>
+                            </div>
+                            <!--
+                              delete phrase, only show if totally empty??????
+                            -->
+                            <div class="menu-item">
+                              <div class="menu-item-content icon-only">
+                                  <div class="menu-item-content">
+                                      <a @click="deletePhrase" class="col button button-fill">
                                           <i class="text-color-gray fa-bigger fas fa-trash"></i>
                                       </a>
                                   </div>
@@ -416,34 +433,21 @@
             console.log(newData.lyrics.verses[verseId].lines[lineId])
           });
           // TODO send changes to server
-
           // TODO send a password
-          
-          //get filename
-
           //send songdata to server
-
-          // something like this???
           var http = new XMLHttpRequest();
           var url = 'http://localhost:8081';
           var password = 'password'
-          //songId
           var params = JSON.stringify({"songId":songId,"data":newData,"password":password});
           http.open('POST', url, true);
-
           //Send the proper header information along with the request
           http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-
           http.onreadystatechange = function() {//Call a function when the state changes.
               if(http.readyState == 4 && http.status == 200) {
                   alert(http.responseText);
               }
           }
           http.send(params);
-          
-          
-          
-
           }); 
       }
   },
@@ -484,6 +488,69 @@
       },
       deleteLine: function(e) {
         console.log(songId,verseId,lineId);
+        // TODO pre-delete confirmation prompt
+        songCollection.get(songId).then(result => {
+          let newData = result
+          // At index, remove one element
+          // debugger;
+          let deletedLine = newData.lyrics.verses[verseId].lines.splice(lineId, 1)
+          console.log({"removing" : deletedLine }) 
+          songCollection.db.setItem(songId, newData)
+
+          // set lineId to an existing line
+          if(!(newData.lyrics.verses[verseId].lines[lineId]) && (newData.lyrics.verses[verseId].lines[lineId-1])){ 
+            --lineId;
+          } else {
+            ++lineId
+          }
+
+          self.$setState({
+            loading: false,
+            song: newData,
+            line: newData.lyrics.verses[verseId].lines[lineId]
+          }, () => {
+            console.log(newData.lyrics.verses[verseId].lines[lineId]);
+            // TODO reload previous song page
+          });
+        });
+      },
+      addPhrase: function(e) {
+        console.log(songId,verseId,lineId);
+        songCollection.get(songId).then(result => {
+          let newData = result
+          // At index, add one element
+          
+          var phraseArray = newData.lyrics.verses[verseId].lines[lineId].phrases
+          var workingIndex = phraseArray.length-1;
+          phraseArray.push({ ...phraseArray[workingIndex] }); // extend by copying the last
+          workingIndex = phraseArray.length-1;
+
+          for (const tag in phraseArray[workingIndex]) {
+            if (Object.hasOwnProperty.call(phraseArray[workingIndex], tag)) {
+              // set all data inside empty
+              phraseArray[workingIndex][tag] = "*"
+            }
+          }
+
+          console.log(phraseArray);
+
+          newData.lyrics.verses[verseId].lines[lineId].phrases = phraseArray
+          songCollection.db.setItem(songId, newData)
+
+
+          self.$setState({
+            loading: false,
+            song: newData,
+            line: newData.lyrics.verses[verseId].lines[lineId]
+          }, () => {
+            console.log(newData.lyrics.verses[verseId].lines[lineId]);
+            // TODO reload previous song page
+          });
+        });
+      },
+      deletePhrase: function(e) {
+        console.log(songId,verseId,lineId);
+        debugger;
         // TODO pre-delete confirmation prompt
         songCollection.get(songId).then(result => {
           let newData = result

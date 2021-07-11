@@ -33,7 +33,7 @@
                   </div>
                   <div class="sheet">
                       <div class="song">
-                          <div class="songMetaData">
+                          <div class="songMetaData" id="songMetaData">
                             <div class="author" id="edit-author">
                               <div class="item-title item-label">
                                 <t>Author</t>
@@ -155,6 +155,7 @@ var defaultLanguage;
 var lyric1;
 var author;
 var key;
+var metadata;
 var deviceWidth = window.innerWidth;
 var self = this;
 if (deviceWidth >= 700) {
@@ -177,7 +178,7 @@ export default {
     pageInit: function(e, page) {
       self = this;
       app = self.$app;
-      var $form = this.$('#edit-SongMetadata')
+      var $form = this.$('#songMetaData')
 
       songId = this.$route.params.songId;
       // console.log(songId)
@@ -206,10 +207,10 @@ export default {
             author: result.author, // string
             key: result.key,// string
             title: result.title, // obj
-            metadata: result.metadata,// obj
+            metadata: result.metadata[0],// obj
             languages: languages
           }, () => {
-            $form.author
+            //$form.author
             self.$(".song")[0].style.transform = "scale("+initScale+")";
             self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
 
@@ -222,97 +223,74 @@ export default {
   methods: {
     save: function(e) {
       console.log(songId)
-    //   var $form = this.$('#edit-line')
-    //   var $ = $form.find("select[name='']") //relation
-    //   if (!self.$app.input.validateInputs('#edit-line')) {
-    //     // TODO make this say what the error is
-    //     self.$app.dialog.alert('Please correct your entries.');
-    //     console.error('<t>Please correct your entries.</t>');
-    //   } else {
+      var $form = this.$('#songMetaData')
+      var $ = $form.find("select[name='']")
 
+      // //key
+      // console.log(this.$('#edit-key')[0].children[1].children[0].value)
+      // //author
+      // console.log(this.$('#edit-author')[0].children[1].children[0].value)
+      var titleArray = Array.from((this.$('#edit-title').children()));
+      let delTitle = titleArray.splice(0, 1)
+      var metadataArray = Array.from((this.$('#edit-metadata').children()));
+      delTitle = metadataArray.splice(0, 1)
+
+      var key = this.$('#edit-key')[0].children[1].children[0].value
+      var author = this.$('#edit-author')[0].children[1].children[0].value
       
-    //   songCollection.get(songId).then(result => {
-    //     // 
-    //     let newData = result
-    //     // newData.lyrics.verses[verseId].lines[lineId].phrases[0][languageCode] = "THIS HAS BEEN SET BY CLICKING THE BUTTON"
-    //     newData.lyrics.verses[verseId].lines[lineId].phrases
-        
-    //     // get data from the dom
-    //     var listOfLines = Array.from(this.$('#edit-line')[0].children)
-    //     // iterate horizontally
-    //     // each chord, number, and language
-    //     listOfLines.forEach(lineElement => {
-    //       var tag = ""
-    //       // find out what the tag is
-    //       if(lineElement.classList.value.includes("metadata")){
-    //         // is chords/nums, both chords and nums are in same place in dom.
-    //         // chords = _this.$('#edit-line')[0].children[0].children[X].children[0].children[0].children[0].value
-    //         // number = _this.$('#edit-line')[0].children[0].children[X].children[1].children[0].children[0].value
-    //         tag = 'metadata'
-    //       } else {
-    //         // at, kt etc...
-    //         tag = lineElement.classList.value
-    //       }
-    //       // now, we have "chords": ['a','b','c']
-    //       let elementChildrenArray = Array.from(lineElement.children)
+      var $attitle = $form.find("input[name='title']");
+      debugger; 
+      songCollection.get(songId).then(result => {
+        let newData = result;
+        newData.key = key;
+        newData.author = author;
 
-    //       // elementChildrenArray.forEach(phraseElement=> { 
-    //       //   // this gives us '1'
-    //       //   console.log(phraseElement.children[1].children[0].children[0].value)
-    //       // });
+        console.log(titleArray);
 
-    //       // look into phrase at similar index
-    //       var i = 0
-    //       while (i < elementChildrenArray.length) {
-    //         if(tag === "metadata"){
-    //           // ----------------------------------------- Special phrase-metaData setter ------------------------------------------------------------- //
-    //           // split it....
-    //           // setting chord
-    //           console.log(elementChildrenArray[i].children[0].children[0].children[0].value)
-    //           newData.lyrics.verses[verseId].lines[lineId].phrases[i]['chord'] = elementChildrenArray[i].children[0].children[0].children[0].value
-    //           // setting number
-    //           console.log(elementChildrenArray[i].children[1].children[0].children[0].value)
-    //           newData.lyrics.verses[verseId].lines[lineId].phrases[i]['number'] = elementChildrenArray[i].children[1].children[0].children[0].value
-    //           // -------------------------------------------------------------------------------------------------------------------------------------- //
-    //         } else {
-    //           console.log(elementChildrenArray[i].children[1].children[0].children[0].value) // needs to skip the first element
-    //           // update song to match
-    //           newData.lyrics.verses[verseId].lines[lineId].phrases[i][tag] = elementChildrenArray[i].children[1].children[0].children[0].value
-    //         }
-    //         i++;
-    //       }    
-    //     });
-    //     // save
-    //     //songCollection.db.setItem(songId, newData)
-    //     console.log(newData);
-    //     debugger;
-    //     songCollection.db.setItem(songId, newData)
-    //     self.$setState({
-    //       loading: false,
-    //       song: newData,
-    //       line: newData.lyrics.verses[verseId].lines[lineId]
-    //     }, () => {
-    //       console.log(newData.lyrics.verses[verseId].lines[lineId])
-    //     });
-    //     // TODO send changes to server
-    //     // TODO send a password
-    //     //send songdata to server
-    //     var http = new XMLHttpRequest();
-    //     var url = 'http://localhost:8081';
-    //     var password = 'password'
-    //     var params = JSON.stringify({"songId":songId,"data":newData,"password":password});
-    //     http.open('POST', url, true);
-    //     //Send the proper header information along with the request
-    //     http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-    //     http.onreadystatechange = function() {//Call a function when the state changes.
-    //         if(http.readyState == 4 && http.status == 200) {
-    //             alert(http.responseText);
-    //         }
-    //     }
-    //     http.send(params);
-    //     }); 
-    // }
-  },
+
+        console.log(metadataArray);
+        // Language tag
+        //metadataArray[x].lastElementChild.classList[1]
+        // Value
+        //metadataArray[x].lastElementChild.firstChild.firstChild.value
+        metadataArray.forEach(dataElement => {
+          var tag = dataElement.lastElementChild.classList[1]
+          var value = dataElement.lastElementChild.firstChild.firstChild.value
+          newData.metadata[0].tag = value
+        });
+        titleArray.forEach(dataElement => {
+          var tag = dataElement.lastElementChild.classList[1]
+          var value = dataElement.lastElementChild.firstChild.firstChild.value
+          newData.title.tag = value
+        });
+
+        // save
+        //songCollection.db.setItem(songId, newData)
+        songCollection.db.setItem(songId, newData)
+        self.$setState({
+          loading: false,
+          song: newData,
+        }, () => {
+          console.log(newData)
+        });
+        // TODO send changes to server
+        // TODO send a password
+        //send songdata to server
+        var http = new XMLHttpRequest();
+        var url = 'http://localhost:8081';
+        var password = 'password'
+        var params = JSON.stringify({"songId":songId,"data":newData,"password":password});
+        http.open('POST', url, true);
+        //Send the proper header information along with the request
+        http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        http.onreadystatechange = function() {//Call a function when the state changes.
+            if(http.readyState == 4 && http.status == 200) {
+                alert(http.responseText);
+            }
+        }
+        http.send(params);
+      }); 
+    },
   }
 }
 </script>

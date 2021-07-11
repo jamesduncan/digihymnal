@@ -127,6 +127,7 @@ Template7.registerHelper('printEachLanguage', function (dataArray, languages, na
     }else{
       results = results.concat(`<div class="${name}, ${language}"><div class="item-input-wrap"><input type="text" value="*"></div></div>`)
     }
+    results = results.concat('</div>')
   });
   
   return results;

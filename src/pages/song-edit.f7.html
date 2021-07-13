@@ -58,6 +58,16 @@
                               </div>
                               {{ printEachLanguage @root.metadata @root.languages "metadata"}}
                             </div>
+                            <div class="verseLabels" id="edit-verseLabels">
+                              <div class="item-title item-label">
+                                <t>Verse Labels</t>
+                              </div>
+                              {{#verseLabels}}
+                              <div class="item-input-wrap">
+                                <input type="text" value="'{{label}}'">
+                              </div>
+                              {{/verseLabels}}
+                            </div>
                           </div>
                       </div>
                   </div>
@@ -135,6 +145,7 @@
 </style>
 <script>
 var songId
+var loading = true;
 var languages
 var line
 var song
@@ -156,6 +167,7 @@ var lyric1;
 var author;
 var key;
 var metadata;
+var verseLabels;
 var deviceWidth = window.innerWidth;
 var self = this;
 if (deviceWidth >= 700) {
@@ -201,6 +213,17 @@ export default {
           // song is used to get next line
           song = result
 
+          // Get Verse Labels
+          verseLabels = []
+          song.lyrics.verses.forEach(verse => {
+            // [{1, 'Verse 1'},{...}]
+            console.log(verse.label)
+            //verseLabels.push({'id':verse.id, 'label':verse.label})
+            verseLabels.push({'label':verse.label})
+          });
+          console.log(verseLabels)
+
+
           self.$setState({
             loading: false,
             song: result,
@@ -208,6 +231,7 @@ export default {
             key: result.key,// string
             title: result.title, // obj
             metadata: result.metadata[0],// obj
+            verseLabels: verseLabels,
             languages: languages
           }, () => {
             //$form.author
@@ -235,20 +259,15 @@ export default {
       var metadataArray = Array.from((this.$('#edit-metadata').children()));
       delTitle = metadataArray.splice(0, 1)
 
-      var key = this.$('#edit-key')[0].children[1].children[0].value
-      var author = this.$('#edit-author')[0].children[1].children[0].value
+      var key = this.$('#edit-key')[0].children[1].children[0].value.trim() 
+      var author = this.$('#edit-author')[0].children[1].children[0].value.trim()
+
       
-      var $attitle = $form.find("input[name='title']");
-      debugger; 
       songCollection.get(songId).then(result => {
         let newData = result;
         newData.key = key;
         newData.author = author;
 
-        console.log(titleArray);
-
-
-        console.log(metadataArray);
         // Language tag
         //metadataArray[x].lastElementChild.classList[1]
         // Value
@@ -256,13 +275,15 @@ export default {
         metadataArray.forEach(dataElement => {
           var tag = dataElement.lastElementChild.classList[1]
           var value = dataElement.lastElementChild.firstChild.firstChild.value
-          newData.metadata[0].tag = value
+          newData.metadata[0][tag] = value.trim()
         });
+        console.log(newData.metadata[0])
         titleArray.forEach(dataElement => {
           var tag = dataElement.lastElementChild.classList[1]
           var value = dataElement.lastElementChild.firstChild.firstChild.value
-          newData.title.tag = value
+          newData.title[tag] = value.trim()
         });
+        console.log(newData.title)
 
         // save
         //songCollection.db.setItem(songId, newData)

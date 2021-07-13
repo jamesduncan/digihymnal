@@ -75,7 +75,11 @@ Template7.registerHelper('printLyric', function (line, showChord, showNumber){
 // (parentObject)
 Template7.registerHelper('printEachPhrase', function (line, languages){
   console.log(line, languages)
-  //debugger;
+  if(line === undefined){
+    debugger;
+    console.error('undefined line')
+    return "";
+  }
   var results = ''
   const validateChords = `required pattern='[ABCDEFG]|[ABCDEFG]m|[ABCDEFG]#|[ABCDEFG]b|[ABCDEFG]#m|[ABCDEFG]bm|[ABCDEFG]7|[ABCDEFG]sus|[ABCDEFG]#7|[ABCDEFG]#sus|[ABCDEFG]b7|[ABCDEFG]bsus'`
   const validateNumber = `required pattern='1|2|3|4|5|6|7|8|9|10|11|12'`
@@ -122,7 +126,7 @@ Template7.registerHelper('printEachLanguage', function (dataArray, languages, na
   var results = ''
   languages.forEach(language => {
     results = results.concat(`<div class="${language}"><div class="item-title item-label"><t>${language}</t></div>`)
-    if(dataArray[language]){
+    if(dataArray !== undefined && dataArray[language] !== null && dataArray[language] !== ''){
       results = results.concat(`<div class="${name}, ${language}"><div class="item-input-wrap"><input type="text" value="${dataArray[language]}&nbsp;"></div></div>`)
     }else{
       results = results.concat(`<div class="${name}, ${language}"><div class="item-input-wrap"><input type="text" value="*"></div></div>`)

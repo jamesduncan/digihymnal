@@ -9,12 +9,11 @@
                         <span class="if-not-md">{{#if loading}}Back{{else}}{{translate "Back"}}{{/if}}</span>
                     </a>
                 </div>
-                <div class="title">{{#if loading}}{{else}} {{song.title[defaultLanguage]}} {{/if}}</div>
+                <div class="title">{{#if loading}}{{else}} {{song.title[defaultLanguage]}}  {{@root.verseLabel}} {{/if}}</div>
             </div>
         </div>
         <div class="page-content hide-navbar-on-scroll">
-            {{#if loading}}
-            {{else}}
+            {{#js_if "!@root.loading"}}
                 <div class="block block-strong" style="margin-bottom: 10px; overflow: hidden;">
                     <div class="menu">
                         <div class="menu-inner no-margin-padding">
@@ -40,30 +39,108 @@
                             <div class="menu-item">
                               <div class="menu-item-content icon-only">
                                   <div class="menu-item-content">
-                                      <a @click="prevLine" class="col button button-fill">
+                                      <a class="col button button-fill{{#if firstLine}} disabled"{{else}}" @click="prevLine"{{/if}} >
                                           <i class="text-color-gray fas fa-bigger fa-arrow-left"></i>
                                       </a>
                                   </div>
                               </div>
                             </div>
+                          {{#js_if "@root.lastLine && @root.lastVerse"}}
+                            <!--  
+                              goto next verse
+                            -->
                             <div class="menu-item">
                               <div class="menu-item-content icon-only">
                                   <div class="menu-item-content">
-                                      <a @click="nextLine" class="col button button-fill">
+                                      <a class="col button button-fill disable disabled" disable>
                                           <i class="text-color-gray fa-bigger fas fa-arrow-right"></i>
                                       </a>
                                   </div>
                               </div>
                             </div>
+                            <div class="item-title item-label">
+                              <t>Verse tools:</t>
+                            </div>
+                            <!-- ADD VERSE -->
+                            <div class="menu-item">
+                              <div class="menu-item-content icon-only">
+                                  <div class="menu-item-content">
+                                      <a @click="addVerse" class="col button button-fill">
+                                          <i class="text-color-gray fa-bigger fas fa-plus"></i>
+                                      </a>
+                                  </div>
+                              </div>
+                            </div>
+                            <div class="item-title item-label">
+                              <t>Line tools:</t>
+                            </div>
+                            <!-- ADD LINE -->
+                              <div class="menu-item">
+                                <div class="menu-item-content icon-only">
+                                    <div class="menu-item-content">
+                                        <a @click="addLine" class="col button button-fill">
+                                            <i class="text-color-gray fa-bigger fas fa-plus"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                              </div>
+                            
+                          {{else}}
+                            {{#if lastLine}}
+                            <!--
+                              goto next verse
+                            -->
+                              <div class="menu-item">
+                                <div class="menu-item-content icon-only">
+                                    <div class="menu-item-content">
+                                        <a @click="nextLine" class="col button button-fill">
+                                            <i class="text-color-gray fa-bigger fas fa-arrow-right"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                              </div> 
+                              <div class="item-title item-label">
+                                <t>Line tools:</t>
+                              </div> 
+                              <!--
+                              ADD LINE
+                              -->
+                              <div class="menu-item">
+                                <div class="menu-item-content icon-only">
+                                    <div class="menu-item-content">
+                                        <a @click="addLine" class="col button button-fill">
+                                            <i class="text-color-gray fa-bigger fas fa-plus"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                              </div>
+                            {{else}}
+                              <div class="menu-item">
+                                <div class="menu-item-content icon-only">
+                                    <div class="menu-item-content">
+                                        <a @click="nextLine" class="col button button-fill">
+                                            <i class="text-color-gray fa-bigger fas fa-arrow-right"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                              </div>
+                              <div class="item-title item-label">
+                                <t>Line tools:</t>
+                              </div>
+                            {{/if}}
+                          {{/js_if}}
                             
                             <div class="menu-item">
                               <div class="menu-item-content icon-only">
                                   <div class="menu-item-content">
-                                      <a @click="deleteLine" class="col button button-fill">
+                                      <a class="col button button-fill{{#if firstLine}} disabled"{{else}}" @click="deleteLine"{{/if}}>
                                           <i class="text-color-gray fa-bigger fas fa-trash"></i>
                                       </a>
                                   </div>
                               </div>
+                            </div>
+                            <div class="item-title item-label">
+                              Phrase tools:
                             </div>
                             <!--
                               Add phrase
@@ -72,7 +149,7 @@
                               <div class="menu-item-content icon-only">
                                   <div class="menu-item-content">
                                       <a @click="addPhrase" class="col button button-fill">
-                                          <i class="text-color-gray fa-bigger fas fa-plus"></i>
+                                          <i class="text-color-gray fas fa-plus"></i>
                                       </a>
                                   </div>
                               </div>
@@ -84,7 +161,7 @@
                               <div class="menu-item-content icon-only">
                                   <div class="menu-item-content">
                                       <a @click="deletePhrase" class="col button button-fill">
-                                          <i class="text-color-gray fa-bigger fas fa-trash"></i>
+                                          <i class="text-color-gray fas fa-trash"></i>
                                       </a>
                                   </div>
                               </div>
@@ -116,7 +193,7 @@
                 <div class="block text-align-right text-color-gray" style="margin-top: 10px;">
                     {{song.author[defaultLanguage]}}
                 </div>
-            {{/if}}
+            {{/js_if}}
         </div>
     </div>
 </template>
@@ -189,13 +266,18 @@
 </style>
 <script>
   var songId
+  var loading
   var verseId
+  var verseLabel
   var lineId
   var languages
   var lyricList
   var line
   var song
   var app
+  var lastVerse
+  var lastLine
+  var firstLine
   import Song from '../data/song';
   // const Song = Song;
   // import Line from '../data/song';
@@ -225,8 +307,12 @@
     // Component Data
     data: function () {
       // Must return an object
+      self = this;
       return {
         loading: true,
+        lastVerse: false,
+        lastLine: false,
+        firstLine: false,
         showNumber: false,
         showChord: false
       }
@@ -262,14 +348,23 @@
               }
             });
             line = result.lyrics.verses[verseId].lines[lineId]
+            console.log(line)
+
+            // check if last line
+            lastLine = (lineId>=(result.lyrics.verses[verseId].lines.length-1));
+            lastVerse = (verseId>=(result.lyrics.verses.length-1));
             // song is used to get next line
             song = result
 
             self.$setState({
               loading: false,
+              lastLine: lastLine,
+              lastVerse: lastVerse,
+              verseLabel : result.lyrics.verses[verseId].label,
+              firstLine: (lineId == 0 && verseId == 0),
               song: result,
               // verse: result.verse[verseId],
-              line: result.lyrics.verses[verseId].lines[lineId],
+              line: line,
               steps: steps,
               languages: languages,
               lyricList: lyricList,
@@ -415,7 +510,7 @@
               } else {
                 console.log(elementChildrenArray[i].children[1].children[0].children[0].value) // needs to skip the first element
                 // update song to match
-                newData.lyrics.verses[verseId].lines[lineId].phrases[i][tag] = elementChildrenArray[i].children[1].children[0].children[0].value
+                newData.lyrics.verses[verseId].lines[lineId].phrases[i][tag] = elementChildrenArray[i].children[1].children[0].children[0].value//.trim()
               }
               i++;
             }    
@@ -423,7 +518,7 @@
           // save
           //songCollection.db.setItem(songId, newData)
           console.log(newData);
-          debugger;
+          //debugger;
           songCollection.db.setItem(songId, newData)
           self.$setState({
             loading: false,
@@ -453,34 +548,53 @@
   },
       nextLine: function(e) {
         // only get index forward if it exists in song
-        if(!(song.lyrics.verses[verseId].lines[++lineId])){
-          // see if there is a next verse
-          if(!(song.lyrics.verses[++verseId].lines[lineId])){
-            --verseId;
-            --lineId
-            console.log("Out of lines in this song...")
-          }
+        //debugger
+        console.log(lastVerse)
+        if(lastLine && !lastVerse){ // if at end of NOTlastVerse, check next verse
+          lastVerse = ((verseId+1) >= (song.lyrics.verses.length-1)); // is next verse last verse?
+          lastLine = ((song.lyrics.verses[parseInt(verseId)+1].lines[1]) == undefined); // is there only one line in next verse?
+          ++verseId;
+          lineId = 0;
+          verseLabel = song.lyrics.verses[verseId].label;
+        } else {
+          // check if last line
+          lastLine = ((lineId+1) >= (song.lyrics.verses[verseId].lines.length-1));
+          ++lineId;
         }
+        
+        
+
+
+
         // update variable
         self.$setState({
           loading: false,
+          firstLine: (lineId == 0 && verseId == 0),
+          lastLine: lastLine,
+          lastVerse: lastVerse,
+          verseLabel: verseLabel,
           line: song.lyrics.verses[verseId].lines[lineId]
         }, () => {
           console.log(song.lyrics.verses[verseId].lines[lineId])
         });
       },
       prevLine: function(e) {
-        // only change if it exists
-        if(!(song.lyrics.verses[verseId].lines[--lineId])){
-          if(!(song.lyrics.verses[--verseId].lines[lineId])){
-            ++lineId
-            ++verseId
-            console.log("Out of lines in this song...")
-          }
+        if(lineId == 0){
+          --verseId
+          lineId = song.lyrics.verses[verseId].lines.length-1
+          // update variable
+          lastVerse = ((verseId) >= (song.lyrics.verses.length-1)); // is next verse last verse?
+          verseLabel = song.lyrics.verses[verseId].label;
+        }else{
+          --lineId
         }
-        // update variable
+
         self.$setState({
           loading: false,
+          firstLine: (lineId == 0 && verseId == 0),
+          lastLine: false,
+          verseLabel: verseLabel,
+          lastVerse: lastVerse,
           line: song.lyrics.verses[verseId].lines[lineId]
         }, () => {
           console.log(song.lyrics.verses[verseId].lines[lineId])
@@ -492,22 +606,114 @@
         songCollection.get(songId).then(result => {
           let newData = result
           // At index, remove one element
-          // debugger;
           let deletedLine = newData.lyrics.verses[verseId].lines.splice(lineId, 1)
-          console.log({"removing" : deletedLine }) 
-          songCollection.db.setItem(songId, newData)
 
-          // set lineId to an existing line
-          if(!(newData.lyrics.verses[verseId].lines[lineId]) && (newData.lyrics.verses[verseId].lines[lineId-1])){ 
+          // default to changing nothing, wil auto set to the right line
+          debugger
+          if ((verseId != 0) && lineId == 0 && (0 == newData.lyrics.verses[verseId].lines.length)){
+            // if last remaining line of not last verse
+            let deletedVerse = newData.lyrics.verses.splice(verseId, 1)
+            if(lastVerse){
+              --verseId;
+            }
+            lineId = newData.lyrics.verses[verseId].lines.length-1;
+          }else if (lastLine){
+            // set lineId to an existing line
             --lineId;
           } else {
-            ++lineId
+            console.error("You tried to delete the last line of the last verse!!!")
           }
 
+          songCollection.db.setItem(songId, newData)
+          song = newData;
+
+          self.$setState({
+            line: newData.lyrics.verses[verseId].lines[lineId],
+            firstLine: (lineId == 0 && verseId == 0),
+            lastLine: (lineId>=(song.lyrics.verses[verseId].lines.length-1)),
+            song: newData,
+            loading: false,
+          });
+        });
+      },
+      addVerse: function(e) {
+        console.log(songId,verseId,lineId);
+        songCollection.get(songId).then(result => {
+          let newData = result;
+          
+          var phraseTemplate = newData.lyrics.verses[verseId].lines[lineId].phrases[0];
+          for (const tag in phraseTemplate) {
+            if (Object.hasOwnProperty.call(phraseTemplate, tag)) {
+              // set all data inside empty
+              phraseTemplate[tag] = "*"
+            }
+          };
+          var lineObj = {"lines":[{'phrases':[phraseTemplate]}]}; // 
+          
+          var currentVerse = newData.lyrics.verses[verseId];
+          ((a < b) ? 'minor' : 'major');
+          
+          var newId = ((parseInt(currentVerse.id)!== NaN) ? (parseInt(currentVerse.id)+1) : 1);
+
+          // 'verse 3'
+          let myArr = currentVerse.label.split(" ");
+          let verseNumber = ((parseInt(myArr[(myArr.length-1)])!=Nan) ? (parseInt(myArr[(myArr.length-1)])) : 1 )
+
+          var newLabel =  'verse'.concat(verseNumber);
+
+          var newVerse  = {
+            "lines": lineObj,
+            "label": newLabel,
+            "id": newId
+          }
+
+          newData.lyrics.verses.push(newVerse);
+          console.log(newData)
+          debugger;
+          songCollection.db.setItem(songId, newData);
+
+          lastLine = true;
           self.$setState({
             loading: false,
             song: newData,
-            line: newData.lyrics.verses[verseId].lines[lineId]
+            lastLine: true,
+            line: newData.lyrics.verses[verseId+1].lines[0]
+          }, () => {
+            console.log(newData.lyrics.verses[verseId].lines[lineId]);
+            // TODO reload previous song page
+          });
+        });
+      },
+      addLine: function(e) {
+        console.log(songId,verseId,lineId);
+        songCollection.get(songId).then(result => {
+          let newData = result;
+          // At index, add one element
+          
+          var phraseTemplate = newData.lyrics.verses[verseId].lines[lineId].phrases[0];
+          for (const tag in phraseTemplate) {
+            if (Object.hasOwnProperty.call(phraseTemplate, tag)) {
+              // set all data inside empty
+              phraseTemplate[tag] = "*"
+            }
+          };
+
+          var lineArray = newData.lyrics.verses[verseId].lines;
+          var workingIndex = lineArray.length-1; // tack it onto the end
+          lineArray.push({'phrases':[phraseTemplate]}); // extend by copying the last
+          workingIndex += 1;
+          
+          newData.lyrics.verses[verseId].lines = lineArray;
+          console.log(newData);
+          debugger;
+          songCollection.db.setItem(songId, newData);
+
+
+          // lastLine = (lineId===(newData.lyrics.verses[verseId].lines.length-1))
+          self.$setState({
+            loading: false,
+            song: newData,
+            line: newData.lyrics.verses[verseId].lines[workingIndex]
           }, () => {
             console.log(newData.lyrics.verses[verseId].lines[lineId]);
             // TODO reload previous song page

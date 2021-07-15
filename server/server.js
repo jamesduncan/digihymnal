@@ -42,7 +42,7 @@ const server = http.createServer(function(request, response) {
           }
         }
       }
-      filename = filename.concat('.js')
+      filename = filename.trim().concat('.js')
 
       var songData = ('export default ').concat(JSON.stringify(song))    
       

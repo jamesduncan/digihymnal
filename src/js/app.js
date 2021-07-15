@@ -76,7 +76,7 @@ Template7.registerHelper('printLyric', function (line, showChord, showNumber){
 Template7.registerHelper('printEachPhrase', function (line, languages){
   console.log(line, languages)
   if(line === undefined){
-    debugger;
+    // debugger;
     console.error('undefined line')
     return "";
   }

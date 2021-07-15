@@ -4,12 +4,12 @@
             <div class="navbar-bg"></div>
             <div class="navbar-inner sliding">
                 <div class="left">
-                    <a href="#" class="link back">
+                    <a {{#if loading}} href="" {{else}}href="/song/view/{{@root.songId}}/"{{/if}}  class="link">
                         <i class="icon icon-back"></i>
                         <span class="if-not-md">{{#if loading}}Back{{else}}{{translate "Back"}}{{/if}}</span>
                     </a>
                 </div>
-                <div class="title">{{#if loading}}{{else}} {{song.title[defaultLanguage]}}  {{@root.verseLabel}} {{/if}}</div>
+                <div class="title">{{#if loading}}{{else}} {{song.title[defaultLanguage]}} : {{@root.verseLabel}} {{/if}}</div>
             </div>
         </div>
         <div class="page-content hide-navbar-on-scroll">
@@ -453,6 +453,22 @@
           this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
         }
       },
+      saveToServer: function(newData) {
+        console.log(songId)
+        var http = new XMLHttpRequest();
+        var url = 'http://localhost:8081';
+        var password = 'password'
+        var params = JSON.stringify({"songId":songId,"data":newData,"password":password});
+        http.open('POST', url, true);
+        //Send the proper header information along with the request
+        http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        http.onreadystatechange = function() {//Call a function when the state changes.
+            if(http.readyState == 4 && http.status == 200) {
+                alert(http.responseText);
+            }
+        }
+        http.send(params);
+      },
       save: function(e) {
         console.log(songId,verseId,lineId)
         var $form = this.$('#edit-line')
@@ -518,32 +534,15 @@
           // save
           //songCollection.db.setItem(songId, newData)
           console.log(newData);
-          //debugger;
+          debugger;
           songCollection.db.setItem(songId, newData)
           self.$setState({
             loading: false,
             song: newData,
-            line: newData.lyrics.verses[verseId].lines[lineId]
-          }, () => {
-            console.log(newData.lyrics.verses[verseId].lines[lineId])
           });
-          // TODO send changes to server
-          // TODO send a password
-          //send songdata to server
-          var http = new XMLHttpRequest();
-          var url = 'http://localhost:8081';
-          var password = 'password'
-          var params = JSON.stringify({"songId":songId,"data":newData,"password":password});
-          http.open('POST', url, true);
-          //Send the proper header information along with the request
-          http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-          http.onreadystatechange = function() {//Call a function when the state changes.
-              if(http.readyState == 4 && http.status == 200) {
-                  alert(http.responseText);
-              }
-          }
-          http.send(params);
-          }); 
+          // send changes to server
+          this.saveToServer(newData)
+        }); 
       }
   },
       nextLine: function(e) {
@@ -609,7 +608,7 @@
           let deletedLine = newData.lyrics.verses[verseId].lines.splice(lineId, 1)
 
           // default to changing nothing, wil auto set to the right line
-          debugger
+          // debugger
           if ((verseId != 0) && lineId == 0 && (0 == newData.lyrics.verses[verseId].lines.length)){
             // if last remaining line of not last verse
             let deletedVerse = newData.lyrics.verses.splice(verseId, 1)
@@ -640,26 +639,26 @@
         console.log(songId,verseId,lineId);
         songCollection.get(songId).then(result => {
           let newData = result;
-          
-          var phraseTemplate = newData.lyrics.verses[verseId].lines[lineId].phrases[0];
+          debugger          
+          var phraseTemplate = Object.assign({}, newData.lyrics.verses[verseId].lines[lineId].phrases[0]);
           for (const tag in phraseTemplate) {
             if (Object.hasOwnProperty.call(phraseTemplate, tag)) {
               // set all data inside empty
               phraseTemplate[tag] = "*"
             }
           };
-          var lineObj = {"lines":[{'phrases':[phraseTemplate]}]}; // 
+          var lineObj = {"lines":[{'phrases':[phraseTemplate]}]}; // make a new template
           
           var currentVerse = newData.lyrics.verses[verseId];
-          ((a < b) ? 'minor' : 'major');
           
           var newId = ((parseInt(currentVerse.id)!== NaN) ? (parseInt(currentVerse.id)+1) : 1);
 
           // 'verse 3'
           let myArr = currentVerse.label.split(" ");
-          let verseNumber = ((parseInt(myArr[(myArr.length-1)])!=Nan) ? (parseInt(myArr[(myArr.length-1)])) : 1 )
+          let verseNumber = (typeof(parseInt(myArr[(myArr.length-1)])) == 'number'  ? (parseInt(myArr[(myArr.length-1)])) : 1 )
 
           var newLabel =  'verse'.concat(verseNumber);
+          console.log(newLabel)
 
           var newVerse  = {
             "lines": lineObj,
@@ -672,6 +671,7 @@
           debugger;
           songCollection.db.setItem(songId, newData);
 
+          this.saveToServer(newData);
           lastLine = true;
           self.$setState({
             loading: false,
@@ -690,7 +690,10 @@
           let newData = result;
           // At index, add one element
           
-          var phraseTemplate = newData.lyrics.verses[verseId].lines[lineId].phrases[0];
+          //var phraseTemplate = newData.lyrics.verses[verseId].lines[lineId].phrases[0];
+          //var phraseTemplate = {};
+          var phraseTemplate = Object.assign({}, newData.lyrics.verses[verseId].lines[lineId].phrases[0]);
+
           for (const tag in phraseTemplate) {
             if (Object.hasOwnProperty.call(phraseTemplate, tag)) {
               // set all data inside empty
@@ -705,10 +708,9 @@
           
           newData.lyrics.verses[verseId].lines = lineArray;
           console.log(newData);
-          debugger;
           songCollection.db.setItem(songId, newData);
 
-
+          this.saveToServer(newData)
           // lastLine = (lineId===(newData.lyrics.verses[verseId].lines.length-1))
           self.$setState({
             loading: false,
@@ -752,6 +754,7 @@
             console.log(newData.lyrics.verses[verseId].lines[lineId]);
             // TODO reload previous song page
           });
+          // TODO update IS CHANGED variable
         });
       },
       deletePhrase: function(e) {

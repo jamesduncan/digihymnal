@@ -321,6 +321,10 @@ export default class SongCollection {
     }
 
     async list({ start, limit, languageCode }) {
+
+        // TODO
+        // Update to pull using AJAX request
+
         let tasks = [];
         let result = [];
         let ids = await this.db.keys();

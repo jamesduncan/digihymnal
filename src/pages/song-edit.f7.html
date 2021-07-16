@@ -312,6 +312,36 @@ export default {
         http.send(params);
       }); 
     },
+  },
+  addLanguageCode: function(languageTag){
+    //
+    songCollection.get(songId).then(result => {
+        let newData = result;
+
+        // Language tag
+        newData.metadata.forEach(metaDataLine => {
+          metaDataLine[languageTag] = "*";
+        });
+        newData.titleObj[languageTag] = "*";
+        // add tag to every phrase
+        newData.lyrics.verses.forEach(verse => {
+          verse.lines(line => {
+            line.phrases(phrase => {
+              phrase[languageTag] = "*";       
+            });
+          });
+        });
+        songCollection.db.setItem(songId, newData)
+        self.$setState({
+          loading: false,
+          song: newData,
+        }, () => {
+          console.log(newData)
+        });
+        // TODO send changes to server
+        //
+      }); 
+    return;
   }
 }
 </script>

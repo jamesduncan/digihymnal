@@ -4,7 +4,7 @@
             <div class="navbar-bg"></div>
             <div class="navbar-inner sliding">
                 <div class="left">
-                    <a {{#if loading}} href="" {{else}}href="/song/view/{{@root.songId}}/"{{/if}}  class="link">
+                    <a href="" class="link back">
                         <i class="icon icon-back"></i>
                         <span class="if-not-md">{{#if loading}}Back{{else}}{{translate "Back"}}{{/if}}</span>
                     </a>
@@ -133,7 +133,7 @@
                             <div class="menu-item">
                               <div class="menu-item-content icon-only">
                                   <div class="menu-item-content">
-                                      <a class="col button button-fill{{#if firstLine}} disabled"{{else}}" @click="deleteLine"{{/if}}>
+                                      <a class="col button button-fill" @click="deleteLine">
                                           <i class="text-color-gray fa-bigger fas fa-trash"></i>
                                       </a>
                                   </div>
@@ -358,6 +358,7 @@
 
             self.$setState({
               loading: false,
+              songId: songId,
               lastLine: lastLine,
               lastVerse: lastVerse,
               verseLabel : result.lyrics.verses[verseId].label,
@@ -454,20 +455,21 @@
         }
       },
       saveToServer: function(newData) {
+        // we're going to save only the verse, one line at a time
         console.log(songId)
         var http = new XMLHttpRequest();
-        var url = 'http://localhost:8081';
-        var password = 'password'
-        var params = JSON.stringify({"songId":songId,"data":newData,"password":password});
+        var url = 'https://dhapi.achoobert.repl.co/handle';
+        
+        var params = JSON.stringify({"songId":songId,"song":newData});
         http.open('POST', url, true);
         //Send the proper header information along with the request
-        http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        http.setRequestHeader('Content-type', 'application/json');
         http.onreadystatechange = function() {//Call a function when the state changes.
-            if(http.readyState == 4 && http.status == 200) {
-                alert(http.responseText);
-            }
+          if(http.readyState == 4 && http.status == 200) {
+            alert(http.responseText);
+          }
         }
-        http.send(params);
+        http.send(params); 
       },
       save: function(e) {
         console.log(songId,verseId,lineId)
@@ -532,9 +534,6 @@
             }    
           });
           // save
-          //songCollection.db.setItem(songId, newData)
-          console.log(newData);
-          debugger;
           songCollection.db.setItem(songId, newData)
           self.$setState({
             loading: false,
@@ -639,7 +638,6 @@
         console.log(songId,verseId,lineId);
         songCollection.get(songId).then(result => {
           let newData = result;
-          debugger          
           var phraseTemplate = Object.assign({}, newData.lyrics.verses[verseId].lines[lineId].phrases[0]);
           for (const tag in phraseTemplate) {
             if (Object.hasOwnProperty.call(phraseTemplate, tag)) {
@@ -668,7 +666,6 @@
 
           newData.lyrics.verses.push(newVerse);
           console.log(newData)
-          debugger;
           songCollection.db.setItem(songId, newData);
 
           this.saveToServer(newData);

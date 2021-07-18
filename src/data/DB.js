@@ -1,5 +1,7 @@
 import localForage from "localforage";
+import { extendPrototype } from 'localforage-setitems';
 
+extendPrototype(localForage);
 let isConfig;
 let DB_Instances = {};
 

@@ -9,6 +9,12 @@
                       <span class="if-not-md">{{#if loading}}Back{{else}}{{translate "Back"}}{{/if}}</span>
                   </a>
               </div>
+              <div class="right">
+                  <a @click="inputLanguageCode" class="">
+                      <i class="icon icon-plus"></i>
+                      <span class=""></span>
+                  </a>
+              </div>
               <div class="title">{{#if loading}}{{else}} {{song.title[defaultLanguage]}} {{/if}}</div>
           </div>
       </div>
@@ -313,7 +319,18 @@ export default {
       }); 
     },
   },
-  addLanguageCode: function(languageTag){
+  getLanguageCode: function(){
+    //TODO
+    debugger
+    app.dialog.create({
+      'title': "Input desired language code",
+      'content': "<form><input type='text'>< @click='inputLanguageCode()'input type='submit' value='Submit'></form>"
+    })
+  },
+  addLanguageCode: function(form){
+    debugger;
+    languagesTag = 'en';
+    // TODO
     //
     songCollection.get(songId).then(result => {
         let newData = result;

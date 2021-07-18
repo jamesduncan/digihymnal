@@ -82,12 +82,24 @@ import Song from '../data/song';
 
 const preference = new Preference();
 const songCollection = new Song();
-songCollection.initSample();
+
+
+/// //// Get an array of IDs and request them individually
+// http.open("GET", "https://dhapi.achoobert.repl.co/list");
+// http.onreadystatechange = function() {
+//     if (this.readyState == 4 && this.status == 200) {
+//        console.log(JSON.parse(http.responseText));
+//        let list = JSON.parse(http.responseText)
+//        songCollection.initSample(list);
+//     }
+// };
+// http.send();
+
 
 var locale = 'kt';
 var languageCode = 'kt';
 var app;
-
+var http = new XMLHttpRequest();
 export default {
 
   data: function () {
@@ -101,14 +113,27 @@ export default {
       var self = this;
       app = self.$app;
       
-      preference.getLanguage().then((languageCode) => {
-        locale = languageCode;
-        window.languageCode = locale;
-        songCollection.list({languageCode: languageCode, start: 0, limit: 500}).then(result => {
-          //console.log(result);
-          self.$setState({ loading: false, songs: result });
-        });
-      });
+      // http.addEventListener("load", reqListener);
+      http.open("GET", "https://dhapi.achoobert.repl.co/songs");
+      http.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+          console.log(JSON.parse(http.responseText));
+          let songsList = JSON.parse(http.responseText)
+          songCollection.initSample(songsList);
+          ///
+          preference.getLanguage().then((languageCode) => {
+            locale = languageCode;
+            window.languageCode = locale;
+            songCollection.list({languageCode: languageCode, start: 0, limit: 500}).then(result => {
+              console.log(result);
+              self.$setState({ loading: false, songs: result });
+            });
+          });
+          //
+          }
+      };
+      http.send();
+      
 
       // create searchbar
       var searchbar = app.searchbar.create({

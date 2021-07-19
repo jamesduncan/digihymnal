@@ -136,6 +136,11 @@ Template7.registerHelper('printEachLanguage', function (dataArray, languages, na
   
   return results;
 })
+// print all languages for passed div
+// (parentObject)
+Template7.registerHelper('printObjectPropertyByKey', function (dataObject, language){
+  return dataObject[language];
+})
 
 var app = new Framework7({
   root: '#app', // App root element

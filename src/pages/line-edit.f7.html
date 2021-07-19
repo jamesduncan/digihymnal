@@ -278,17 +278,15 @@
   var lastVerse
   var lastLine
   var firstLine
+  import DataManager from '../data/dataManager';
   import Song from '../data/song';
-  // const Song = Song;
-  // import Line from '../data/song';
   import Preference from "../data/preference";
+  const dataManager = new DataManager();
+  const songCollection = new Song();
   const preference = new Preference();
   
   // Import locales
   const locale = require('../js/locales.js');
-
-  const songCollection = new Song();
-  // songCollection.initSample();
 
   var initScale = 1;
   var lyric1;
@@ -454,23 +452,6 @@
           this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
         }
       },
-      saveToServer: function(newData) {
-        // we're going to save only the verse, one line at a time
-        console.log(songId)
-        var http = new XMLHttpRequest();
-        var url = 'https://dhapi.achoobert.repl.co/handle';
-        
-        var params = JSON.stringify({"songId":songId,"song":newData});
-        http.open('POST', url, true);
-        //Send the proper header information along with the request
-        http.setRequestHeader('Content-type', 'application/json');
-        http.onreadystatechange = function() {//Call a function when the state changes.
-          if(http.readyState == 4 && http.status == 200) {
-            alert(http.responseText);
-          }
-        }
-        http.send(params); 
-      },
       save: function(e) {
         console.log(songId,verseId,lineId)
         var $form = this.$('#edit-line')
@@ -539,8 +520,9 @@
             loading: false,
             song: newData,
           });
-          // send changes to server
-          this.saveToServer(newData)
+          // send line changes to server
+          dataManager.putLine(songId,verseId,lineId,newData.lyrics.verses[verseId].lines[lineId])
+            .then(responseText => alert(responseText)); 
         }); 
       }
   },
@@ -668,7 +650,9 @@
           console.log(newData)
           songCollection.db.setItem(songId, newData);
 
-          this.saveToServer(newData);
+          // send verse changes to server
+          dataManager.putVerse(songId,verseId,newData.lyrics.verses[verseId])
+            .then(responseText => alert(responseText)); 
           lastLine = true;
           self.$setState({
             loading: false,
@@ -707,7 +691,9 @@
           console.log(newData);
           songCollection.db.setItem(songId, newData);
 
-          this.saveToServer(newData)
+          // send verse changes to server
+          dataManager.putVerse(songId,verseId,newData.lyrics.verses[verseId])
+            .then(responseText => alert(responseText)); 
           // lastLine = (lineId===(newData.lyrics.verses[verseId].lines.length-1))
           self.$setState({
             loading: false,

@@ -11,9 +11,12 @@ export default class SongCollection {
         //this.db.setItems(songList)
         let tasks = []
         for (const songID in songList) {
+            if(songID === null || songList === null){
+                continue;
+            }
             if (Object.hasOwnProperty.call(songList, songID)) {
                 const song = songList[songID];
-                tasks.push(await this.db.setItem(parseInt(songID),song.song))
+                tasks.push(await this.db.setItem(songID,song.song))
             }
         }
         return Promise.all(tasks)        

@@ -54,19 +54,22 @@
                         {{/each}}
                     {{else}}
                         {{#each songs}}
-                            {{#if title}}
+                            {{#if this.song}}
+                            <!--this is where we filter the songs to the language-->
+                            {{#js_if "Object.hasOwnProperty.call(this.song.title, @root.locale)"}}
                                 <li>
-                                    <a href="/song/view/{{id}}/" class="item-link">
+                                    <a href="/song/view/{{this.id}}/" class="item-link">
                                         <div class="item-content">
                                             <div class="item-inner">
                                                 <div class="item-title-row">
-                                                    <div class="item-title">{{title}}</div>
+                                                    <div class="item-title">{{ printObjectPropertyByKey this.song.title @root.locale }}</div>
                                                 </div>
-                                                <div class="item-subtitle text-color-gray">{{author[locale]}}</div>
+                                                <div class="item-subtitle text-color-gray">{{this.song.author}}</div>
                                             </div>
                                         </div>
                                     </a>
                                 </li>
+                            {{/js_if}}
                             {{/if}}
                         {{/each}}
                     {{/if}}
@@ -79,21 +82,11 @@
 import Preference from "../data/preference";
 //////
 import Song from '../data/song';
+import DataManager from '../data/dataManager';
 
 const preference = new Preference();
 const songCollection = new Song();
-
-
-/// //// Get an array of IDs and request them individually
-// http.open("GET", "https://dhapi.achoobert.repl.co/list");
-// http.onreadystatechange = function() {
-//     if (this.readyState == 4 && this.status == 200) {
-//        console.log(JSON.parse(http.responseText));
-//        let list = JSON.parse(http.responseText)
-//        songCollection.initSample(list);
-//     }
-// };
-// http.send();
+const dataManager = new DataManager();
 
 
 var locale = 'kt';
@@ -112,27 +105,26 @@ export default {
     pageInit: function(e, page) {
       var self = this;
       app = self.$app;
-      
-      // http.addEventListener("load", reqListener);
-      http.open("GET", "https://dhapi.achoobert.repl.co/songs");
-      http.onreadystatechange = function() {
-          if (this.readyState == 4 && this.status == 200) {
-          console.log(JSON.parse(http.responseText));
-          let songsList = JSON.parse(http.responseText)
-          songCollection.initSample(songsList);
-          ///
-          preference.getLanguage().then((languageCode) => {
-            locale = languageCode;
-            window.languageCode = locale;
-            songCollection.list({languageCode: languageCode, start: 0, limit: 500}).then(result => {
-              console.log(result);
-              self.$setState({ loading: false, songs: result });
-            });
-          });
-          //
-          }
-      };
-      http.send();
+
+      dataManager.getSong('2').then(json => {
+        console.log(json)
+      });
+
+
+      // get the full list of songs from the server, 
+      // then send to the localforage-init area
+      dataManager.getSongs().then( songData => {
+        console.log(songData);
+        songCollection.initSample(songData);
+        preference.getLanguage().then((languageCode) => {
+          locale = languageCode;
+          console.log(locale)
+          window.languageCode = locale;
+          console.log(songData);
+          self.$setState({ loading: false, songs: songData, locale: languageCode });
+        });
+
+      })
       
 
       // create searchbar

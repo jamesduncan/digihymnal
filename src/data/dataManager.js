@@ -49,15 +49,16 @@ export default class dataManager {
     }
     // TODO update entire song. Needed when deleting verse, adding language, ?changeing metadata?
     async putSong(songId, newData) {
-        const body = { 'songId': songId,'newData': newData };
- 
-        fetch('https://dhapi.achoobert.repl.co/handle', {
-                method: 'POST',
-                body:    JSON.stringify(body),
-                headers: { 'Content-Type': 'application/json' },
-            })
-            .then(res => res.json())
-            .then(json => console.log(json));
+      debugger
+      const body = { 'songId': songId,'newData': newData };
+
+      fetch('https://dhapi.achoobert.repl.co/handle', {
+              method: 'POST',
+              body:    JSON.stringify(body),
+              headers: { 'Content-Type': 'application/json' },
+          })
+          .then(res => res.json())
+          .then(json => console.log(json));
     }
     // TODO Make new song record
     async putNewSong(songId, newData) {

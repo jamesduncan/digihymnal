@@ -650,8 +650,8 @@
           console.log(newData)
           songCollection.db.setItem(songId, newData);
 
-          // send verse changes to server
-          dataManager.putVerse(songId,verseId,newData.lyrics.verses[verseId])
+          // send ovreall song changes to server
+          dataManager.putSong(songId,newData)
             .then(responseText => alert(responseText)); 
           lastLine = true;
           self.$setState({

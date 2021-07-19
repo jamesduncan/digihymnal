@@ -9,12 +9,12 @@
                       <span class="if-not-md">{{#if loading}}Back{{else}}{{translate "Back"}}{{/if}}</span>
                   </a>
               </div>
-              <div class="right">
-                  <a @click="inputLanguageCode" class="">
+              <!-- <div class="right">
+                  <a @click="addLanguageCode" class="">
                       <i class="icon icon-plus"></i>
                       <span class=""></span>
                   </a>
-              </div>
+              </div> -->
               <div class="title">{{#if loading}}{{else}} {{song.title[defaultLanguage]}} {{/if}}</div>
           </div>
       </div>
@@ -156,18 +156,17 @@ var languages
 var line
 var song
 var app
+
+import DataManager from '../data/dataManager';
 import Song from '../data/song';
 import Preference from "../data/preference";
+const dataManager = new DataManager();
+const songCollection = new Song();
 const preference = new Preference();
 
 // Import locales
 const locale = require('../js/locales.js');
-
-const songCollection = new Song();
-
-
 var initScale = 1;
-
 var defaultLanguage;
 var lyric1;
 var author;
@@ -292,73 +291,60 @@ export default {
         console.log(newData.title)
 
         // save
-        //songCollection.db.setItem(songId, newData)
         songCollection.db.setItem(songId, newData)
+        //
+        dataManager.putSong(songId,newData)
+          .then(responseText => alert(responseText));
         self.$setState({
           loading: false,
           song: newData,
         }, () => {
           console.log(newData)
         });
-        // TODO send changes to server
-        // TODO send a password
-        //send songdata to server
-        var http = new XMLHttpRequest();
-        var url = 'http://localhost:8081';
-        var password = 'password'
-        var params = JSON.stringify({"songId":songId,"data":newData,"password":password});
-        http.open('POST', url, true);
-        //Send the proper header information along with the request
-        http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-        http.onreadystatechange = function() {//Call a function when the state changes.
-            if(http.readyState == 4 && http.status == 200) {
-                alert(http.responseText);
-            }
-        }
-        http.send(params);
       }); 
     },
   },
-  getLanguageCode: function(){
-    //TODO
-    debugger
-    app.dialog.create({
-      'title': "Input desired language code",
-      'content': "<form><input type='text'>< @click='inputLanguageCode()'input type='submit' value='Submit'></form>"
-    })
-  },
-  addLanguageCode: function(form){
-    debugger;
-    languagesTag = 'en';
-    // TODO
-    //
-    songCollection.get(songId).then(result => {
-        let newData = result;
+  // getLanguageCode: function(){
+  //   //TODO
+  //   debugger
+  //   app.dialog.create({
+  //     'title': "Input desired language code",
+  //     'content': "<form><input type='text'>< @click='addLanguageCode()'input type='submit' value='Submit'></form>"
+  //   })
+  // },
+  // addLanguageCode: function(){return "ok"},
+  // addLanguageCode: function(form){
+  //   debugger;
+  //   languagesTag = 'en';
+  //   // TODO
+  //   //
+  //   songCollection.get(songId).then(result => {
+  //       let newData = result;
 
-        // Language tag
-        newData.metadata.forEach(metaDataLine => {
-          metaDataLine[languageTag] = "*";
-        });
-        newData.titleObj[languageTag] = "*";
-        // add tag to every phrase
-        newData.lyrics.verses.forEach(verse => {
-          verse.lines(line => {
-            line.phrases(phrase => {
-              phrase[languageTag] = "*";       
-            });
-          });
-        });
-        songCollection.db.setItem(songId, newData)
-        self.$setState({
-          loading: false,
-          song: newData,
-        }, () => {
-          console.log(newData)
-        });
-        // TODO send changes to server
-        //
-      }); 
-    return;
-  }
+  //       // Language tag
+  //       newData.metadata.forEach(metaDataLine => {
+  //         metaDataLine[languageTag] = "*";
+  //       });
+  //       newData.titleObj[languageTag] = "*";
+  //       // add tag to every phrase
+  //       newData.lyrics.verses.forEach(verse => {
+  //         verse.lines(line => {
+  //           line.phrases(phrase => {
+  //             phrase[languageTag] = "*";       
+  //           });
+  //         });
+  //       });
+  //       songCollection.db.setItem(songId, newData)
+  //       self.$setState({
+  //         loading: false,
+  //         song: newData,
+  //       }, () => {
+  //         console.log(newData)
+  //       });
+  //       // TODO send changes to server
+  //       //
+  //     }); 
+  //   return;
+  // }
 }
 </script>

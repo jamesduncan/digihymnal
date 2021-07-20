@@ -273,26 +273,25 @@ export default {
         newData.key = key;
         newData.author = author;
 
-        // Language tag
-        //metadataArray[x].lastElementChild.classList[1]
-        // Value
-        //metadataArray[x].lastElementChild.firstChild.firstChild.value
+        // Language tag: metadataArray[x].lastElementChild.classList[1]
+        // Value: metadataArray[x].lastElementChild.firstChild.firstChild.value
         metadataArray.forEach(dataElement => {
           var tag = dataElement.lastElementChild.classList[1]
           var value = dataElement.lastElementChild.firstChild.firstChild.value
           newData.metadata[0][tag] = value.trim()
         });
-        console.log(newData.metadata[0])
+        // console.log(newData.metadata[0])
         titleArray.forEach(dataElement => {
           var tag = dataElement.lastElementChild.classList[1]
           var value = dataElement.lastElementChild.firstChild.firstChild.value
           newData.title[tag] = value.trim()
         });
-        console.log(newData.title)
+        // console.log(newData.title)
 
         // save
         songCollection.db.setItem(songId, newData)
-        //
+        // save to server
+        console.log({"Song ID": songId, "song": newData})
         dataManager.putSong(songId,newData)
           .then(responseText => alert(responseText));
         self.$setState({

@@ -39,7 +39,7 @@ export default class dataManager {
     async putVerse(songId,verseId,newData) {
         const body = { 'songId': songId,'verseId': verseId,'newData': newData };
  
-        fetch('https://dhapi.achoobert.repl.co/handle', {
+        fetch(`https://dhapi.achoobert.repl.co/handle/update/${songId}`, {
                 method: 'POST',
                 body:    JSON.stringify(body),
                 headers: { 'Content-Type': 'application/json' },
@@ -52,7 +52,7 @@ export default class dataManager {
       debugger
       const body = { 'songId': songId,'newData': newData };
 
-      fetch('https://dhapi.achoobert.repl.co/handle', {
+      fetch(`https://dhapi.achoobert.repl.co/handle/update/${songId}`, {
               method: 'POST',
               body:    JSON.stringify(body),
               headers: { 'Content-Type': 'application/json' },
@@ -64,7 +64,7 @@ export default class dataManager {
     async putNewSong(songId, newData) {
         const body = { 'songId': songId,'newData': newData };
  
-        fetch('https://dhapi.achoobert.repl.co/handle', {
+        fetch(`https://dhapi.achoobert.repl.co/handle/update/${songId}`, {
                 method: 'POST',
                 body:    JSON.stringify(body),
                 headers: { 'Content-Type': 'application/json' },

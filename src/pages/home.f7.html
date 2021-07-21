@@ -40,6 +40,16 @@
             <div class="list media-list searchbar-found">
                 <ul>
                     {{#if loading}}
+                        <li>
+                          <div class="item-content">
+                            <div class="item-inner">
+                              <div class="item-title-row">
+                                <div class="item-title">Please wait</div>
+                              </div>
+                              <div class="item-subtitle text-color-gray">The server is trying its best</div>
+                            </div>
+                          </div>
+                        </li>
                         {{#each "1234567890"}}
                             <li class="skeleton-text skeleton-effect-fade">
                                 <div class="item-content">
@@ -53,25 +63,23 @@
                             </li>
                         {{/each}}
                     {{else}}
-                        {{#each songs}}
-                            {{#if this.song}}
-                            <!--this is where we filter the songs to the language-->
-                            {{#js_if "Object.hasOwnProperty.call(this.song.title, @root.locale)"}}
-                                <li>
-                                    <a href="/song/view/{{this.id}}/" class="item-link">
-                                        <div class="item-content">
-                                            <div class="item-inner">
-                                                <div class="item-title-row">
-                                                    <div class="item-title">{{ printObjectPropertyByKey this.song.title @root.locale }}</div>
-                                                </div>
-                                                <div class="item-subtitle text-color-gray">{{this.song.author}}</div>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </li>
-                            {{/js_if}}
-                            {{/if}}
-                        {{/each}}
+                      {{#each songs}}
+                        <!--this is where we filter the songs to the language-->
+                        {{#js_if "Object.hasOwnProperty.call(this.title, @root.locale)"}}
+                          <li>
+                            <a href="/song/view/{{this.id}}/" class="item-link">
+                              <div class="item-content">
+                                <div class="item-inner">
+                                  <div class="item-title-row">
+                                    <div class="item-title">{{ printObjectPropertyByKey this.title @root.locale }}</div>
+                                  </div>
+                                  <div class="item-subtitle text-color-gray">{{this.author}}</div>
+                                </div>
+                              </div>
+                            </a>
+                          </li>
+                        {{/js_if}}
+                      {{/each}}
                     {{/if}}
                 </ul>
             </div>
@@ -82,12 +90,9 @@
 import Preference from "../data/preference";
 //////
 import Song from '../data/song';
-import DataManager from '../data/dataManager';
 
 const preference = new Preference();
 const songCollection = new Song();
-const dataManager = new DataManager();
-
 
 var locale = 'kt';
 var languageCode = 'kt';
@@ -102,42 +107,40 @@ export default {
   },
   on: {
 
-    pageInit: function(e, page) {
-      var self = this;
-      app = self.$app;
+  pageInit: function(e, page) {
+    var self = this;
+    app = self.$app;
 
-      dataManager.getSong('2').then(json => {
-        console.log(json)
-      });
+    // dataManager.getSong('2').then(json => {
+    //   console.log(json)
+    // });
 
 
-      // get the full list of songs from the server, 
-      // then send to the localforage-init area
-      dataManager.getSongs().then( songData => {
-        console.log(songData);
-        songCollection.initSample(songData);
+    // get the full list of songs from the server, 
+    // then send to the localforage-init area
+    songCollection.initSample().then( () => {
+      songCollection.getAll().then( songData => {
+        console.log(songData)
         preference.getLanguage().then((languageCode) => {
           locale = languageCode;
-          console.log(locale)
           window.languageCode = locale;
-          console.log(songData);
           self.$setState({ loading: false, songs: songData, locale: languageCode });
         });
-
       })
+    })
       
 
-      // create searchbar
-      var searchbar = app.searchbar.create({
-        el: '.searchbar',
-        searchContainer: '.list',
-        searchIn: '.item-title, .item-subtitle',
-        on: {
-          search(sb, query, previousQuery) {
-            console.log(query, previousQuery);
-          }
+    // create searchbar
+    var searchbar = app.searchbar.create({
+      el: '.searchbar',
+      searchContainer: '.list',
+      searchIn: '.item-title, .item-subtitle',
+      on: {
+        search(sb, query, previousQuery) {
+          console.log(query, previousQuery);
         }
-      });
+      }
+    });
     }
   }
 }

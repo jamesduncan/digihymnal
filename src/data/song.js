@@ -1,37 +1,78 @@
+import DataManager from '../data/dataManager';
 import DB from "./DB";
-
+const dataManager = new DataManager();
 const DB_NAME = "DIGIHYMNAL_SONG";
 
 export default class SongCollection {
     constructor() {
         this.db = DB.getInstance(DB_NAME);
+        this.cacheIsSet = false;
     }
 
-    async initSample(songList) {
-        //this.db.setItems(songList)
-        let tasks = []
-        for (const songID in songList) {
-            if(songID === null || songList === null){
-                continue;
+    async initSample() {
+      //this.db.setItems(songList)
+      console.log({"cacheIsSet":this.cacheIsSet});
+      if (this.cacheIsSet){
+        return "";
+      } else{
+        //let tasks = []
+        return new Promise((resolve, reject) => {
+          dataManager.getSongs().then( songList => {
+            try {
+              this.setAll(songList).then(() => {
+                //this.getAll(null).then(gottenData => {
+                  // debugger;
+                  // console.log(gottenData)
+                this.cacheIsSet = true
+                resolve();
+                //})
+              })
+            } catch (error) {
+              reject(error)
             }
-            if (Object.hasOwnProperty.call(songList, songID)) {
-                const song = songList[songID];
-                tasks.push(await this.db.setItem(songID,song.song))
-            }
+          });
+        });
+      }        
+    }
+    
+    async setAll(HymnalData) {
+      var tasks = []
+      // the array we get from the server doesn't match the 'id' in the song. 
+      // We need to rebuild the local data using the correct index
+      for (const songID in HymnalData) {
+        if(songID === null || HymnalData === null){
+          console.error("Hymnal Data is null")
+          continue;
         }
-        return Promise.all(tasks)        
+        if (Object.hasOwnProperty.call(HymnalData, songID)) {
+          const song = HymnalData[songID];
+          tasks.push(await this.setOne(song.id,song.song));
+        }
+      }
+      return Promise.all(tasks)          
+    }
+    async setOne(songId, song) {
+      return new Promise((resolve, reject) => {
+        if(songId == undefined){
+          reject("Id undefined")
+        }
+        this.db.setItem(songId,song).then(() =>{
+          resolve()
+        })
+      })           
+    }
+
+    async getAll() {
+      return this.db.getItems(null);            
     }
 
 
     async list({ start, limit, languageCode }) {
 
-        // TODO
-        // Update to pull using AJAX request
-
         let tasks = [];
         let result = [];
         let rawIds = await this.db.keys();
-        ['author', 'id', 'key', 'lyrics', 'metadata', 'song', 'title', 'undefined']
+        // ['author', 'id', 'key', 'lyrics', 'metadata', 'song', 'title', 'undefined']
         let ids = rawIds.filter(arrayItem => !(['author', 'id', 'key', 'lyrics', 'metadata', 'song', 'title', 'undefined'].includes(arrayItem)));
         //  ids = [0,1,2]
         ids = ids.slice(start || 0, limit || 10);

@@ -7,6 +7,166 @@ export default class SongCollection {
     constructor() {
         this.db = DB.getInstance(DB_NAME);
         this.cacheIsSet = false;
+        this.nextAvailableId = 0;
+        this.exampleSong = {
+          "title": {
+              "at": "Twinkle twinkle little star",
+              "kt": "Twinkle twinkle little star",
+              "ct": "Twinkle twinkle little star",
+              "en": "Twinkle twinkle little star"
+          },
+          "author": "traditional",
+          "key": "G",
+          "lyrics": {
+              "verses": [
+                  {
+                      "lines": [
+                          {
+                              "phrases": [
+                                  {
+                                      "chord": "G",
+                                      "number": "1",
+                                      "en": "Twinkle, twinkle li",
+                                      "at": "ཀྱེ། དཀོན་མཆོག",
+                                      "kt": "ཀྱེ། དཀོན་མཆོག ",
+                                      "ct": "ཀྱེ། དཀོན་མཆོག"
+                                  },
+                                  {
+                                      "chord": "C",
+                                      "number": "4",
+                                      "at": "ttle st",
+                                      "at": "ཀོན་མཆོ",
+                                      "kt": "ཀོན་མཆོ ",
+                                      "ct": "ཀོན་མཆོ"
+                                  },
+                                  {
+                                      "chord": "G",
+                                      "number": "1",
+                                      "en": "ar,",
+                                      "at": "མཆོ",
+                                      "kt": "ཀོམཆོ ",
+                                      "ct": "ན་མཆོ"
+                                  }
+                              ]
+                          },{
+                              "phrases": [
+                                  {
+                                      "chord": "C",
+                                      "number": "4",
+                                      "en": "How I w",
+                                      "at": "ཀྱེ། དཀོན་མཆོག",
+                                      "kt": "ཀྱེ། དཀོན་མཆོག ",
+                                      "ct": "ཀྱེ། དཀོན་མཆོག"
+                                  },{
+                                      "chord": "G",
+                                      "number": "1",
+                                      "en": "onder w",
+                                      "at": "ཀྱེ། དཀོན་མཆོག",
+                                      "kt": "ཀྱེ། དཀོན་མཆོག ",
+                                      "ct": "ཀྱེ། དཀོན་མཆོག"
+                                  },{
+                                      "chord": "D",
+                                      "number": "5",
+                                      "en": "hat you a",
+                                      "at": "ཀྱེ། དཀོན་མཆོག",
+                                      "kt": "ཀྱེ། དཀོན་མཆོག ",
+                                      "ct": "ཀྱེ། དཀོན་མཆོག"
+                                  },{
+                                      "chord": "G",
+                                      "number": "1",
+                                      "en": "re",
+                                      "at": "ཀྱེ། དཀོན་མཆོག",
+                                      "kt": "ཀྱེ། དཀོན་མཆོག ",
+                                      "ct": "ཀྱེ། དཀོན་མཆོག"
+                                  },
+                              ]
+                          }
+                      ],
+                      "label": "Chorus",
+                      "id": 1
+                  },{
+                      "lines": [
+                          {
+                              "phrases": [
+                                {
+                                    "chord": "G",
+                                    "number": "1",
+                                    "en": "Up ab",
+                                    "at": "ཀྱེ། དཀོན་མཆོག",
+                                    "kt": "ཀྱེ། དཀོན་མཆོག ",
+                                    "ct": "ཀྱེ། དཀོན་མཆོག"
+                                },{
+                                    "chord": "C",
+                                    "number": "4",
+                                    "en": "ove the w",
+                                    "at": "ཀྱེ། དཀོན་མཆོག",
+                                    "kt": "ཀྱེ། དཀོན་མཆོག ",
+                                    "ct": "ཀྱེ། དཀོན་མཆོག"
+                                },{
+                                    "chord": "G",
+                                    "number": "1",
+                                    "en": "orld so h",
+                                    "at": "ཀྱེ། དཀོན་མཆོག",
+                                    "kt": "ཀྱེ། དཀོན་མཆོག ",
+                                    "ct": "ཀྱེ། དཀོན་མཆོག"
+                                },{
+                                    "chord": "D",
+                                    "number": "5",
+                                    "en": "igh,",
+                                    "at": "ཀྱེ། དཀོན་མཆོག",
+                                    "kt": "ཀྱེ། དཀོན་མཆོག ",
+                                    "ct": "ཀྱེ། དཀོན་མཆོག"
+                                },
+                              ]
+                          },{
+                              "phrases": [
+                                {
+                                    "chord": "G",
+                                    "number": "1",
+                                    "en": "Like a Di",
+                                    "at": "ཀྱེ། དཀོན་མཆོག",
+                                    "kt": "ཀྱེ། དཀོན་མཆོག ",
+                                    "ct": "ཀྱེ། དཀོན་མཆོག"
+                                },{
+                                    "chord": "C",
+                                    "number": "4",
+                                    "en": "amond ",
+                                    "at": "ཀྱེ། དཀོན་མཆོག",
+                                    "kt": "ཀྱེ། དཀོན་མཆོག ",
+                                    "ct": "ཀྱེ། དཀོན་མཆོག"
+                                },{
+                                    "chord": "G",
+                                    "number": "1",
+                                    "en": "in the s",
+                                    "at": "ཀྱེ། དཀོན་མཆོག",
+                                    "kt": "ཀྱེ། དཀོན་མཆོག ",
+                                    "ct": "ཀྱེ། དཀོན་མཆོག"
+                                },{
+                                    "chord": "D",
+                                    "number": "5",
+                                    "en": "ky.",
+                                    "at": "ཀྱེ། དཀོན་མཆོག",
+                                    "kt": "ཀྱེ། དཀོན་མཆོག ",
+                                    "ct": "ཀྱེ། དཀོན་མཆོག"
+                                }
+                              ]
+                          }
+                      ],
+                      "label": "verse 1",
+                      "id": 2
+                  },
+              ]
+          },
+          "metadata": [
+              {
+                  "at": "Copyright ",
+                  "kt": " Copyright © 1976 Kay Chance, Glaubenszentrum, Dr.-H.-Jasper-Str.20, D-37581 Bad Gandersheim Germany Used by permission ",
+                  "ct": "Copyright",
+                  "en": ".Copyright....  "
+              }
+          ],
+          "id": "99999999999"
+      }
     }
 
     async initSample() {
@@ -57,6 +217,10 @@ export default class SongCollection {
           reject("Id undefined")
         }
         this.db.setItem(songId,song).then(() =>{
+          if (this.nextAvailableId <= parseInt(songId)){
+            this.nextAvailableId = (parseInt(songId) + 1);
+            console.log({"The nextAvailableId is": this.nextAvailableId});
+          }
           resolve()
         })
       })           
@@ -66,6 +230,26 @@ export default class SongCollection {
       return this.db.getItems(null);            
     }
 
+    async makeNewBlankSong() {
+      // TODO get the next available ID...
+      var id = this.nextAvailableId.toString()
+      this.nextAvailableId += 1;
+      // get blank data
+      var data = this.exampleSong;
+      data.id = id
+      console.log({"id":id, "data":data})
+      return this.db.setItem(id, data, () => {
+        console.log({"it worked!":id})
+      }).then(() => {
+        dataManager.putNewSong(id,data)
+        debugger
+        this.get(id).then( data => {
+          console.log(data)
+          debugger
+        })
+        return id;
+      });
+    }
 
     async list({ start, limit, languageCode }) {
 

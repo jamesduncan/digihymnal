@@ -65,6 +65,7 @@
                     {{else}}
                       {{#each songs}}
                         <!--this is where we filter the songs to the language-->
+                        {{#js_if "this && Object.hasOwnProperty.call(this, 'title')"}}
                         {{#js_if "Object.hasOwnProperty.call(this.title, @root.locale)"}}
                           <li>
                             <a href="/song/view/{{this.id}}/" class="item-link">
@@ -79,7 +80,20 @@
                             </a>
                           </li>
                         {{/js_if}}
+                        {{/js_if}}
                       {{/each}}
+                      <li>
+                        <a href="" @click="addNewSong" class="item button">
+                          <div class="item-content">
+                            <div class="item-inner">
+                              <div class="item-title-row">
+                                <div class="item-title">Add New Song</div>
+                              </div>
+                              <div class="item-subtitle text-color-gray">Add a new empty song record</div>
+                            </div>
+                          </div>
+                        </a>
+                      </li>
                     {{/if}}
                 </ul>
             </div>
@@ -106,41 +120,50 @@ export default {
     }
   },
   on: {
+    pageInit: function(e, page) {
+      var self = this;
+      app = self.$app;
 
-  pageInit: function(e, page) {
-    var self = this;
-    app = self.$app;
-
-    // dataManager.getSong('2').then(json => {
-    //   console.log(json)
-    // });
+      // dataManager.getSong('2').then(json => {
+      //   console.log(json)
+      // });
 
 
-    // get the full list of songs from the server, 
-    // then send to the localforage-init area
-    songCollection.initSample().then( () => {
-      songCollection.getAll().then( songData => {
-        console.log(songData)
-        preference.getLanguage().then((languageCode) => {
-          locale = languageCode;
-          window.languageCode = locale;
-          self.$setState({ loading: false, songs: songData, locale: languageCode });
-        });
+      // get the full list of songs from the server, 
+      // then send to the localforage-init area
+      songCollection.initSample().then( () => {
+        songCollection.getAll().then( songData => {
+          console.log(songData)
+          preference.getLanguage().then((languageCode) => {
+            locale = languageCode;
+            window.languageCode = locale;
+            self.$setState({ loading: false, songs: songData, locale: languageCode });
+          });
+        })
       })
-    })
-      
+        
 
-    // create searchbar
-    var searchbar = app.searchbar.create({
-      el: '.searchbar',
-      searchContainer: '.list',
-      searchIn: '.item-title, .item-subtitle',
-      on: {
-        search(sb, query, previousQuery) {
-          console.log(query, previousQuery);
+      // create searchbar
+      var searchbar = app.searchbar.create({
+        el: '.searchbar',
+        searchContainer: '.list',
+        searchIn: '.item-title, .item-subtitle',
+        on: {
+          search(sb, query, previousQuery) {
+            console.log(query, previousQuery);
+          }
         }
-      }
-    });
+      });
+    } 
+  },
+  methods: {
+    addNewSong: function(e) {
+      //app = self.$app;
+      songCollection.makeNewBlankSong().then( songId => {
+        //app.router.navigate(`/song/edit/${songId}/`, {reloadAll: true})
+        app.views.main.router.navigate(`/song/view/${songId}/`, {reloadAll: false})
+        ///
+      })
     }
   }
 }

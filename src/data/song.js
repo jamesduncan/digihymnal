@@ -206,7 +206,11 @@ export default class SongCollection {
         }
         if (Object.hasOwnProperty.call(HymnalData, songID)) {
           const song = HymnalData[songID];
-          tasks.push(await this.setOne(song.id,song.song));
+          try {
+            tasks.push(await this.setOne(song.id,song.song));
+          } catch (error) {
+            console.error({"error": error, "data":HymnalData[songID]})
+          }
         }
       }
       return Promise.all(tasks)          
@@ -230,25 +234,38 @@ export default class SongCollection {
       return this.db.getItems(null);            
     }
 
+    async checkIdClear() {
+      var id = toString(this.nextAvailableId)
+      this.get(id).then( data =>{
+        if (data != undefined || data != null){
+          ++this.nextAvailableId;
+          this.checkIdClear();
+        }else {
+          return;
+        }
+      })
+    }
     async makeNewBlankSong() {
       // TODO get the next available ID...
-      var id = this.nextAvailableId.toString()
-      this.nextAvailableId += 1;
-      // get blank data
-      var data = this.exampleSong;
-      data.id = id
-      console.log({"id":id, "data":data})
-      return this.db.setItem(id, data, () => {
-        console.log({"it worked!":id})
-      }).then(() => {
-        dataManager.putNewSong(id,data)
-        debugger
-        this.get(id).then( data => {
-          console.log(data)
+      return checkIdClear().then(() => {
+        var id = this.nextAvailableId.toString()
+        this.nextAvailableId += 1;
+        // get blank data
+        var data = this.exampleSong;
+        data.id = id
+        console.log({"id":id, "data":data})
+        return this.db.setItem(id, data, () => {
+          console.log({"it worked!":id})
+        }).then(() => {
+          dataManager.putNewSong(id,data)
           debugger
-        })
-        return id;
-      });
+          this.get(id).then( data => {
+            console.log(data)
+            debugger
+          })
+          return id;
+        });
+      })
     }
 
     async list({ start, limit, languageCode }) {

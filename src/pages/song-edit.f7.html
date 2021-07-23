@@ -11,9 +11,12 @@
               </div>
               <div class="title">{{#if loading}}{{else}} {{song.title[defaultLanguage]}} {{/if}}</div>
               <div class="right">
-                  <a @click="addLanguageCode" class="button">
-                      <i class="icon icon-plus"></i>
-                      <span class=""></span>
+                  <a @click="pickLanguageCode" class="button">
+                    <span class="fa-stack">
+                      <i class="fas fa-square fa-stack-2x"style="color:grey"></i>
+                      <i class="fas fa-language fa-stack-1x"style="color:white"></i>
+                      <i class="fas fa-plus fa-stack-1x" style="color:Tomato; text-align:left;  margin-top: 9px; margin-left: 5px;"></i>
+                    </span>
                   </a>
               </div>
           </div>
@@ -302,19 +305,14 @@ export default {
         });
       }); 
     },
-  
-    // getLanguageCode: function(){
-    //   //TODO
-    //   debugger
-    //   app.dialog.create({
-    //     'title': "Input desired language code",
-    //     'content': "<form><input type='text'>< @click='addLanguageCode()'input type='submit' value='Submit'></form>"
-    //   })
-    // },
-    addLanguageCode: function(){
+    pickLanguageCode: function(){
+      // TODO add logic here for picking a language
       var newLanguageTag = 'en';
-      // TODO
       //
+      return addLanguageCode(newLanguageTag);
+    },
+    addLanguageCode: function(newLanguageTag){
+      // var newLanguageTag = 'en';
       songCollection.get(songId).then(result => {
         let newData = result;
         var languageTag = newLanguageTag;

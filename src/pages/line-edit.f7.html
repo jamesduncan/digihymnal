@@ -522,7 +522,7 @@
           });
           // send line changes to server
           dataManager.putLine(songId,verseId,lineId,newData.lyrics.verses[verseId].lines[lineId])
-            .then(responseText => alert(responseText)); 
+            .then(responseText => alert(JSON.stringify(responseText))); 
         }); 
       }
   },
@@ -652,7 +652,7 @@
 
           // send ovreall song changes to server
           dataManager.putSong(songId,newData)
-            .then(responseText => alert(responseText)); 
+            .then(responseText => alert(JSON.stringify(responseText))); 
           lastLine = true;
           self.$setState({
             loading: false,
@@ -693,7 +693,7 @@
 
           // send verse changes to server
           dataManager.putVerse(songId,verseId,newData.lyrics.verses[verseId])
-            .then(responseText => alert(responseText)); 
+            .then(responseText => alert(JSON.stringify(responseText))); 
           // lastLine = (lineId===(newData.lyrics.verses[verseId].lines.length-1))
           self.$setState({
             loading: false,

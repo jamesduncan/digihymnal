@@ -64,7 +64,7 @@ export default class dataManager {
     async putNewSong(songId, newData) {
         const body = { 'songId': songId,'newData': newData };
  
-        fetch(`https://dhapi.achoobert.repl.co/handle/update/${songId}`, {
+        fetch(`https://dhapi.achoobert.repl.co/handle/new`, {
                 method: 'POST',
                 body:    JSON.stringify(body),
                 headers: { 'Content-Type': 'application/json' },

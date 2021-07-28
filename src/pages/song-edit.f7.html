@@ -272,6 +272,10 @@ export default {
 
       
       songCollection.get(songId).then(result => {
+        if(result.id != songId){
+          console.log("This is going to cause problems")
+          debugger;
+        }
         let newData = result;
         newData.key = key;
         newData.author = author;
@@ -296,7 +300,7 @@ export default {
         // save to server
         console.log({"Song ID": songId, "song": newData})
         dataManager.putSong(songId,newData)
-          .then(responseText => alert(responseText));
+          .then(responseText => alert(JSON.stringify(responseText)));
         self.$setState({
           loading: false,
           song: newData,

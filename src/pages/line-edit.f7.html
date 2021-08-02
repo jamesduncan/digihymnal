@@ -168,28 +168,32 @@
                             </div>
                         </div>
                     </div>
-
-                    <!--<div class="sheet">
-                        <div class="song">
-                            <div class="verse">
-                              <h3>{{#if label}}{{translate label}}{{else}}<br />{{/if}}</h3>
-                              <div class="line">
-                                {{ printLyric @root.line @root.showChord @root.showNumber}}
-                              </div>
-                            </div>
-                        </div>
-                    </div>-->
+                    
                     <div class="sheet">
                         <div class="song">
+                            <!-- -->
+                            <div style="padding: 50px">
+                              <div id="slider" class="slider"></div>
+                            </div>
+                            <!-- -->
                             <div class="verse">
-                              <h3>{{#if label}}{{translate label}}{{else}}<br />{{/if}}</h3>
-                              <div class="line" id="edit-line">
-                                {{ printEachPhrase @root.line @root.languages }}
+                              <div class="line">
+                                {{ printLyric @root.line}}
                               </div>
                             </div>
-                        </div>
+                          </div>
                     </div>
-                </div>
+                    <!-- <div class="sheet">
+                      <div class="song">
+                        <div class="verse">
+                          {{#if label}}<h3>{{label}}</h3>{{/if}}
+                          <div class="line" id="edit-line">
+                            {{ printEachPhrase @root.line @root.languages }}
+                          </div>
+                        </div>
+                      </div>
+                    </div> -->
+                  </div>
                 <div class="block text-align-right text-color-gray" style="margin-top: 10px;">
                     {{song.author[defaultLanguage]}}
                 </div>
@@ -198,6 +202,9 @@
     </div>
 </template>
 <style>
+    .noUi-marker {
+      height: 0 !important;
+    } 
     .no-margin-padding {
         margin: 0;
         padding: 0;
@@ -263,6 +270,7 @@
     .noChords .chord {
         top: -30px;
     }
+    
 </style>
 <script>
   var songId
@@ -280,6 +288,16 @@
   var firstLine
   import DataManager from '../data/dataManager';
   import Song from '../data/song';
+  import noUiSlider from 'nouislider';
+  import 'nouislider/dist/nouislider.css';
+// //  the namespace:
+// import * as noUiSlider from 'nouislider';
+// import 'nouislider/dist/nouislider.css';
+
+// // Alternatively, you can include both files:
+// <link href="nouislider.css" rel="stylesheet">
+// <script src="nouislider.js"><//////script>
+
   import Preference from "../data/preference";
   const dataManager = new DataManager();
   const songCollection = new Song();
@@ -354,6 +372,7 @@
             // song is used to get next line
             song = result
 
+            
             self.$setState({
               loading: false,
               songId: songId,
@@ -371,6 +390,150 @@
             }, () => {
               self.$(".song")[0].style.transform = "scale("+initScale+")";
               self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+              
+              // a. make invisible lyric string. knobs align to divs associated with each letter
+              // b. get average size of each character, get count of space-taking characters (ignore diacritics). Total length of slider is that length, steps is that total
+              // c. highlited text-cursor
+              // d. find px width of each character. Ignore 0 width.
+              //   // example: [('index':0,'pxwidth':3),('index':1,'pxwidth':2),('index':0,'pxwidth':4),]
+              // then make stepper match that
+              //   // [(0, width:3),(1, width:2),(2, width:4),]
+              //   //  I...I..I....I..
+              var lyric = {}
+              lyric.arr = {}
+              
+              line.phrases.forEach(phrase => {
+                for (const key in phrase) {
+                  if (Object.hasOwnProperty.call(phrase, key)) {
+                    const element = phrase[key];
+                    if(lyric[key]){
+                      lyric[key] = lyric[key].concat(element)
+                    } else {
+                      lyric[key] = element
+                    }
+                  }
+                }
+              });  
+              //
+              var pipFormatter = {};
+              //var pipFormats = {'0':'abc', '1':'pqr', '2':'xyz'};
+              var range = {};
+              // {min/max/percentage: [increment, 1]}
+
+              for (const tag in lyric) {
+                pipFormatter[tag] = {};
+                range[tag] = {};   
+                if (Object.hasOwnProperty.call(lyric, tag)) {
+                  const element = lyric[tag];
+                  if(typeof(element)=='string'){
+                    console.log(element)
+                    //array
+                    var langArray = lyric[tag].split("");
+                    lyric.arr[tag] = lyric[tag].split("");
+
+                    let totalCharacters = langArray.length;
+                    let increment = (Math.floor((100/totalCharacters)* 10) )/10
+                    var i = 0;
+                    // pipFormatter = {'min': [0,increment]}
+                    range[tag]['min'] = [0,1];
+                    while (i<totalCharacters){
+                      // {('0':'abc')}
+                      let currentChar = langArray[i]; // get char from position 0, insert to position 1
+                      pipFormatter[tag][i.toString()] = currentChar;
+
+                      // range
+                      // {'50%': [1,1]}
+                      let currentPlace = (increment*i)  // starts at 0
+                      let nextPlace = (increment*(++i))
+                      range[tag][`${nextPlace}%`] = [i,1];
+                    };
+                    pipFormatter[tag][i.toString()] = " ";
+                    range[tag]['max'] = [i,1];
+                    makeSlider( tag, pipFormatter[tag], range[tag] )
+                  }
+                }
+              };
+            
+              function makeSlider(tag, pipFormats, lyricRange){ // TODO start
+                //  Make the slider
+                //var skipSlider = self.$(".skipSlider")[0]//document.getElementById('nonlinear');
+                var slider = self.$(`.slider-${tag}`)[0];
+
+                noUiSlider.create(slider, {
+                  start: [0,4],
+                  tooltips: [
+                    {
+                      to: function() {
+                        return "2<br/>A";
+                      }
+                    },
+                    {
+                      to: function() {
+                        return "3<br/>G";
+                      }
+                    }
+                  ],
+                  range: lyricRange,
+                  pips: {
+                    mode: 'range',
+                    format: {
+                      to: function(a) {
+                        return pipFormats[a];
+                      }
+                    }
+                  }
+                });
+              }
+              ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+              console.log (lyric)
+              //  Make the slider
+              console.log(line)
+              debugger
+              //var skipSlider = self.$(".skipSlider")[0]//document.getElementById('nonlinear');
+              var slider = self.$(".slideren")[0];
+              var pipFormats = {'0':'H', 
+                                '1':'e', 
+                                '2':'y',
+                                '3':' ',
+                                '4':'D',
+                                '5':'u',
+                                '6':'d',
+                                '7':'e'};
+
+              noUiSlider.create(slider, {
+                start: [0,4],
+                tooltips: [
+                  {
+                    to: function() {
+                      return "2<br/>A";
+                    }
+                  },
+                  {
+                    to: function() {
+                      return "3<br/>G";
+                    }
+                  }
+                ],
+                range: {
+                  min: [0,1],
+                  "5%": [1,1],
+                  "10%": [2,1],
+                  "15%": [3,1],
+                  "56.8%": [4,1],
+                  "71%": [5,1],
+                  "85%": [6,1],
+                  max: [7]
+                },
+                pips: {
+                  mode: 'range',
+                  format: {
+                    to: function(a) {
+                      return pipFormats[a];
+                    }
+                  }
+                }
+              });
+              //
 
               languages.forEach(lang => {
                 console.log(lang.tag)

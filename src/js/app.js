@@ -42,12 +42,15 @@ Template7.registerHelper('getKeyInParent', function(parent, keyArr) {
 // (parentObject)
 Template7.registerHelper('printLyric', function(line) {
     var results = ''
+    //debugger
     for (const key in line.phrases[0]) {
         if (key != "chord", key != "number") {
-            results = results.concat(`<div style="padding: 50px"><div id="slider-${key}" class="slider-${key}"></div></div>`)
+          //this.$$(`#slider-${key}`).empty()
+          results = results.concat(`<div id="sliderContainer${key}" style="padding: 50px"><div id="slider-${key}" class="slider-${key}"></div></div>`)
         }
     }
     console.log(results)
+    // this.$$("#sliderContainerat").remove()
     return results;
 });
 // print all lyrics

@@ -1,353 +1,366 @@
 <template>
-  <div class="page">
-      <div class="navbar">
-          <div class="navbar-bg"></div>
-          <div class="navbar-inner sliding">
-              <div class="left">
-                  <a href="#" class="link back">
-                      <i class="icon icon-back"></i>
-                      <span class="if-not-md">{{#if loading}}Back{{else}}{{translate "Back"}}{{/if}}</span>
-                  </a>
-              </div>
-              <div class="title">{{#if loading}}{{else}} {{song.title[defaultLanguage]}} {{/if}}</div>
-              <div class="right">
-                  <a @click="pickLanguageCode" class="button">
-                    <span class="fa-stack">
-                      <i class="fas fa-square fa-stack-2x"style="color:grey"></i>
-                      <i class="fas fa-language fa-stack-1x"style="color:white"></i>
-                      <i class="fas fa-plus fa-stack-1x" style="color:Tomato; text-align:left;  margin-top: 9px; margin-left: 5px;"></i>
-                    </span>
-                  </a>
-              </div>
-          </div>
-      </div>
-      <div class="page-content hide-navbar-on-scroll">
-          {{#if loading}}
-          {{else}}
-              <div class="block block-strong" style="margin-bottom: 10px; overflow: hidden;">
-                  <div class="menu">
-                      <div class="menu-inner no-margin-padding">
-                        <div>
-                          <div class="menu-item">
-                            <div class="menu-item-content icon-only">
-                              <div class="menu-item-content">
-                                  <a @click="save" class="col button button-fill">
-                                      <i class="text-color-gray fa-bigger fas fa-save"></i>
-                                  </a>
-                              </div>
+    <div class="page">
+        <div class="navbar">
+            <div class="navbar-bg"></div>
+            <div class="navbar-inner sliding">
+                <div class="left">
+                    <a href="#" class="link back">
+                        <i class="icon icon-back"></i>
+                        <span class="if-not-md">{{#if loading}}Back{{else}}{{translate "Back"}}{{/if}}</span>
+                    </a>
+                </div>
+                <div class="title">{{#if loading}}{{else}} {{song.title[defaultLanguage]}} {{/if}}</div>
+                <!-- <div class="right">
+<a @click="pickLanguageCode" class="button">
+    <span class="fa-stack">
+        <i class="fas fa-square fa-stack-2x" style="color:grey"></i>
+        <i class="fas fa-language fa-stack-1x" style="color:white"></i>
+        <i class="fas fa-plus fa-stack-1x" style="color:Tomato; text-align:left;  margin-top: 9px; margin-left: 5px;"></i>
+    </span>
+</a>
+</div> -->
+            </div>
+        </div>
+        <div class="page-content hide-navbar-on-scroll">
+            <div class="sheet">
+                <div class="song">
+                    <div class="list no-hairlines-md" id="songMetaData">
+                        {{#if loading}}
+                        {{else}}
+                            <ul>
+                                <li class="item-content item-input">
+                                    <div class="item-inner">
+                                        <div class="item-title item-label">
+                                            <t>Author</t>
+                                        </div>
+                                        <div class="item-input-wrap">
+                                            <input name="author" type="text" placeholder="Author" value="{{author}}" />
+                                            <span class="input-clear-button"></span>
+                                        </div>
+                                    </div>
+                                </li>
+                                <li class="item-content item-input">
+                                    <div class="item-inner">
+                                        <div class="item-title item-label">
+                                            <t>Key</t>
+                                        </div>
+                                        <div class="item-input-wrap">
+                                            <input name="key" type="text" placeholder="Key" value="{{key}}" />
+                                            <span class="input-clear-button"></span>
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+
+                            <div class="block-title">
+                                <t>Title</t>
                             </div>
-                          </div>
-                        </div>
-                      </div>
-                  </div>
-                  <div class="sheet">
-                      <div class="song">
-                          <div class="songMetaData" id="songMetaData">
-                            <div class="author" id="edit-author">
-                              <div class="item-title item-label">
-                                <t>Author</t>
-                              </div>
-                              <div class="item-input-wrap"><input type="text" value="{{author}}"></div>
-                            </div>
-                            <div class="key" id="edit-key">
-                              <div class="item-title item-label">
-                                <t>Key</t>
-                              </div>
-                              <div class="item-input-wrap"><input type="text" value="{{key}}"></div>
-                            </div>
-                            <div class="title" id="edit-title">
-                              <div class="item-title item-label">
-                                <t>Title(s)</t>
-                              </div>
-                              {{ printEachLanguage @root.title @root.languages "title"}}
-                            </div>
-                            <div class="metadata" id="edit-metadata">
-                              <div class="item-title item-label">
+                            <ul id="edit-title">
+                                {{ printEachLanguage @root.title @root.languages "title"}}
+                            </ul>
+
+                            <div class="block-title">
                                 <t>Metadata</t>
-                              </div>
-                              {{ printEachLanguage @root.metadata @root.languages "metadata"}}
                             </div>
-                            <div class="verseLabels" id="edit-verseLabels">
-                              <div class="item-title item-label">
+                            <ul id="edit-metadata">
+                                {{ printEachLanguage @root.metadata @root.languages "metadata"}}
+                            </ul>
+
+                            <div class="block-title">
                                 <t>Verse Labels</t>
-                              </div>
-                              {{#verseLabels}}
-                              <div class="item-input-wrap">
-                                <input type="text" value="'{{label}}'">
-                              </div>
-                              {{/verseLabels}}
                             </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-          {{/if}}
-      </div>
-  </div>
+                            <ul id="edit-verseLabels">
+                                {{#each verseLabels}}
+                                    <li class="item-content item-input">
+                                        <div class="item-inner">
+                                            <div class="item-title item-label">
+                                                <t>Label</t>
+                                            </div>
+                                            <div class="item-input-wrap">
+                                                <textarea name="verseLabel" class="resizable resizeMe" placeholder="Label">{{label}}</textarea>
+                                                <span class="input-clear-button"></span>
+                                            </div>
+                                        </div>
+                                    </li>
+                                {{/each}}
+                            </ul>
+                        {{/if}}
+                    </div>
+                </div>
+            </div>
+            <div class="block">
+                <a @click="save" class="col button button-fill button-large">
+                    <i class="fa-bigger fas fa-save"></i>
+                    <t>Save</t>
+                </a>
+            </div>
+        </div>
+    </div>
 </template>
 <style>
-  .no-margin-padding {
-      margin: 0;
-      padding: 0;
-  }
+    .no-margin-padding {
+        margin: 0;
+        padding: 0;
+    }
 
-  .fa-bigger {
-      font-size: larger;
-  }
+    .fa-bigger {
+        font-size: larger;
+    }
 
-  .song {
-      transform-origin: left top;
-  }
+    .song {
+        transform-origin: left top;
+    }
 
-  .line {
-      margin-bottom: 20px;
-  }
+    .line {
+        margin-bottom: 20px;
+    }
 
-  .phrase {
-      position: relative;
-      display: inline-block;
-      margin: 55px 10px 0 0;
-      min-width: 20px;
-  }
+    .phrase {
+        position: relative;
+        display: inline-block;
+        margin: 55px 10px 0 0;
+        min-width: 20px;
+    }
 
-  .chord,
-  .number {
-      top: -55px;
-      background: var(--f7-theme-color);
-      border-radius: 3px;
-      min-width: 20px;
-      height: 20px;
-      line-height: 20px;
-      text-align: center;
-      color: white;
-      font-weight: bold;
-      display: inline-block;
-      padding: 0 2px;
-      margin-right: 5px;
-      position: absolute;
-      padding: 2px;
-  }
+    .chord,
+    .number {
+        top: -55px;
+        background: var(--f7-theme-color);
+        border-radius: 3px;
+        min-width: 20px;
+        height: 20px;
+        line-height: 20px;
+        text-align: center;
+        color: white;
+        font-weight: bold;
+        display: inline-block;
+        padding: 0 2px;
+        margin-right: 5px;
+        position: absolute;
+        padding: 2px;
+    }
 
-  .number {
-      top: -25px;
-      border-radius: 100%;
-      width: 20px;
-      height: 20px;
-      padding: 2px;
-      background: var(--f7-color-blue);
-      font-family: 'Notes', monospace;
-  }
+    .number {
+        top: -25px;
+        border-radius: 100%;
+        width: 20px;
+        height: 20px;
+        padding: 2px;
+        background: var(--f7-color-blue);
+        font-family: 'Notes', monospace;
+    }
 
-  .noNumbers,
-  .noChords {
-      margin-top: 30px !important;
-  }
+    .noNumbers,
+    .noChords {
+        margin-top: 30px !important;
+    }
 
-  .noNumbers.noChords {
-      margin-top: 10px !important;
-  }
+    .noNumbers.noChords {
+        margin-top: 10px !important;
+    }
 
-  .noNumbers .chord,
-  .noChords .chord {
-      top: -30px;
-  }
+    .noNumbers .chord,
+    .noChords .chord {
+        top: -30px;
+    }
 </style>
 <script>
-var songId
-var loading = true;
-var languages
-var line
-var song
-var app
+    var songId;
+    var loading = true;
+    var languages
+    var line
+    var song
+    var app
 
-import DataManager from '../data/dataManager';
-import Song from '../data/song';
-import Preference from "../data/preference";
-const dataManager = new DataManager();
-const songCollection = new Song();
-const preference = new Preference();
+    import DataManager from '../data/dataManager';
+    import Song from '../data/song';
+    import Preference from "../data/preference";
+    const dataManager = new DataManager();
+    const songCollection = new Song();
+    const preference = new Preference();
 
-// Import locales
-const locale = require('../js/locales.js');
-var initScale = 1;
-var defaultLanguage;
-var lyric1;
-var author;
-var key;
-var metadata;
-var verseLabels;
-var deviceWidth = window.innerWidth;
-var self = this;
-if (deviceWidth >= 700) {
-  initScale = 2;
-} else if (deviceWidth >= 500) {
-  initScale = 1.5;
-}
-var steps = 0;
-
-export default {
-  // Component Data
-  data: function () {
-    // Must return an object
-    return {
-      loading: true
+    // Import locales
+    const locale = require('../js/locales.js');
+    var initScale = 1;
+    var defaultLanguage;
+    var lyric1;
+    var author;
+    var key;
+    var metadata;
+    var verseLabels;
+    var deviceWidth = window.innerWidth;
+    var self = this;
+    if (deviceWidth >= 700) {
+        initScale = 2;
+    } else if (deviceWidth >= 500) {
+        initScale = 1.5;
     }
-  },
-  // Page Events
-  on: {
-    pageInit: function(e, page) {
-      self = this;
-      app = self.$app;
-      var $form = this.$('#songMetaData')
+    var steps = 0;
 
-      songId = this.$route.params.songId;
-      // console.log(songId)
-
-      preference.getLanguage().then((languageCode) => {
-        lyric1 = languageCode;
-        defaultLanguage = languageCode;
-        console.log('current lang: ' + lyric1);
-        songCollection.get(songId).then(result => {
-          languages = [];
-          var translationLangs = Object.keys(result.title);
-          locale.customLocales.forEach((item) => {
-            if (translationLangs.indexOf(item.tag) > -1) {
-              if (item.tag == lyric1) {
-                item.default = true;
-              }
-              languages.push(item.tag)
+    export default {
+        // Component Data
+        data: function() {
+            // Must return an object
+            return {
+                loading: true
             }
-          });
-          // song is used to get next line
-          song = result
+        },
+        // Page Events
+        on: {
+            pageInit: function(e, page) {
+                self = this;
+                app = self.$app;
+                songId = this.$route.params.songId;
+                // var $form = this.$('#songMetaData')
 
-          // Get Verse Labels
-          verseLabels = []
-          song.lyrics.verses.forEach(verse => {
-            // [{1, 'Verse 1'},{...}]
-            console.log(verse.label)
-            //verseLabels.push({'id':verse.id, 'label':verse.label})
-            verseLabels.push({'label':verse.label})
-          });
-          console.log(verseLabels)
+                // console.log(songId)
+
+                preference.getLanguage().then((languageCode) => {
+                    lyric1 = languageCode;
+                    defaultLanguage = languageCode;
+                    console.log('current lang: ' + lyric1);
+                    songCollection.get(songId).then(result => {
+                        languages = [];
+                        var translationLangs = Object.keys(result.title);
+                        locale.customLocales.forEach((item) => {
+                            if (translationLangs.indexOf(item.tag) > -1) {
+                                if (item.tag == lyric1) {
+                                    item.default = true;
+                                }
+                                languages.push(item.tag)
+                            }
+                        });
+                        // song is used to get next line
+                        song = result
+
+                        // Get Verse Labels
+                        verseLabels = []
+                        song.lyrics.verses.forEach(verse => {
+                            // [{1, 'Verse 1'},{...}]
+                            console.log(verse.label)
+                            //verseLabels.push({'id':verse.id, 'label':verse.label})
+                            verseLabels.push({
+                                'label': String(verse.label)
+                            })
+                        });
+                        console.log("verse labels", verseLabels)
+
+                        self.$setState({
+                            loading: false,
+                            song: result,
+                            author: result.author, // string
+                            key: result.key, // string
+                            title: result.title, // obj
+                            metadata: result.metadata[0], // obj
+                            verseLabels: verseLabels,
+                            languages: languages
+                        });
+                        self.$tick(function() {
+                            console.log('DOM and state updated');
+                            self.$('textarea').trigger('change');
+                        });
+                    });
+                });
+            },
+        },
+        methods: {
+            save: function(e) {
+                console.log(songId)
+                var $form = this.$('#songMetaData')
+                var $ = $form.find("select[name='']")
+
+                // //key
+                // console.log(this.$('#edit-key')[0].children[1].children[0].value)
+                // //author
+                // console.log(this.$('#edit-author')[0].children[1].children[0].value)
+                var titleArray = Array.from((this.$('#edit-title').children()));
+                let delTitle = titleArray.splice(0, 1)
+                var metadataArray = Array.from((this.$('#edit-metadata').children()));
+                delTitle = metadataArray.splice(0, 1)
+
+                var key = this.$('input[name="key"]').value.trim()
+                var author = this.$('input[name="author"]').value.trim()
+
+                songCollection.get(songId).then(result => {
+                    if (result.id != songId) {
+                        console.log("This is going to cause problems")
+                        debugger;
+                    }
+                    let newData = result;
+                    newData.key = key;
+                    newData.author = author;
+
+                    // Language tag: metadataArray[x].lastElementChild.classList[1]
+                    // Value: metadataArray[x].lastElementChild.firstChild.firstChild.value
+                    metadataArray.forEach(dataElement => {
+                        var tag = dataElement.lastElementChild.classList[1]
+                        var value = dataElement.lastElementChild.firstChild.firstChild.value
+                        newData.metadata[0][tag] = value.trim()
+                    });
+                    // console.log(newData.metadata[0])
+                    titleArray.forEach(dataElement => {
+                        var tag = dataElement.lastElementChild.classList[1]
+                        var value = dataElement.lastElementChild.firstChild.firstChild.value
+                        newData.title[tag] = value.trim()
+                    });
+                    // console.log(newData.title)
+
+                    // save
+                    songCollection.db.setItem(songId, newData)
+                    // save to server
+                    console.log({
+                        "Song ID": songId,
+                        "song": newData
+                    })
+                    dataManager.putSong(songId, newData)
+                        .then(responseText => alert(JSON.stringify(responseText)));
+                    self.$setState({
+                        loading: false,
+                        song: newData,
+                    }, () => {
+                        console.log(newData)
+                    });
+                });
+            },
+            pickLanguageCode: function() {
+                // TODO add logic here for picking a language
+                var newLanguageTag = 'en';
+                //
+                return addLanguageCode(newLanguageTag);
+            },
+            addLanguageCode: function(newLanguageTag) {
+                // var newLanguageTag = 'en';
+                songCollection.get(songId).then(result => {
+                    let newData = result;
+                    var languageTag = newLanguageTag;
 
 
-          self.$setState({
-            loading: false,
-            song: result,
-            author: result.author, // string
-            key: result.key,// string
-            title: result.title, // obj
-            metadata: result.metadata[0],// obj
-            verseLabels: verseLabels,
-            languages: languages
-          }, () => {
-            //$form.author
-            self.$(".song")[0].style.transform = "scale("+initScale+")";
-            self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
-
-            console.log(result)            
-          });
-        });
-      });
-    },
-  },
-  methods: {
-    save: function(e) {
-      console.log(songId)
-      var $form = this.$('#songMetaData')
-      var $ = $form.find("select[name='']")
-
-      // //key
-      // console.log(this.$('#edit-key')[0].children[1].children[0].value)
-      // //author
-      // console.log(this.$('#edit-author')[0].children[1].children[0].value)
-      var titleArray = Array.from((this.$('#edit-title').children()));
-      let delTitle = titleArray.splice(0, 1)
-      var metadataArray = Array.from((this.$('#edit-metadata').children()));
-      delTitle = metadataArray.splice(0, 1)
-
-      var key = this.$('#edit-key')[0].children[1].children[0].value.trim() 
-      var author = this.$('#edit-author')[0].children[1].children[0].value.trim()
-
-      
-      songCollection.get(songId).then(result => {
-        if(result.id != songId){
-          console.log("This is going to cause problems")
-          debugger;
-        }
-        let newData = result;
-        newData.key = key;
-        newData.author = author;
-
-        // Language tag: metadataArray[x].lastElementChild.classList[1]
-        // Value: metadataArray[x].lastElementChild.firstChild.firstChild.value
-        metadataArray.forEach(dataElement => {
-          var tag = dataElement.lastElementChild.classList[1]
-          var value = dataElement.lastElementChild.firstChild.firstChild.value
-          newData.metadata[0][tag] = value.trim()
-        });
-        // console.log(newData.metadata[0])
-        titleArray.forEach(dataElement => {
-          var tag = dataElement.lastElementChild.classList[1]
-          var value = dataElement.lastElementChild.firstChild.firstChild.value
-          newData.title[tag] = value.trim()
-        });
-        // console.log(newData.title)
-
-        // save
-        songCollection.db.setItem(songId, newData)
-        // save to server
-        console.log({"Song ID": songId, "song": newData})
-        dataManager.putSong(songId,newData)
-          .then(responseText => alert(JSON.stringify(responseText)));
-        self.$setState({
-          loading: false,
-          song: newData,
-        }, () => {
-          console.log(newData)
-        });
-      }); 
-    },
-    pickLanguageCode: function(){
-      // TODO add logic here for picking a language
-      var newLanguageTag = 'en';
-      //
-      return addLanguageCode(newLanguageTag);
-    },
-    addLanguageCode: function(newLanguageTag){
-      // var newLanguageTag = 'en';
-      songCollection.get(songId).then(result => {
-        let newData = result;
-        var languageTag = newLanguageTag;
-        
-        
-        // Language tag
-        newData.metadata.forEach(metaDataLine => {
-          metaDataLine[languageTag] = "*";
-        });
-        newData.title[languageTag] = "*";
-        // add tag to every phrase
-        newData.lyrics.verses.forEach(verse => {
-          verse.lines.forEach(line => {
-            line.phrases.forEach(phrase => {
-              phrase[languageTag] = "*";       
-            });
-          });
-        });
-        songCollection.db.setItem(songId, newData)
-        debugger;
-        self.$setState({
-          loading: false,
-          song: newData,
-        }, () => {
-          console.log(newData)
-        });
-        // TODO send changes to server
-        //
-      }); 
-      return;
-    } 
-  },
-}
+                    // Language tag
+                    newData.metadata.forEach(metaDataLine => {
+                        metaDataLine[languageTag] = "*";
+                    });
+                    newData.title[languageTag] = "*";
+                    // add tag to every phrase
+                    newData.lyrics.verses.forEach(verse => {
+                        verse.lines.forEach(line => {
+                            line.phrases.forEach(phrase => {
+                                phrase[languageTag] = "*";
+                            });
+                        });
+                    });
+                    songCollection.db.setItem(songId, newData)
+                    debugger;
+                    self.$setState({
+                        loading: false,
+                        song: newData,
+                    }, () => {
+                        console.log(newData)
+                    });
+                    // TODO send changes to server
+                    //
+                });
+                return;
+            }
+        },
+    }
 </script>

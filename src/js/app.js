@@ -1,5 +1,7 @@
 import $$ from 'dom7';
-import Framework7,  { Template7 }  from 'framework7/framework7.esm.bundle.js';
+import Framework7, {
+    Template7
+} from 'framework7/framework7.esm.bundle.js';
 
 // Import locales
 import './locales.js';
@@ -20,119 +22,127 @@ import routes from './routes.js';
 // Import main app component
 import App from '../app.f7.html';
 
-import { transpose } from "./transpose";
+import {
+    transpose
+} from "./transpose";
 Template7.registerHelper('transpose', transpose);
 
 // Import translation tool
-import { translate } from "./translate";
+import {
+    translate
+} from "./translate";
 Template7.registerHelper('translate', translate);
 
 // get lyric by ID
 // (this.tag, parentObject)
-Template7.registerHelper('getKeyInParent', function (parent,keyArr){
-  return 'ra';
+Template7.registerHelper('getKeyInParent', function(parent, keyArr) {
+    return 'ra';
 })
 // make a slider div for each language
 // (parentObject)
-Template7.registerHelper('printLyric', function (line){
-  var results = ''
-  for (const key in line.phrases[0]) {
-    if(key != "chord",key != "number"){
-      results = results.concat(`<div style="padding: 50px"><div id="slider-${key}" class="slider-${key}"></div></div>`)
+Template7.registerHelper('printLyric', function(line) {
+    var results = ''
+    for (const key in line.phrases[0]) {
+        if (key != "chord", key != "number") {
+            results = results.concat(`<div style="padding: 50px"><div id="slider-${key}" class="slider-${key}"></div></div>`)
+        }
     }
-  }
-  console.log (results)
-  return results;
+    console.log(results)
+    return results;
 });
 // print all lyrics
 // (parentObject)
-Template7.registerHelper('printEachPhrase', function (line, languages){
-  console.log(line, languages)
-  if(line === undefined){
-    // debugger;
-    console.error('undefined line')
-    return "";
-  }
-  var results = ''
-  const validateChords = `required pattern='[ABCDEFG]|[ABCDEFG]m|[ABCDEFG]#|[ABCDEFG]b|[ABCDEFG]#m|[ABCDEFG]bm|[ABCDEFG]7|[ABCDEFG]sus|[ABCDEFG]#7|[ABCDEFG]#sus|[ABCDEFG]b7|[ABCDEFG]bsus'`
-  const validateNumber = `required pattern='1|2|3|4|5|6|7|8|9|10|11|12'`
-  //
-  results = results.concat(`<div class="line metadata">`)
-  line.phrases.forEach(phrase => {
-    results = results.concat(`<div class="phrase metadata"> `)
-    if(phrase["chord"]){
-      results = results.concat(`<div class="chord"><div class="item-input-wrap"><input type="text" ${validateChords} value="${phrase["chord"]}"></div></div>`)
-    } else {
-      results = results.concat(`<div class="chord"><div class="item-input-wrap"><input type="text" ${validateChords} placeholder="*"></div></div>`)
+Template7.registerHelper('printEachPhrase', function(line, languages) {
+    console.log(line, languages)
+    if (line === undefined) {
+        // debugger;
+        console.error('undefined line')
+        return "";
     }
-    if(phrase["number"]){
-      results = results.concat(`<div class="number"><div class="item-input-wrap"><input type="text" ${validateNumber}value="${phrase["number"]}"></div></div>`)
-    }else {
-      results = results.concat(`<div class="number"><div class="item-input-wrap"><input type="text" ${validateNumber}placeholder="*"></div></div>`)
-    }
-    results = results.concat('</div>');
-  });
-  results = results.concat('</div>');
-
-  languages.forEach(language => {
-    results = results.concat(`<div class="${language}">`)
+    var results = ''
+    const validateChords = `required pattern='[ABCDEFG]|[ABCDEFG]m|[ABCDEFG]#|[ABCDEFG]b|[ABCDEFG]#m|[ABCDEFG]bm|[ABCDEFG]7|[ABCDEFG]sus|[ABCDEFG]#7|[ABCDEFG]#sus|[ABCDEFG]b7|[ABCDEFG]bsus'`
+    const validateNumber = `required pattern='1|2|3|4|5|6|7|8|9|10|11|12'`
+    //
+    results = results.concat(`<div class="line metadata">`)
     line.phrases.forEach(phrase => {
-      results = results.concat(`<div class="phrase ${language}"> `)
-        results = results.concat(`<div class="lyric marker icon-only"> <i class="text-color-gray fas fa-circle"></i></div>`)
-        
-        if(phrase[language]){
-          results = results.concat(`<div class="lyric ${language}"><div class="item-input-wrap"><input type="text" value="${phrase[language]}&nbsp;"></div></div>`)
-        }else{
-          results = results.concat(`<div class="lyric ${language}"><div class="item-input-wrap"><input type="text" value="*"></div></div>`)
+        results = results.concat(`<div class="phrase metadata"> `)
+        if (phrase["chord"]) {
+            results = results.concat(`<div class="chord"><div class="item-input-wrap"><input type="text" ${validateChords} value="${phrase["chord"]}"></div></div>`)
+        } else {
+            results = results.concat(`<div class="chord"><div class="item-input-wrap"><input type="text" ${validateChords} placeholder="*"></div></div>`)
         }
-      results = results.concat('</div>')
+        if (phrase["number"]) {
+            results = results.concat(`<div class="number"><div class="item-input-wrap"><input type="text" ${validateNumber}value="${phrase["number"]}"></div></div>`)
+        } else {
+            results = results.concat(`<div class="number"><div class="item-input-wrap"><input type="text" ${validateNumber}placeholder="*"></div></div>`)
+        }
+        results = results.concat('</div>');
     });
     results = results.concat('</div>');
-  });
-  
-  return results;
+
+    languages.forEach(language => {
+        results = results.concat(`<div class="${language}">`)
+        line.phrases.forEach(phrase => {
+            results = results.concat(`<div class="phrase ${language}"> `)
+            results = results.concat(`<div class="lyric marker icon-only"> <i class="text-color-gray fas fa-circle"></i></div>`)
+
+            if (phrase[language]) {
+                results = results.concat(`<div class="lyric ${language}"><div class="item-input-wrap"><input type="text" value="${phrase[language]}&nbsp;"></div></div>`)
+            } else {
+                results = results.concat(`<div class="lyric ${language}"><div class="item-input-wrap"><input type="text" value="*"></div></div>`)
+            }
+            results = results.concat('</div>')
+        });
+        results = results.concat('</div>');
+    });
+
+    return results;
 })
 // print all languages for passed div
 // (parentObject)
-Template7.registerHelper('printEachLanguage', function (dataArray, languages, name){
-  console.log(dataArray, languages, name)
-  var results = ''
-  languages.forEach(language => {
-    results = results.concat(`<div class="${language}"><div class="item-title item-label"><t>${language}</t></div>`)
-    if(dataArray !== undefined && dataArray[language] !== null && dataArray[language] !== ''){
-      results = results.concat(`<div class="${name}, ${language}"><div class="item-input-wrap"><input type="text" value="${dataArray[language]}&nbsp;"></div></div>`)
-    }else{
-      results = results.concat(`<div class="${name}, ${language}"><div class="item-input-wrap"><input type="text" value="*"></div></div>`)
-    }
-    results = results.concat('</div>')
-  });
-  
-  return results;
+Template7.registerHelper('printEachLanguage', function(dataArray, languages, name) {
+    console.log(dataArray, languages, name)
+    var results = '';
+    languages.forEach(language => {
+        results += `<li class="item-content item-input">`;
+        results += `<div class="item-inner">`;
+        results += `<div class="item-title item-label">`;
+        results += `<t>${language}</t>`;
+        results += `</div>`;
+        results += `<div class="item-input-wrap">`;
+        results += `<textarea name="${name}" class="resizable resizeMe" placeholder="${language}">${dataArray[language]}</textarea>`;
+        results += `<span class="input-clear-button"></span>`;
+        results += `</div>`;
+        results += `</div>`;
+        results += `</li>`;
+    });
+
+    return results;
 })
 // print all languages for passed div
 // (parentObject)
-Template7.registerHelper('printObjectPropertyByKey', function (dataObject, language){
-  return dataObject[language];
+Template7.registerHelper('printObjectPropertyByKey', function(dataObject, language) {
+    return dataObject[language];
 })
 
 var app = new Framework7({
-  root: '#app', // App root element
-  component: App, // App main component
+    root: '#app', // App root element
+    component: App, // App main component
 
-  name: 'Digital Hymnal', // App name
-  theme: 'auto', // Automatic theme detection
-  panel: {
-    swipe: true
-  },
-  autoDarkTheme: true,
-  // App routes
-  routes: routes,
-  // Register service worker
-  serviceWorker: {
-    path: '/service-worker.js',
-  },
-  navbar: {
-    hideOnPageScroll: true,
-    iosCenterTitle: false,
-  }
+    name: 'Digital Hymnal', // App name
+    theme: 'auto', // Automatic theme detection
+    panel: {
+        swipe: true
+    },
+    autoDarkTheme: true,
+    // App routes
+    routes: routes,
+    // Register service worker
+    serviceWorker: {
+        path: '/service-worker.js',
+    },
+    navbar: {
+        hideOnPageScroll: true,
+        iosCenterTitle: false,
+    }
 });

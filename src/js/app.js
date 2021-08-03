@@ -80,21 +80,21 @@ Template7.registerHelper('printEachPhrase', function(line, languages) {
     });
     results = results.concat('</div>');
 
-    languages.forEach(language => {
-        results = results.concat(`<div class="${language}">`)
-        line.phrases.forEach(phrase => {
-            results = results.concat(`<div class="phrase ${language}"> `)
-            results = results.concat(`<div class="lyric marker icon-only"> <i class="text-color-gray fas fa-circle"></i></div>`)
+    // languages.forEach(language => {
+    //     results = results.concat(`<div class="${language}">`)
+    //     line.phrases.forEach(phrase => {
+    //         results = results.concat(`<div class="phrase ${language}"> `)
+    //         results = results.concat(`<div class="lyric marker icon-only"> <i class="text-color-gray fas fa-circle"></i></div>`)
 
-            if (phrase[language]) {
-                results = results.concat(`<div class="lyric ${language}"><div class="item-input-wrap"><input type="text" value="${phrase[language]}&nbsp;"></div></div>`)
-            } else {
-                results = results.concat(`<div class="lyric ${language}"><div class="item-input-wrap"><input type="text" value="*"></div></div>`)
-            }
-            results = results.concat('</div>')
-        });
-        results = results.concat('</div>');
-    });
+    //         if (phrase[language]) {
+    //             results = results.concat(`<div class="lyric ${language}"><div class="item-input-wrap"><input type="text" value="${phrase[language]}&nbsp;"></div></div>`)
+    //         } else {
+    //             results = results.concat(`<div class="lyric ${language}"><div class="item-input-wrap"><input type="text" value="*"></div></div>`)
+    //         }
+    //         results = results.concat('</div>')
+    //     });
+    //     results = results.concat('</div>');
+    // });
 
     return results;
 })

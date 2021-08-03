@@ -170,29 +170,17 @@
                     </div>
                     
                     <div class="sheet">
-                        <div class="song">
-                            <!-- -->
-                            <div style="padding: 50px">
-                              <div id="slider" class="slider"></div>
-                            </div>
-                            <!-- -->
-                            <div class="verse">
-                              <div class="line">
-                                {{ printLyric @root.line}}
-                              </div>
-                            </div>
-                          </div>
-                    </div>
-                    <!-- <div class="sheet">
                       <div class="song">
                         <div class="verse">
-                          {{#if label}}<h3>{{label}}</h3>{{/if}}
                           <div class="line" id="edit-line">
+                            <!-- -->
                             {{ printEachPhrase @root.line @root.languages }}
-                          </div>
+                            <!-- -->
+                            {{ printLyric @root.line}}
+                            </div>
                         </div>
                       </div>
-                    </div> -->
+                    </div>
                   </div>
                 <div class="block text-align-right text-color-gray" style="margin-top: 10px;">
                     {{song.author[defaultLanguage]}}
@@ -435,7 +423,7 @@
                   }
                 }
                 // push to chord/num list
-                chordList.push({'to':function(){return `"${meta.number}<br/>${meta.chord}"`}})
+                chordList.push({'to':function(){return `${meta.number}<br/>${meta.chord}`}})
               });  
               
               var pipFormatter = {};
@@ -476,25 +464,10 @@
             
               function makeSlider(tag, pipFormats, lyricRange, chordStartLocations, chordDataObject){ // TODO start
                 //  Make the slider
-                debugger
-                //var skipSlider = self.$(".skipSlider")[0]//document.getElementById('nonlinear');
                 var slider = self.$(`.slider-${tag}`)[0];
-                // start [a,b,c]
-                // tooltips: [ {to: function() {return "2<br/>A";} } ]
                 noUiSlider.create(slider, {
                   start: chordStartLocations,
-                  tooltips: chordDataObject,//[
-                  //   {
-                  //     to: function() {
-                  //       return "2<br/>A";
-                  //     }
-                  //   },
-                  //   {
-                  //     to: function() {
-                  //       return "3<br/>G";
-                  //     }
-                  //   }
-                  // ],
+                  tooltips: chordDataObject,
                   range: lyricRange,
                   pips: {
                     mode: 'range',
@@ -630,7 +603,8 @@
               tag = 'metadata'
             } else {
               // at, kt etc...
-              tag = lineElement.classList.value
+              //  TODO   SKIP IT FOR NOW
+              //tag = lineElement.classList.value
             }
             // now, we have "chords": ['a','b','c']
             let elementChildrenArray = Array.from(lineElement.children)
@@ -654,9 +628,9 @@
                 newData.lyrics.verses[verseId].lines[lineId].phrases[i]['number'] = elementChildrenArray[i].children[1].children[0].children[0].value
                 // -------------------------------------------------------------------------------------------------------------------------------------- //
               } else {
-                console.log(elementChildrenArray[i].children[1].children[0].children[0].value) // needs to skip the first element
-                // update song to match
-                newData.lyrics.verses[verseId].lines[lineId].phrases[i][tag] = elementChildrenArray[i].children[1].children[0].children[0].value//.trim()
+                // console.log(elementChildrenArray[i].children[1].children[0].children[0].value) // needs to skip the first element
+                // // update song to match
+                // newData.lyrics.verses[verseId].lines[lineId].phrases[i][tag] = elementChildrenArray[i].children[1].children[0].children[0].value//.trim()
               }
               i++;
             }    

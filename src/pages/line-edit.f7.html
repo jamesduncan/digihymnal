@@ -400,7 +400,7 @@
               //   // [(0, width:3),(1, width:2),(2, width:4),]
               //   //  I...I..I....I..
               var lyric = {}
-              lyric.arr = {}
+              //lyric.arr = {}
               
               line.phrases.forEach(phrase => {
                 for (const key in phrase) {
@@ -429,7 +429,8 @@
                     console.log(element)
                     //array
                     var langArray = lyric[tag].split("");
-                    lyric.arr[tag] = lyric[tag].split("");
+                    var langArrayParsed = diacriticChecker(langArray, 0);
+                    //lyric.arr[tag] = lyric[tag].split("");
 
                     let totalCharacters = langArray.length;
                     let increment = (Math.floor((100/totalCharacters)* 10) )/10
@@ -484,56 +485,73 @@
                   }
                 });
               }
-              ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-              console.log (lyric)
-              //  Make the slider
-              console.log(line)
-              debugger
-              //var skipSlider = self.$(".skipSlider")[0]//document.getElementById('nonlinear');
-              var slider = self.$(".slideren")[0];
-              var pipFormats = {'0':'H', 
-                                '1':'e', 
-                                '2':'y',
-                                '3':' ',
-                                '4':'D',
-                                '5':'u',
-                                '6':'d',
-                                '7':'e'};
-
-              noUiSlider.create(slider, {
-                start: [0,4],
-                tooltips: [
-                  {
-                    to: function() {
-                      return "2<br/>A";
-                    }
-                  },
-                  {
-                    to: function() {
-                      return "3<br/>G";
-                    }
-                  }
-                ],
-                range: {
-                  min: [0,1],
-                  "5%": [1,1],
-                  "10%": [2,1],
-                  "15%": [3,1],
-                  "56.8%": [4,1],
-                  "71%": [5,1],
-                  "85%": [6,1],
-                  max: [7]
-                },
-                pips: {
-                  mode: 'range',
-                  format: {
-                    to: function(a) {
-                      return pipFormats[a];
-                    }
-                  }
+              function diacriticChecker(array, index){  
+                var nextIndex = index+1
+                if (nextIndex >= array.length) {
+                  return array;
                 }
-              });
-              //
+                //if ([' ྱ', ' ེ', ' ོ', ].includes(array[nextIndex])){
+                //console.log(array[nextIndex]);
+                //if(array[nextIndex]){
+                  //console.log(  (array[nextIndex]).charCodeAt(0)  );
+                  if ([4017,  3962, 3964, 3954].includes( (array[nextIndex]).charCodeAt(0) )){
+                    array[index] = array[index].concat(array.splice(nextIndex, 1)[0]);
+                  } else {// only increase if no diacritic
+                    ++index;
+                  }
+                //}
+                return diacriticChecker(array, index);
+              }
+              ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+              // console.log (lyric)
+              // //  Make the slider
+              // console.log(line)
+              // debugger
+              // //var skipSlider = self.$(".skipSlider")[0]//document.getElementById('nonlinear');
+              // var slider = self.$(".slideren")[0];
+              // var pipFormats = {'0':'H', 
+              //                   '1':'e', 
+              //                   '2':'y',
+              //                   '3':' ',
+              //                   '4':'D',
+              //                   '5':'u',
+              //                   '6':'d',
+              //                   '7':'e'};
+
+              // noUiSlider.create(slider, {
+              //   start: [0,4],
+              //   tooltips: [
+              //     {
+              //       to: function() {
+              //         return "2<br/>A";
+              //       }
+              //     },
+              //     {
+              //       to: function() {
+              //         return "3<br/>G";
+              //       }
+              //     }
+              //   ],
+              //   range: {
+              //     min: [0,1],
+              //     "5%": [1,1],
+              //     "10%": [2,1],
+              //     "15%": [3,1],
+              //     "56.8%": [4,1],
+              //     "71%": [5,1],
+              //     "85%": [6,1],
+              //     max: [7]
+              //   },
+              //   pips: {
+              //     mode: 'range',
+              //     format: {
+              //       to: function(a) {
+              //         return pipFormats[a];
+              //       }
+              //     }
+              //   }
+              // });
+              // //
 
               languages.forEach(lang => {
                 console.log(lang.tag)

@@ -17,7 +17,7 @@
                                     <a @click="changeLanguage" data-languageCode="{{tag}}" class="item-content">
                                         <div class="item-inner">
                                             <div class="item-title text-color-gray">{{#if local}}{{local}}{{else}}{{name}}{{/if}}</div>
-                                            <div class="item-after text-color-primary">{{#if default}}<i class="fas fa-check-circle"></i>{{else}}<i class="far fa-circle">{{/if}}</div>
+                                            <div class="item-after text-color-primary">{{#if default}}<i class="fas fa-check-circle"></i>{{else}}<i class="far fa-circle"></i>{{/if}}</div>
                                         </div>
                                     </a>
                                 </li>
@@ -30,7 +30,7 @@
                             <li>
                                 <t class="text-color-gray">Edit Mode</t>
                                 <label class="toggle toggle-init">
-                                    <input name="editMode" type="checkbox">
+                                    <input @click="toggleEditMode" name="editMode" type="checkbox" {{#if editMode}}checked{{/if}}>
                                     <span class="toggle-icon"></span>
                                 </label>
                             </li>
@@ -67,7 +67,8 @@
 
             // Must return an object
             return {
-                languages: locale.customLocales
+                languages: locale.customLocales,
+                editMode: false
             }
         },
         on: {
@@ -81,6 +82,12 @@
                         languages: languages
                     })
                 });
+
+                preference.getEditMode().then((mode) => {
+self.$setState({
+editMode: mode
+})
+});
             }
         },
         methods: {
@@ -98,6 +105,11 @@
                     force: true,
                     ignoreCache: true
                 });
+            },
+            toggleEditMode: async function(event) {
+                var self = this;
+                var mode = event.target.checked;
+                await preference.setEditMode(mode);
             }
         }
     }

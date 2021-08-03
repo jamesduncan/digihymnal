@@ -400,21 +400,44 @@
               //   // [(0, width:3),(1, width:2),(2, width:4),]
               //   //  I...I..I....I..
               var lyric = {}
-              //lyric.arr = {}
+
+              // start [a,b,c]
+              var chordStartLocations = {}    //  {'en':[1,5,12]}
+              languages.forEach(languageCode => {
+                chordStartLocations[languageCode] = [];
+                lyric[languageCode] = [];
+              });
               
+              // tooltips: [ {to: function() {return "2<br/>A";} } ]
+              var chordList = []
+
               line.phrases.forEach(phrase => {
+                let meta = {}; // chord and number
                 for (const key in phrase) {
                   if (Object.hasOwnProperty.call(phrase, key)) {
                     const element = phrase[key];
-                    if(lyric[key]){
-                      lyric[key] = lyric[key].concat(element)
-                    } else {
-                      lyric[key] = element
+                    if(key == 'chord' ){
+                      meta.chord = element
+                    }else if( key == 'number'){
+                      meta.number = element
+                    } else   { // language
+                      let elementAsArray = diacriticChecker( element.split(""), 0 ) // lets work with the 'true' length array
+                      lyric[key] = lyric[key].concat(elementAsArray)
+                      // 
+                      var chordEndIndex = chordStartLocations[key].length 
+                      if(chordEndIndex == 0){
+                        chordStartLocations[key].push( 0 )
+                        chordStartLocations[key].push( elementAsArray.length )
+                      } else { 
+                        chordStartLocations[key].push(  chordStartLocations[key][chordEndIndex-1] + elementAsArray.length)
+                      }
                     }
                   }
                 }
+                // push to chord/num list
+                chordList.push({'to':function(){return `"${meta.number}<br/>${meta.chord}"`}})
               });  
-              //
+              
               var pipFormatter = {};
               //var pipFormats = {'0':'abc', '1':'pqr', '2':'xyz'};
               var range = {};
@@ -424,14 +447,8 @@
                 pipFormatter[tag] = {};
                 range[tag] = {};   
                 if (Object.hasOwnProperty.call(lyric, tag)) {
-                  const element = lyric[tag];
-                  if(typeof(element)=='string'){
-                    console.log(element)
-                    //array
-                    var langArray = lyric[tag].split("");
-                    var langArrayParsed = diacriticChecker(langArray, 0);
-                    //lyric.arr[tag] = lyric[tag].split("");
-
+                  if(typeof(lyric[tag])){
+                    var langArray = lyric[tag]
                     let totalCharacters = langArray.length;
                     let increment = (Math.floor((100/totalCharacters)* 10) )/10
                     var i = 0;
@@ -450,30 +467,34 @@
                     };
                     pipFormatter[tag][i.toString()] = " ";
                     range[tag]['max'] = [i,1];
-                    makeSlider( tag, pipFormatter[tag], range[tag] )
+                    // we actual need to start at zero, so pop last element
+                    chordStartLocations[tag].pop()
+                    makeSlider( tag, pipFormatter[tag], range[tag], chordStartLocations[tag], chordList)
                   }
                 }
               };
             
-              function makeSlider(tag, pipFormats, lyricRange){ // TODO start
+              function makeSlider(tag, pipFormats, lyricRange, chordStartLocations, chordDataObject){ // TODO start
                 //  Make the slider
+                debugger
                 //var skipSlider = self.$(".skipSlider")[0]//document.getElementById('nonlinear');
                 var slider = self.$(`.slider-${tag}`)[0];
-
+                // start [a,b,c]
+                // tooltips: [ {to: function() {return "2<br/>A";} } ]
                 noUiSlider.create(slider, {
-                  start: [0,4],
-                  tooltips: [
-                    {
-                      to: function() {
-                        return "2<br/>A";
-                      }
-                    },
-                    {
-                      to: function() {
-                        return "3<br/>G";
-                      }
-                    }
-                  ],
+                  start: chordStartLocations,
+                  tooltips: chordDataObject,//[
+                  //   {
+                  //     to: function() {
+                  //       return "2<br/>A";
+                  //     }
+                  //   },
+                  //   {
+                  //     to: function() {
+                  //       return "3<br/>G";
+                  //     }
+                  //   }
+                  // ],
                   range: lyricRange,
                   pips: {
                     mode: 'range',
@@ -491,73 +512,18 @@
                   return array;
                 }
                 //if ([' ྱ', ' ེ', ' ོ', ].includes(array[nextIndex])){
-                //console.log(array[nextIndex]);
-                //if(array[nextIndex]){
-                  //console.log(  (array[nextIndex]).charCodeAt(0)  );
-                  if ([4017,  3962, 3964, 3954].includes( (array[nextIndex]).charCodeAt(0) )){
-                    array[index] = array[index].concat(array.splice(nextIndex, 1)[0]);
-                  } else {// only increase if no diacritic
-                    ++index;
-                  }
-                //}
+                if ([4017,  3962, 3964, 3954].includes( (array[nextIndex]).charCodeAt(0) )){
+                  array[index] = array[index].concat(array.splice(nextIndex, 1)[0]);
+                } else {// only increase if no diacritic
+                  ++index;
+                }
                 return diacriticChecker(array, index);
               }
-              ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-              // console.log (lyric)
-              // //  Make the slider
-              // console.log(line)
-              // debugger
-              // //var skipSlider = self.$(".skipSlider")[0]//document.getElementById('nonlinear');
-              // var slider = self.$(".slideren")[0];
-              // var pipFormats = {'0':'H', 
-              //                   '1':'e', 
-              //                   '2':'y',
-              //                   '3':' ',
-              //                   '4':'D',
-              //                   '5':'u',
-              //                   '6':'d',
-              //                   '7':'e'};
-
-              // noUiSlider.create(slider, {
-              //   start: [0,4],
-              //   tooltips: [
-              //     {
-              //       to: function() {
-              //         return "2<br/>A";
-              //       }
-              //     },
-              //     {
-              //       to: function() {
-              //         return "3<br/>G";
-              //       }
-              //     }
-              //   ],
-              //   range: {
-              //     min: [0,1],
-              //     "5%": [1,1],
-              //     "10%": [2,1],
-              //     "15%": [3,1],
-              //     "56.8%": [4,1],
-              //     "71%": [5,1],
-              //     "85%": [6,1],
-              //     max: [7]
-              //   },
-              //   pips: {
-              //     mode: 'range',
-              //     format: {
-              //       to: function(a) {
-              //         return pipFormats[a];
-              //       }
-              //     }
-              //   }
-              // });
-              // //
 
               languages.forEach(lang => {
-                console.log(lang.tag)
                 line.phrases.forEach(phrase => {
-                  console.log(phrase[lang.tag])
-                  lyricList.push({"tag":lang.tag,"lyric":line[lang.tag]})
+                  console.log(phrase[lang])
+                  lyricList.push({"tag":lang,"lyric":line[lang]})
                 });
               });
               console.log(result.lyrics.verses[verseId].lines[lineId])

@@ -30,6 +30,7 @@
     "localforage-getitems": "^1.4.2",
     "localforage-setitems": "^1.4.0",
     "node-fetch": "^2.6.1",
+    "nouislider": "^15.2.0",
     "template7": "^1.4.2",
     "timers-browserify": "^2.0.11"
   },

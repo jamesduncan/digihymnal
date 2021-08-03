@@ -5,10 +5,11 @@
                 <div class="navbar">
                     <div class="navbar-bg"></div>
                     <div class="navbar-inner">
-                        <div class="title">{{#if loading}}Choose a language{{else}}{{translate "Choose a language"}}{{/if}}</div>
+                        <div class="title">{{#if loading}}Settings{{else}}{{translate "Settings"}}{{/if}}</div>
                     </div>
                 </div>
                 <div class="page-content">
+                    <div class="block-title">{{#if loading}}Choose a language{{else}}{{translate "Choose a language"}}{{/if}}</div>
                     <div class="list">
                         <ul>
                             {{#each languages}}
@@ -23,67 +24,81 @@
                             {{/each}}
                         </ul>
                     </div>
+                    <div class="block-title">{{#if loading}}Advanced{{else}}{{translate "Advanced"}}{{/if}}</div>
+                    <div class="list simple-list">
+                        <ul>
+                            <li>
+                                <t class="text-color-gray">Edit Mode</t>
+                                <label class="toggle toggle-init">
+                                    <input name="editMode" type="checkbox">
+                                    <span class="toggle-icon"></span>
+                                </label>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </template>
 <script>
+    // Import locales
+    const locale = require('../js/locales.js');
 
-// Import locales
-const locale = require('../js/locales.js');
+    import Preference from "../data/preference";
+    const preference = new Preference();
 
-import Preference from "../data/preference";
-const preference = new Preference();
-
-function setDefaultLanguage(languageCode) {
-  var languages = [];
-  locale.customLocales.forEach((item) => {
-    if (item.tag == languageCode) {
-      item.default = true;
-    } else {
-      item.default = false;
+    function setDefaultLanguage(languageCode) {
+        var languages = [];
+        locale.customLocales.forEach((item) => {
+            if (item.tag == languageCode) {
+                item.default = true;
+            } else {
+                item.default = false;
+            }
+            languages.push(item)
+        });
+        return languages;
     }
-    languages.push(item)
-  });
-  return languages;
-}
 
-export default {
-  // Component Data
-  data: function () {
-    
-    // Must return an object
-    return {
-      languages: locale.customLocales
-    }
-  },
-  on: {
-    panelOpened: async function(event) {
-      var self = this;
+    export default {
+        // Component Data
+        data: function() {
 
-      preference.getLanguage().then((languageCode) => {
-        var languages = setDefaultLanguage(languageCode);
-        
-        self.$setState({
-          languages: languages
-        })
-      });
-    }
-  },
-  methods: {
-    changeLanguage: async function(event) {
-      var self = this;
-      var languageCode = this.$$(event.currentTarget).data("languagecode");
-      var languages = setDefaultLanguage(languageCode);
-      
-      self.$setState({
-        languages: languages
-      })
+            // Must return an object
+            return {
+                languages: locale.customLocales
+            }
+        },
+        on: {
+            panelOpened: async function(event) {
+                var self = this;
 
-      await preference.setLanguage(languageCode);
-      self.$router.back('/', {force: true, ignoreCache: true});
+                preference.getLanguage().then((languageCode) => {
+                    var languages = setDefaultLanguage(languageCode);
+
+                    self.$setState({
+                        languages: languages
+                    })
+                });
+            }
+        },
+        methods: {
+            changeLanguage: async function(event) {
+                var self = this;
+                var languageCode = this.$$(event.currentTarget).data("languagecode");
+                var languages = setDefaultLanguage(languageCode);
+
+                self.$setState({
+                    languages: languages
+                })
+
+                await preference.setLanguage(languageCode);
+                self.$router.back('/', {
+                    force: true,
+                    ignoreCache: true
+                });
+            }
+        }
     }
-  }
-}
 </script>

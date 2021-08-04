@@ -43,16 +43,16 @@ Template7.registerHelper('getKeyInParent', function(parent, keyArr) {
 Template7.registerHelper('printLyric', function(line) {
     var results = ''
     for (const key in line.phrases[0]) {
-      if (key != "chord" && key != "number" ) { // do no recreate if already exist
-        let exists = (this.$$(`#slider-${key}`))
-        if ( !exists.length ) { // do no recreate if already exist
-          results = results.concat(`<div id="sliderContainer${key}" style="padding: 50px"><div id="slider-${key}" class="slider-${key}"></div></div>`)
-        } else {
-          exists.noUiSlider.destroy()
-          results = results.concat(`<div id="sliderContainer${key}" style="padding: 50px"><div id="slider-${key}" class="slider-${key}"></div></div>`)
-          //results = results.concat(exists[0].outerHTML)
+        if (key != "chord" && key != "number") { // do no recreate if already exist
+            let exists = (this.$$(`#slider-${key}`))
+            if (!exists.length) { // do no recreate if already exist
+                results = results.concat(`<div id="sliderContainer${key}" style="padding: 50px"><div id="slider-${key}" class="slider-${key}"></div></div>`)
+            } else {
+                // exists.noUiSlider.destroy()
+                results = results.concat(`<div id="sliderContainer${key}" style="padding: 50px"><div id="slider-${key}" class="slider-${key}"></div></div>`)
+                //results = results.concat(exists[0].outerHTML)
+            }
         }
-      }
     }
     debugger
     console.log(results)

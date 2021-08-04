@@ -434,66 +434,52 @@
                     console.error('<t>Please correct your entries.</t>');
                 } else {
 
-
                     songCollection.get(songId).then(result => {
-                        // 
                         let newData = result
-                        // newData.lyrics.verses[verseId].lines[lineId].phrases[0][languageCode] = "THIS HAS BEEN SET BY CLICKING THE BUTTON"
                         newData.lyrics.verses[verseId].lines[lineId].phrases
 
                         // get data from the dom
-                        var listOfLines = Array.from(this.$('#edit-line')[0].children)
-                        // iterate horizontally
-                        // each chord, number, and language
-                        listOfLines.forEach(lineElement => {
+                        var newLanguageLineData = {}
+                        
+                        languages.forEach(langTag => {
+                            newLanguageLineData[langTag] = self.parseLanguageText(langTag);
+                        });
+
+                        // metadata getter
+                        var listOfLines = Array.from(this.$('#edit-line')[0].children)// iterate horizontally
+                        listOfLines.forEach(lineElement => {// each chord, number, and language
                             var tag = ""
-                            // find out what the tag is
-                            if (lineElement.classList.value.includes("metadata")) {
-                                // is chords/nums, both chords and nums are in same place in dom.
-                                // chords = _this.$('#edit-line')[0].children[0].children[X].children[0].children[0].children[0].value
-                                // number = _this.$('#edit-line')[0].children[0].children[X].children[1].children[0].children[0].value
+                            if (lineElement.classList.value.includes("metadata")) { // is chords/nums, both chords and nums are in same place in dom.
                                 tag = 'metadata'
-                            } else {
-                                // at, kt etc...
-                                //  TODO   SKIP IT FOR NOW
-                                //tag = lineElement.classList.value
-                            }
-                            // now, we have "chords": ['a','b','c']
+                            } // now, we have "chords": ['a','b','c']
                             let elementChildrenArray = Array.from(lineElement.children)
-
-                            // elementChildrenArray.forEach(phraseElement=> { 
-                            //   // this gives us '1'
-                            //   console.log(phraseElement.children[1].children[0].children[0].value)
-                            // });
-
-                            // look into phrase at similar index
                             var i = 0
                             while (i < elementChildrenArray.length) {
                                 if (tag === "metadata") {
-                                    // ----------------------------------------- Special phrase-metaData setter ------------------------------------------------------------- //
-                                    // split it....
                                     // setting chord
-                                    console.log(elementChildrenArray[i].children[0].children[0].children[0].value)
                                     newData.lyrics.verses[verseId].lines[lineId].phrases[i]['chord'] = elementChildrenArray[i].children[0].children[0].children[0].value
                                     // setting number
-                                    console.log(elementChildrenArray[i].children[1].children[0].children[0].value)
                                     newData.lyrics.verses[verseId].lines[lineId].phrases[i]['number'] = elementChildrenArray[i].children[1].children[0].children[0].value
-                                    // -------------------------------------------------------------------------------------------------------------------------------------- //
-                                } else {
-                                    // console.log(elementChildrenArray[i].children[1].children[0].children[0].value) // needs to skip the first element
-                                    // // update song to match
-                                    // newData.lyrics.verses[verseId].lines[lineId].phrases[i][tag] = elementChildrenArray[i].children[1].children[0].children[0].value//.trim()
-                                }
+                                    for (const langTag in newLanguageLineData) {
+                                        if (Object.hasOwnProperty.call(newLanguageLineData, langTag)) {
+                                            const element = newLanguageLineData[langTag][i];
+                                            newData.lyrics.verses[verseId].lines[lineId].phrases[i][langTag] = element;
+                                        }
+                                    }
+                                } 
                                 i++;
                             }
                         });
+
                         // save
-                        line = newData.lyrics.verses[verseId].lines[lineId]
+                        line = newData.lyrics.verses[verseId].lines[lineId];
+                        song = newData;
                         songCollection.db.setItem(songId, newData);
                         self.clearSliders();
                         self.$setState({
                             loading: false,
                             song: newData,
+                            line: newData.lyrics.verses[verseId].lines[lineId]
                         }, () => {
                             self.displayLyricSliders();
                         });
@@ -502,6 +488,67 @@
                             .then(responseText => alert(JSON.stringify(responseText)));
                     });
                 }
+            },
+            parseLanguageText: function(tag, languageLine, chordArray){
+                // I need the full string "Twinkle, twinkle, little star"
+                // I need placment of phrase breaks ["0.00", "10.00", "15.00"]
+                if(!chordArray){
+                    try {
+                        chordArray = this.$$(`#slider-${tag}`)[0].noUiSlider.get()
+                    } catch (error) {
+                        console.error(error)
+                    }
+                    if (!chordArray) {
+                        console.error({"no div for tag":tag})
+                    }
+                }
+                if(!languageLine){
+                    try {
+                        languageLine = ''
+                        line.phrases.forEach(phrase => {
+                            if (Object.hasOwnProperty.call(phrase, tag)) {
+                                languageLine = languageLine.concat(phrase[tag]);   
+                            }
+                        });
+                    } catch (error) {
+                        console.error(error)
+                    }
+                    if (!languageLine) {
+                        console.error({"no line data for tag":tag});
+                    }
+                }
+                var phraseArray = [] ;// ["Twin","kle, twinkle,", " little star"]
+                
+                if (typeof chordArray === 'string'){// there's only the one chord
+                    phraseArray.push(languageLine)
+                } else {
+                    if( typeof languageLine == 'string'){
+                        languageLine = languageLine.split("");
+                    }
+                    var parsedLineArr =  self.diacriticChecker(languageLine, 0);
+                    var lastDivider = 0;
+                    var notFirstChord = false;
+
+
+                    chordArray.forEach(chord => {
+                        if(notFirstChord){
+                            if ( lastDivider === divider){ // chords are tightly packed, insert empty string
+                                phraseArray.push( '' );
+                            }
+                            let divider = (parseInt(chord) - parseInt(lastDivider))
+                            lastDivider = divider
+                            let toInsert = (parsedLineArr.splice(0,divider)).join(""); // splice(start, deleteCount)
+                            phraseArray.push( toInsert );
+                        } else{
+                            //skipped
+                            notFirstChord = true;
+                        }
+                    });
+                    // push remaining text...
+                    phraseArray.push( parsedLineArr.join("") )
+                    console.log({tag: phraseArray})
+                }
+                return phraseArray;
             },
             nextLine: function(e) {
                 // only get index forward if it exists in song
@@ -580,9 +627,9 @@
                         console.error("You tried to delete the last line of the last verse!!!")
                     }
 
-                    songCollection.db.setItem(songId, newData)
                     song = newData;
                     line = song.lyrics.verses[verseId].lines[lineId]
+                    songCollection.db.setItem(songId, newData)
                     self.clearSliders()
                     self.$setState({
                         line: newData.lyrics.verses[verseId].lines[lineId],
@@ -631,7 +678,9 @@
                     }
 
                     newData.lyrics.verses.push(newVerse);
-                    console.log(newData)
+                    console.log(newData);
+                    song = newData;
+                    line = song.lyrics.verses[verseId].lines[lineId];
                     songCollection.db.setItem(songId, newData);
 
                     // send ovreall song changes to server
@@ -709,13 +758,13 @@
                     var workingIndex = phraseArray.length - 1;
                     phraseArray.push({
                         ...phraseArray[workingIndex]
-                    }); // extend by copying the last
+                    }); // extend by copying the last -will only keep object structure
                     workingIndex = phraseArray.length - 1;
 
                     for (const tag in phraseArray[workingIndex]) {
                         if (Object.hasOwnProperty.call(phraseArray[workingIndex], tag)) {
                             // set all data inside empty
-                            phraseArray[workingIndex][tag] = "*"
+                            phraseArray[workingIndex][tag] = ""
                         }
                     }
 
@@ -739,25 +788,41 @@
                 });
             },
             deletePhrase: function(e) {
+                if( line.phrases.length <= 1 ){
+                    return;
+                }
                 console.log(songId, verseId, lineId);
                 songCollection.get(songId).then(result => {
                     let newData = result
 
                     var workingIndex = (newData.lyrics.verses[verseId].lines[lineId].phrases).length - 1;
-                    let deletedPhrase = newData.lyrics.verses[verseId].lines[lineId].phrases.splice(workingIndex, 1)
+                    let deletedPhrase = newData.lyrics.verses[verseId].lines[lineId].phrases.splice(workingIndex--, 1)[0]
+                    // merge the lyrics
+                    for (const tag in deletedPhrase) {
+                        if (Object.hasOwnProperty.call(deletedPhrase, tag)) {
+                            if (tag != 'chord' && tag != 'number'){
+                                const element = deletedPhrase[tag];
+                                newData.lyrics.verses[verseId].lines[lineId].phrases[workingIndex][tag] += element;
+                            }
+                        }
+                    }
+
+
                     console.log({
                         "removing": deletedPhrase
                     })
-                    songCollection.db.setItem(songId, newData)
-                    self.clearSliders()
-                    self.$setState({
-                        loading: false,
-                        song: newData,
-                        line: newData.lyrics.verses[verseId].lines[lineId]
-                    }, () => {
-                        console.log(newData.lyrics.verses[verseId].lines[lineId]);
-                        self.displayLyricSliders()
-                        // TODO reload previous song page
+                    line = newData.lyrics.verses[verseId].lines[lineId]
+                    songCollection.db.setItem(songId, newData).then(() =>{
+                        self.clearSliders()
+                        self.$setState({
+                            loading: false,
+                            song: newData,
+                            line: newData.lyrics.verses[verseId].lines[lineId]
+                        }, () => {
+                            console.log(newData.lyrics.verses[verseId].lines[lineId]);
+                            self.displayLyricSliders()
+                            // TODO reload previous song page
+                        });
                     });
                 });
             },
@@ -839,7 +904,7 @@
                                 let nextPlace = (increment * (++i))
                                 range[tag][`${nextPlace}%`] = [i, 1];
                             };
-                            pipFormatter[tag][i.toString()] = " ";
+                            pipFormatter[tag][i.toString()] = "";
                             range[tag]['max'] = [i, 1];
                             // we actual need to start at zero, so pop last element
                             chordStartLocations[tag].pop()
@@ -851,6 +916,9 @@
 
             makeSlider: function(tag, pipFormats, lyricRange, chordStartLocations, chordDataObject) {
                 //  Make the slider
+                if(chordDataObject.length > chordStartLocations.length){
+                    chordStartLocations.push(lyricRange.max[0])
+                }
                 var slider = self.$(`.slider-${tag}`)[0];  
                 noUiSlider.create(slider, {
                     start: chordStartLocations,
@@ -865,6 +933,9 @@
                         }
                     }
                 });
+                // Disable first handle
+                var origins = slider.getElementsByClassName('noUi-origin');
+                origins[0].setAttribute('disabled', true);
             },
             diacriticChecker: function(array, index) {
                 var nextIndex = index + 1

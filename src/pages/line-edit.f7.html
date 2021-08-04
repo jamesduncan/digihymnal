@@ -424,46 +424,6 @@
                 this.$(".song")[0].style.transform = "scale(" + initScale + ")";
                 this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
             },
-            toggleChords: function(e) {
-                if (this.$(".menuChords .fa-check-square")[0].style.display == "") {
-                    this.$setState({
-                        showChord: false
-                    });
-                    this.$(".menuChords .fa-square")[0].style.display = "";
-                    this.$(".menuChords .fa-check-square")[0].style.display = "none";
-                    this.$(".phrase").addClass("noChords");
-                    this.$(".stepper")[0].style.display = "none";
-                    this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
-                } else {
-                    this.$setState({
-                        showChord: true
-                    });
-                    this.$(".menuChords .fa-check-square")[0].style.display = "";
-                    this.$(".menuChords .fa-square")[0].style.display = "none";
-                    this.$(".phrase").removeClass("noChords");
-                    this.$(".stepper")[0].style.display = "";
-                    this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
-                }
-            },
-            toggleNumbers: function(e) {
-                if (this.$(".menuNumbers .fa-check-circle")[0].style.display == "") {
-                    this.$setState({
-                        showNumber: false
-                    });
-                    this.$(".menuNumbers .fa-circle")[0].style.display = "";
-                    this.$(".menuNumbers .fa-check-circle")[0].style.display = "none";
-                    this.$(".phrase").addClass("noNumbers");
-                    this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
-                } else {
-                    this.$setState({
-                        showNumber: true
-                    });
-                    this.$(".menuNumbers .fa-check-circle")[0].style.display = "";
-                    this.$(".menuNumbers .fa-circle")[0].style.display = "none";
-                    this.$(".phrase").removeClass("noNumbers");
-                    this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
-                }
-            },
             save: function(e) {
                 console.log(songId, verseId, lineId)
                 var $form = this.$('#edit-line')

@@ -777,25 +777,23 @@
         });
       },
       displayLyricSliders: function(e){
+        // 
         var lyric = {}
-        // start [a,b,c]
         var chordStartLocations = {}    //  {'en':[1,5,12]}
+        var chordList = []              // tooltips: [ {to: function() {return "2<br/>A";} } ]
+        
+        // init each language
         languages.forEach(languageCode => {
           chordStartLocations[languageCode] = [];
           lyric[languageCode] = [];
-          // check if already initialized
-          if(self.$(`.slider-${languageCode}`)[0]){
-            var slider = self.$(`.slider-${languageCode}`)[0];//this.$$(`#slider-${languageCode}`).empty()
-            if (slider.noUiSlider) {
-              debugger
-              self.$(`.slider-${languageCode}`)[0].noUiSlider.destroy();
-              this.$$(`#slider-${languageCode}`).empty()
+          // check if slider initialized, init if not
+          var slider = self.$(`.slider-${languageCode}`)[0];
+          if(slider){
+            if (!slider.noUiSlider) {
+              noUiSlider.create(slider, { start: [0], range:  {'min': 0, 'max': 2 }, });
             }
           }
         });
-        
-        // tooltips: [ {to: function() {return "2<br/>A";} } ]
-        var chordList = []
 
         line.phrases.forEach(phrase => {
           let meta = {}; // chord and number
@@ -807,7 +805,7 @@
               }else if( key == 'number'){
                 meta.number = element
               } else   { // language
-                let elementAsArray = diacriticChecker( element.split(""), 0 ) // lets work with the 'true' length array
+                let elementAsArray = self.diacriticChecker( element.split(""), 0 ) // lets work with the 'true' length array
                 lyric[key] = lyric[key].concat(elementAsArray)
                 // 
                 var chordEndIndex = chordStartLocations[key].length 
@@ -824,10 +822,8 @@
           chordList.push({'to':function(){return `${meta.number}<br/>${meta.chord}`}})
         });  
         
-        var pipFormatter = {};
-        //var pipFormats = {'0':'abc', '1':'pqr', '2':'xyz'};
-        var range = {};
-        // {min/max/percentage: [increment, 1]}
+        var pipFormatter = {}; //var pipFormats = {'0':'abc', '1':'pqr', '2':'xyz'};
+        var range = {};        // {min/max/percentage: [increment, 1]}
 
         for (const tag in lyric) {
           pipFormatter[tag] = {};
@@ -855,42 +851,90 @@
               range[tag]['max'] = [i,1];
               // we actual need to start at zero, so pop last element
               chordStartLocations[tag].pop()
-              makeSlider( tag, pipFormatter[tag], range[tag], chordStartLocations[tag], chordList)
+              self.makeSlider( tag, pipFormatter[tag], range[tag], chordStartLocations[tag], chordList)
             }
           }
         };
       
-        function makeSlider(tag, pipFormats, lyricRange, chordStartLocations, chordDataObject){ // TODO start
-          //  Make the slider
-          var slider = self.$(`.slider-${tag}`)[0];
-          noUiSlider.create(slider, {
-            start: chordStartLocations,
-            tooltips: chordDataObject,
-            range: lyricRange,
-            pips: {
-              mode: 'range',
-              format: {
-                to: function(a) {
-                  return pipFormats[a];
-                }
-              }
+        // function makeSlider(tag, pipFormats, lyricRange, chordStartLocations, chordDataObject){ // TODO start
+        //   //  Make the slider
+        //   var slider = self.$(`.slider-${tag}`)[0];
+        //   noUiSlider.create(slider, {
+        //     start: chordStartLocations,
+        //     tooltips: chordDataObject,
+        //     range: lyricRange,
+        //     pips: {
+        //       mode: 'range',
+        //       format: {
+        //         to: function(a) {
+        //           return pipFormats[a];
+        //         }
+        //       }
+        //     }
+        //   });
+        // }
+        // function diacriticChecker(array, index){  
+        //   var nextIndex = index+1
+        //   if (nextIndex >= array.length) {
+        //     return array;
+        //   }
+        //   //if ([' ྱ', ' ེ', ' ོ', ].includes(array[nextIndex])){
+        //   if ([4017,  3962, 3964, 3954].includes( (array[nextIndex]).charCodeAt(0) )){
+        //     array[index] = array[index].concat(array.splice(nextIndex, 1)[0]);
+        //   } else {// only increase if no diacritic
+        //     ++index;
+        //   }
+        //   return diacriticChecker(array, index);
+        // }
+    },
+    
+    makeSlider: function(tag, pipFormats, lyricRange, chordStartLocations, chordDataObject){
+      //  Make the slider
+      var slider = self.$(`.slider-${tag}`)[0];
+      // slider.noUiSlider.updateOptions(
+      //   { start: chordStartLocations,// newOptions:
+      //     tooltips: chordDataObject,
+      //     range: lyricRange,
+      //     pips: {
+      //       mode: 'range',
+      //       format: {
+      //         to: function(a) {
+      //           return pipFormats[a];
+      //         }
+      //       }
+      //     }
+      //   },
+	    //   true // Boolean 'fireSetEvent', 
+      // );      
+      slider.noUiSlider.destroy()
+      debugger;
+      noUiSlider.create(slider, {
+        start: chordStartLocations,
+        tooltips: chordDataObject,
+        range: lyricRange,
+        pips: {
+          mode: 'range',
+          format: {
+            to: function(a) {
+              return pipFormats[a];
             }
-          });
-        }
-        function diacriticChecker(array, index){  
-          var nextIndex = index+1
-          if (nextIndex >= array.length) {
-            return array;
           }
-          //if ([' ྱ', ' ེ', ' ོ', ].includes(array[nextIndex])){
-          if ([4017,  3962, 3964, 3954].includes( (array[nextIndex]).charCodeAt(0) )){
-            array[index] = array[index].concat(array.splice(nextIndex, 1)[0]);
-          } else {// only increase if no diacritic
-            ++index;
-          }
-          return diacriticChecker(array, index);
         }
+      });
+    },
+    diacriticChecker: function(array, index){
+      var nextIndex = index+1
+      if (nextIndex >= array.length) {
+        return array;
       }
+      //if ([' ྱ', ' ེ', ' ོ', ].includes(array[nextIndex])){
+      if ([4017,  3962, 3964, 3954].includes( (array[nextIndex]).charCodeAt(0) )){
+        array[index] = array[index].concat(array.splice(nextIndex, 1)[0]);
+      } else {// only increase if no diacritic
+        ++index;
+      }
+      return self.diacriticChecker(array, index);
     }
+  }
   }
 </script>

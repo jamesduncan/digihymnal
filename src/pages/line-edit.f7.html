@@ -949,6 +949,25 @@
                     ++index;
                 }
                 return self.diacriticChecker(array, index);
+            },
+            linePanel: function(tag) {
+                // app.panel.create(parameters)
+                // closeByBackdropClick
+                // el	:HTMLElementstring
+
+                // app.panel.open(panel, animate)
+                // Other option. pass app.js the line data to pre-generate this generated popup when a button it programatically generates is pressed. 
+                // onclick, it calls one of these suckers to update. 
+                // That's also the way to change lango on song edit
+                // this is cleaner, so hopefully it works???
+                var el = "<div>....."
+                line.forEach(phrase => {
+                    if (Object.hasOwnProperty.call(phrase, el)) { //whoop whoop
+                        el += phrase[el];
+                    }
+                });
+                el = "</div><save button @saveLine(mylocalelement)>"
+                app.panel.create(el)
             }
         }
     }

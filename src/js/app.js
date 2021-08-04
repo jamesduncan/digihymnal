@@ -44,7 +44,7 @@ Template7.registerHelper('printLyric', function(line) {
     var results = ''
     for (const key in line.phrases[0]) {
       if (key != "chord" && key != "number") { 
-        results = results.concat(`<div id="sliderContainer${key}" style="padding: 50px"><div id="slider-${key}" class="slider-${key}"></div></div>`)
+        results = results.concat(`<div id="sliderContainer${key}" style="padding: 50px"><div type:"button" @click="linePanel(${key})"></div><div id="slider-${key}" class="slider-${key}"></div></div>`)
       }
     }
     return results;

@@ -528,12 +528,14 @@
                             }
                         });
                         // save
-                        songCollection.db.setItem(songId, newData)
+                        line = newData.lyrics.verses[verseId].lines[lineId]
+                        songCollection.db.setItem(songId, newData);
+                        self.clearSliders();
                         self.$setState({
                             loading: false,
                             song: newData,
                         }, () => {
-                            self.displayLyricSliders()
+                            self.displayLyricSliders();
                         });
                         // send line changes to server
                         dataManager.putLine(songId, verseId, lineId, newData.lyrics.verses[verseId].lines[lineId])
@@ -543,7 +545,6 @@
             },
             nextLine: function(e) {
                 // only get index forward if it exists in song
-                //debugger
                 console.log(lastVerse)
                 if (lastLine && !lastVerse) { // if at end of NOTlastVerse, check next verse
                     lastVerse = ((verseId + 1) >= (song.lyrics.verses.length - 1)); // is next verse last verse?
@@ -557,6 +558,8 @@
                     ++lineId;
                 }
                 // update variable
+                line = song.lyrics.verses[verseId].lines[lineId]
+                self.clearSliders()
                 self.$setState({
                     loading: false,
                     firstLine: (lineId == 0 && verseId == 0),
@@ -565,6 +568,7 @@
                     verseLabel: verseLabel,
                     line: song.lyrics.verses[verseId].lines[lineId]
                 }, () => {
+                    self.clearSliders()
                     self.displayLyricSliders()
                     console.log(song.lyrics.verses[verseId].lines[lineId])
                 });
@@ -579,7 +583,8 @@
                 } else {
                     --lineId
                 }
-
+                line = song.lyrics.verses[verseId].lines[lineId]
+                self.clearSliders()
                 self.$setState({
                     loading: false,
                     firstLine: (lineId == 0 && verseId == 0),
@@ -601,7 +606,6 @@
                     let deletedLine = newData.lyrics.verses[verseId].lines.splice(lineId, 1)
 
                     // default to changing nothing, wil auto set to the right line
-                    // debugger
                     if ((verseId != 0) && lineId == 0 && (0 == newData.lyrics.verses[verseId].lines.length)) {
                         // if last remaining line of not last verse
                         let deletedVerse = newData.lyrics.verses.splice(verseId, 1)
@@ -618,7 +622,8 @@
 
                     songCollection.db.setItem(songId, newData)
                     song = newData;
-
+                    line = song.lyrics.verses[verseId].lines[lineId]
+                    self.clearSliders()
                     self.$setState({
                         line: newData.lyrics.verses[verseId].lines[lineId],
                         firstLine: (lineId == 0 && verseId == 0),
@@ -673,6 +678,9 @@
                     dataManager.putSong(songId, newData)
                         .then(responseText => alert(JSON.stringify(responseText)));
                     lastLine = true;
+                    song = newData;
+                    line = newData.lyrics.verses[verseId].lines[lineId];
+                    self.clearSliders();
                     self.$setState({
                         loading: false,
                         song: newData,
@@ -717,6 +725,9 @@
                     dataManager.putVerse(songId, verseId, newData.lyrics.verses[verseId])
                         .then(responseText => alert(JSON.stringify(responseText)));
                     // lastLine = (lineId===(newData.lyrics.verses[verseId].lines.length-1))
+                    song = newData;
+                    line = song.lyrics.verses[verseId].lines[lineId];
+                    self.clearSliders();
                     self.$setState({
                         loading: false,
                         song: newData,
@@ -752,8 +763,9 @@
 
                     newData.lyrics.verses[verseId].lines[lineId].phrases = phraseArray
                     songCollection.db.setItem(songId, newData)
-
-
+                    song = newData;
+                    line = song.lyrics.verses[verseId].lines[lineId];
+                    self.clearSliders()
                     self.$setState({
                         loading: false,
                         song: newData,
@@ -777,7 +789,7 @@
                         "removing": deletedPhrase
                     })
                     songCollection.db.setItem(songId, newData)
-
+                    self.clearSliders()
                     self.$setState({
                         loading: false,
                         song: newData,
@@ -789,29 +801,26 @@
                     });
                 });
             },
+            clearSliders: function() {
+                languages.forEach(languageCode => {
+                    var slider = self.$(`.slider-${languageCode}`)[0];
+                    if (slider) {
+                        if (slider.noUiSlider) {
+                            slider.noUiSlider.destroy();
+                        }
+                    }
+                });
+            },
             displayLyricSliders: function(e) {
                 // 
-                var lyric = {}
-                var chordStartLocations = {} //  {'en':[1,5,12]}
-                var chordList = [] // tooltips: [ {to: function() {return "2<br/>A";} } ]
+                var lyric = {};
+                var chordStartLocations = {}; //  {'en':[1,5,12]}
+                var chordList = [];           // tooltips: [ {to: function() {return "2<br/>A";} } ]
 
                 // init each language
                 languages.forEach(languageCode => {
                     chordStartLocations[languageCode] = [];
                     lyric[languageCode] = [];
-                    // check if slider initialized, init if not
-                    var slider = self.$(`.slider-${languageCode}`)[0];
-                    if (slider) {
-                        if (!slider.noUiSlider) {
-                            noUiSlider.create(slider, {
-                                start: [0],
-                                range: {
-                                    'min': 0,
-                                    'max': 2
-                                },
-                            });
-                        }
-                    }
                 });
 
                 line.phrases.forEach(phrase => {
@@ -878,59 +887,11 @@
                         }
                     }
                 };
-
-                // function makeSlider(tag, pipFormats, lyricRange, chordStartLocations, chordDataObject){ // TODO start
-                //   //  Make the slider
-                //   var slider = self.$(`.slider-${tag}`)[0];
-                //   noUiSlider.create(slider, {
-                //     start: chordStartLocations,
-                //     tooltips: chordDataObject,
-                //     range: lyricRange,
-                //     pips: {
-                //       mode: 'range',
-                //       format: {
-                //         to: function(a) {
-                //           return pipFormats[a];
-                //         }
-                //       }
-                //     }
-                //   });
-                // }
-                // function diacriticChecker(array, index){  
-                //   var nextIndex = index+1
-                //   if (nextIndex >= array.length) {
-                //     return array;
-                //   }
-                //   //if ([' ྱ', ' ེ', ' ོ', ].includes(array[nextIndex])){
-                //   if ([4017,  3962, 3964, 3954].includes( (array[nextIndex]).charCodeAt(0) )){
-                //     array[index] = array[index].concat(array.splice(nextIndex, 1)[0]);
-                //   } else {// only increase if no diacritic
-                //     ++index;
-                //   }
-                //   return diacriticChecker(array, index);
-                // }
             },
 
             makeSlider: function(tag, pipFormats, lyricRange, chordStartLocations, chordDataObject) {
                 //  Make the slider
-                var slider = self.$(`.slider-${tag}`)[0];
-                // slider.noUiSlider.updateOptions(
-                //   { start: chordStartLocations,// newOptions:
-                //     tooltips: chordDataObject,
-                //     range: lyricRange,
-                //     pips: {
-                //       mode: 'range',
-                //       format: {
-                //         to: function(a) {
-                //           return pipFormats[a];
-                //         }
-                //       }
-                //     }
-                //   },
-                //   true // Boolean 'fireSetEvent', 
-                // );      
-                slider.noUiSlider.destroy()
-                debugger;
+                var slider = self.$(`.slider-${tag}`)[0];  
                 noUiSlider.create(slider, {
                     start: chordStartLocations,
                     tooltips: chordDataObject,

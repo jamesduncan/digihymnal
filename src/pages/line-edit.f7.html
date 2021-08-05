@@ -433,60 +433,57 @@
                     self.$app.dialog.alert('Please correct your entries.');
                     console.error('<t>Please correct your entries.</t>');
                 } else {
+                    let newData = song;
 
-                    songCollection.get(songId).then(result => {
-                        let newData = result
-                        newData.lyrics.verses[verseId].lines[lineId].phrases
-
-                        // get data from the dom
-                        var newLanguageLineData = {}
-                        
-                        languages.forEach(langTag => {
-                            newLanguageLineData[langTag] = self.parseLanguageText(langTag);
-                        });
-
-                        // metadata getter
-                        var listOfLines = Array.from(this.$('#edit-line')[0].children)// iterate horizontally
-                        listOfLines.forEach(lineElement => {// each chord, number, and language
-                            var tag = ""
-                            if (lineElement.classList.value.includes("metadata")) { // is chords/nums, both chords and nums are in same place in dom.
-                                tag = 'metadata'
-                            } // now, we have "chords": ['a','b','c']
-                            let elementChildrenArray = Array.from(lineElement.children)
-                            var i = 0
-                            while (i < elementChildrenArray.length) {
-                                if (tag === "metadata") {
-                                    // setting chord
-                                    newData.lyrics.verses[verseId].lines[lineId].phrases[i]['chord'] = elementChildrenArray[i].children[0].children[0].children[0].value
-                                    // setting number
-                                    newData.lyrics.verses[verseId].lines[lineId].phrases[i]['number'] = elementChildrenArray[i].children[1].children[0].children[0].value
-                                    for (const langTag in newLanguageLineData) {
-                                        if (Object.hasOwnProperty.call(newLanguageLineData, langTag)) {
-                                            const element = newLanguageLineData[langTag][i];
-                                            newData.lyrics.verses[verseId].lines[lineId].phrases[i][langTag] = element;
-                                        }
-                                    }
-                                } 
-                                i++;
-                            }
-                        });
-
-                        // save
-                        line = newData.lyrics.verses[verseId].lines[lineId];
-                        song = newData;
-                        songCollection.db.setItem(songId, newData);
-                        self.clearSliders();
-                        self.$setState({
-                            loading: false,
-                            song: newData,
-                            line: newData.lyrics.verses[verseId].lines[lineId]
-                        }, () => {
-                            self.displayLyricSliders();
-                        });
-                        // send line changes to server
-                        dataManager.putLine(songId, verseId, lineId, newData.lyrics.verses[verseId].lines[lineId])
-                            .then(responseText => alert(JSON.stringify(responseText)));
+                    // get data from the dom
+                    var newLanguageLineData = {}
+                    
+                    languages.forEach(langTag => {
+                        newLanguageLineData[langTag] = self.parseLanguageText(langTag);
                     });
+
+                    // metadata getter
+                    var listOfLines = Array.from(this.$('#edit-line')[0].children)// iterate horizontally
+                    listOfLines.forEach(lineElement => {// each chord, number, and language
+                        var tag = ""
+                        if (lineElement.classList.value.includes("metadata")) { // is chords/nums, both chords and nums are in same place in dom.
+                            tag = 'metadata'
+                        } // now, we have "chords": ['a','b','c']
+                        let elementChildrenArray = Array.from(lineElement.children)
+                        var i = 0
+                        while (i < elementChildrenArray.length) {
+                            if (tag === "metadata") {
+                                // setting chord
+                                newData.lyrics.verses[verseId].lines[lineId].phrases[i]['chord'] = elementChildrenArray[i].children[0].children[0].children[0].value
+                                // setting number
+                                newData.lyrics.verses[verseId].lines[lineId].phrases[i]['number'] = elementChildrenArray[i].children[1].children[0].children[0].value
+                                for (const langTag in newLanguageLineData) {
+                                    if (Object.hasOwnProperty.call(newLanguageLineData, langTag)) {
+                                        const element = newLanguageLineData[langTag][i];
+                                        newData.lyrics.verses[verseId].lines[lineId].phrases[i][langTag] = element;
+                                    }
+                                }
+                            } 
+                            i++;
+                        }
+                    });
+
+                    // save
+                    line = newData.lyrics.verses[verseId].lines[lineId];
+                    song = newData;
+                    songCollection.db.setItem(songId, newData);
+                    self.clearSliders();
+                    self.$setState({
+                        loading: false,
+                        song: newData,
+                        line: newData.lyrics.verses[verseId].lines[lineId]
+                    }, () => {
+                        self.displayLyricSliders();
+                    });
+                    // send line changes to server
+                    dataManager.putLine(songId, verseId, lineId, newData.lyrics.verses[verseId].lines[lineId])
+                        .then(responseText => alert(JSON.stringify(responseText)));
+                
                 }
             },
             parseLanguageText: function(tag, languageLine, chordArray){
@@ -607,222 +604,209 @@
             deleteLine: function(e) {
                 console.log(songId, verseId, lineId);
                 // TODO pre-delete confirmation prompt
-                songCollection.get(songId).then(result => {
-                    let newData = result
-                    // At index, remove one element
-                    let deletedLine = newData.lyrics.verses[verseId].lines.splice(lineId, 1)
+                let newData = song
+                // At index, remove one element
+                let deletedLine = newData.lyrics.verses[verseId].lines.splice(lineId, 1)
 
-                    // default to changing nothing, wil auto set to the right line
-                    if ((verseId != 0) && lineId == 0 && (0 == newData.lyrics.verses[verseId].lines.length)) {
-                        // if last remaining line of not last verse
-                        let deletedVerse = newData.lyrics.verses.splice(verseId, 1)
-                        if (lastVerse) {
-                            --verseId;
-                        }
-                        lineId = newData.lyrics.verses[verseId].lines.length - 1;
-                    } else if (lastLine) {
-                        // set lineId to an existing line
-                        --lineId;
-                    } else {
-                        console.error("You tried to delete the last line of the last verse!!!")
+                // default to changing nothing, wil auto set to the right line
+                if ((verseId != 0) && lineId == 0 && (0 == newData.lyrics.verses[verseId].lines.length)) {
+                    // if last remaining line of not last verse
+                    let deletedVerse = newData.lyrics.verses.splice(verseId, 1)
+                    if (lastVerse) {
+                        --verseId;
                     }
+                    lineId = newData.lyrics.verses[verseId].lines.length - 1;
+                } else if (lastLine) {
+                    // set lineId to an existing line
+                    --lineId;
+                } else {
+                    console.error("You tried to delete the last line of the last verse!!!")
+                }
 
-                    song = newData;
-                    line = song.lyrics.verses[verseId].lines[lineId]
-                    songCollection.db.setItem(songId, newData)
-                    self.clearSliders()
-                    self.$setState({
-                        line: newData.lyrics.verses[verseId].lines[lineId],
-                        firstLine: (lineId == 0 && verseId == 0),
-                        lastLine: (lineId >= (song.lyrics.verses[verseId].lines.length - 1)),
-                        song: newData,
-                        loading: false,
-                    }, () => {
-                        self.displayLyricSliders()
-                        // TODO reload previous song page
-                    });
+                song = newData;
+                line = song.lyrics.verses[verseId].lines[lineId]
+                songCollection.db.setItem(songId, newData)
+                self.clearSliders()
+                self.$setState({
+                    line: newData.lyrics.verses[verseId].lines[lineId],
+                    firstLine: (lineId == 0 && verseId == 0),
+                    lastLine: (lineId >= (song.lyrics.verses[verseId].lines.length - 1)),
+                    song: newData,
+                    loading: false,
+                }, () => {
+                    self.displayLyricSliders()
+                    // TODO reload previous song page
                 });
             },
             addVerse: function(e) {
                 console.log(songId, verseId, lineId);
-                songCollection.get(songId).then(result => {
-                    let newData = result;
-                    var phraseTemplate = Object.assign({}, newData.lyrics.verses[verseId].lines[lineId].phrases[0]);
-                    for (const tag in phraseTemplate) {
-                        if (Object.hasOwnProperty.call(phraseTemplate, tag)) {
-                            // set all data inside empty
-                            phraseTemplate[tag] = "*"
-                        }
-                    };
-                    var lineObj = {
-                        "lines": [{
-                            'phrases': [phraseTemplate]
-                        }]
-                    }; // make a new template
-
-                    var currentVerse = newData.lyrics.verses[verseId];
-
-                    var newId = ((parseInt(currentVerse.id) !== NaN) ? (parseInt(currentVerse.id) + 1) : 1);
-
-                    // 'verse 3'
-                    let myArr = currentVerse.label.split(" ");
-                    let verseNumber = (typeof(parseInt(myArr[(myArr.length - 1)])) == 'number' ? (parseInt(myArr[(myArr.length - 1)])) : 1)
-
-                    var newLabel = 'verse'.concat(verseNumber);
-                    console.log(newLabel)
-
-                    var newVerse = {
-                        "lines": lineObj,
-                        "label": newLabel,
-                        "id": newId
+                let newData = song;
+                var phraseTemplate = Object.assign({}, newData.lyrics.verses[verseId].lines[lineId].phrases[0]);
+                for (const tag in phraseTemplate) {
+                    if (Object.hasOwnProperty.call(phraseTemplate, tag)) {
+                        // set all data inside empty
+                        phraseTemplate[tag] = "*"
                     }
+                };
+                var lineObj = {
+                    "lines": [{
+                        'phrases': [phraseTemplate]
+                    }]
+                }; // make a new template
 
-                    newData.lyrics.verses.push(newVerse);
-                    console.log(newData);
-                    song = newData;
-                    line = song.lyrics.verses[verseId].lines[lineId];
-                    songCollection.db.setItem(songId, newData);
+                var currentVerse = newData.lyrics.verses[verseId];
 
-                    // send ovreall song changes to server
-                    dataManager.putSong(songId, newData)
-                        .then(responseText => alert(JSON.stringify(responseText)));
-                    lastLine = true;
-                    song = newData;
-                    line = newData.lyrics.verses[verseId].lines[lineId];
-                    self.clearSliders();
-                    self.$setState({
-                        loading: false,
-                        song: newData,
-                        lastLine: true,
-                        line: newData.lyrics.verses[verseId + 1].lines[0]
-                    }, () => {
-                        console.log(newData.lyrics.verses[verseId].lines[lineId]);
-                        self.displayLyricSliders()
-                        // TODO reload previous song page
-                    });
+                var newId = ((parseInt(currentVerse.id) !== NaN) ? (parseInt(currentVerse.id) + 1) : 1);
+
+                // 'verse 3'
+                let myArr = currentVerse.label.split(" ");
+                let verseNumber = (typeof(parseInt(myArr[(myArr.length - 1)])) == 'number' ? (parseInt(myArr[(myArr.length - 1)])) : 1)
+
+                var newLabel = 'verse'.concat(verseNumber);
+                console.log(newLabel)
+
+                var newVerse = {
+                    "lines": lineObj,
+                    "label": newLabel,
+                    "id": newId
+                }
+
+                newData.lyrics.verses.push(newVerse);
+                console.log(newData);
+                song = newData;
+                line = song.lyrics.verses[verseId].lines[lineId];
+                songCollection.db.setItem(songId, newData);
+
+                // send ovreall song changes to server
+                dataManager.putSong(songId, newData)
+                    .then(responseText => alert(JSON.stringify(responseText)));
+                lastLine = true;
+                song = newData;
+                line = newData.lyrics.verses[verseId].lines[lineId];
+                self.clearSliders();
+                self.$setState({
+                    loading: false,
+                    song: newData,
+                    lastLine: true,
+                    line: newData.lyrics.verses[verseId + 1].lines[0]
+                }, () => {
+                    console.log(newData.lyrics.verses[verseId].lines[lineId]);
+                    self.displayLyricSliders()
+                    // TODO reload previous song page
                 });
             },
             addLine: function(e) {
-                console.log(songId, verseId, lineId);
-                songCollection.get(songId).then(result => {
-                    let newData = result;
-                    // At index, add one element
+                let newData = song;
+                // At index, add one element
 
-                    //var phraseTemplate = newData.lyrics.verses[verseId].lines[lineId].phrases[0];
-                    //var phraseTemplate = {};
-                    var phraseTemplate = Object.assign({}, newData.lyrics.verses[verseId].lines[lineId].phrases[0]);
+                //var phraseTemplate = newData.lyrics.verses[verseId].lines[lineId].phrases[0];
+                //var phraseTemplate = {};
+                var phraseTemplate = Object.assign({}, newData.lyrics.verses[verseId].lines[lineId].phrases[0]);
 
-                    for (const tag in phraseTemplate) {
-                        if (Object.hasOwnProperty.call(phraseTemplate, tag)) {
-                            // set all data inside empty
-                            phraseTemplate[tag] = "*"
-                        }
-                    };
+                for (const tag in phraseTemplate) {
+                    if (Object.hasOwnProperty.call(phraseTemplate, tag)) {
+                        // set all data inside empty
+                        phraseTemplate[tag] = "*"
+                    }
+                };
 
-                    var lineArray = newData.lyrics.verses[verseId].lines;
-                    var workingIndex = lineArray.length - 1; // tack it onto the end
-                    lineArray.push({
-                        'phrases': [phraseTemplate]
-                    }); // extend by copying the last
-                    workingIndex += 1;
+                var lineArray = newData.lyrics.verses[verseId].lines;
+                var workingIndex = lineArray.length - 1; // tack it onto the end
+                lineArray.push({
+                    'phrases': [phraseTemplate]
+                }); // extend by copying the last
+                workingIndex += 1;
 
-                    newData.lyrics.verses[verseId].lines = lineArray;
-                    console.log(newData);
-                    songCollection.db.setItem(songId, newData);
+                newData.lyrics.verses[verseId].lines = lineArray;
+                console.log(newData);
+                songCollection.db.setItem(songId, newData);
 
-                    // send verse changes to server
-                    dataManager.putVerse(songId, verseId, newData.lyrics.verses[verseId])
-                        .then(responseText => alert(JSON.stringify(responseText)));
-                    // lastLine = (lineId===(newData.lyrics.verses[verseId].lines.length-1))
-                    song = newData;
-                    line = song.lyrics.verses[verseId].lines[lineId];
-                    self.clearSliders();
-                    self.$setState({
-                        loading: false,
-                        song: newData,
-                        line: newData.lyrics.verses[verseId].lines[workingIndex]
-                    }, () => {
-                        self.displayLyricSliders()
-                        console.log(newData.lyrics.verses[verseId].lines[lineId]);
-                        // TODO reload previous song page
-                    });
+                // send verse changes to server
+                dataManager.putVerse(songId, verseId, newData.lyrics.verses[verseId])
+                    .then(responseText => alert(JSON.stringify(responseText)));
+                // lastLine = (lineId===(newData.lyrics.verses[verseId].lines.length-1))
+                song = newData;
+                line = song.lyrics.verses[verseId].lines[lineId];
+                self.clearSliders();
+                self.$setState({
+                    loading: false,
+                    song: newData,
+                    line: newData.lyrics.verses[verseId].lines[workingIndex]
+                }, () => {
+                    self.displayLyricSliders()
+                    console.log(newData.lyrics.verses[verseId].lines[lineId]);
+                    // TODO reload previous song page
                 });
             },
             addPhrase: function(e) {
-                console.log(songId, verseId, lineId);
-                songCollection.get(songId).then(result => {
-                    let newData = result
-                    // At index, add one element
+                let newData = song
+                // At index, add one element
 
-                    var phraseArray = newData.lyrics.verses[verseId].lines[lineId].phrases
-                    var workingIndex = phraseArray.length - 1;
-                    phraseArray.push({
-                        ...phraseArray[workingIndex]
-                    }); // extend by copying the last -will only keep object structure
-                    workingIndex = phraseArray.length - 1;
+                var phraseArray = newData.lyrics.verses[verseId].lines[lineId].phrases
+                var workingIndex = phraseArray.length - 1;
+                phraseArray.push({
+                    ...phraseArray[workingIndex]
+                }); // extend by copying the last -will only keep object structure
+                workingIndex = phraseArray.length - 1;
 
-                    for (const tag in phraseArray[workingIndex]) {
-                        if (Object.hasOwnProperty.call(phraseArray[workingIndex], tag)) {
-                            // set all data inside empty
-                            phraseArray[workingIndex][tag] = ""
+                for (const tag in phraseArray[workingIndex]) {
+                    if (Object.hasOwnProperty.call(phraseArray[workingIndex], tag)) {
+                        // set all data inside empty
+                        phraseArray[workingIndex][tag] = ""
+                    }
+                }
+
+                console.log(phraseArray);
+
+                newData.lyrics.verses[verseId].lines[lineId].phrases = phraseArray
+                songCollection.db.setItem(songId, newData)
+                song = newData;
+                line = song.lyrics.verses[verseId].lines[lineId];
+                self.clearSliders()
+                self.$setState({
+                    loading: false,
+                    song: newData,
+                    line: newData.lyrics.verses[verseId].lines[lineId]
+                }, () => {
+                    self.displayLyricSliders()
+                    console.log(newData.lyrics.verses[verseId].lines[lineId]);
+                    // TODO reload previous song page
+                });
+                // TODO update IS CHANGED variable
+            },
+            deletePhrase: function(e) {
+                if( line.phrases.length <= 1 ){
+                    return;
+                }
+                let newData = song;
+
+                var workingIndex = (newData.lyrics.verses[verseId].lines[lineId].phrases).length - 1;
+                let deletedPhrase = newData.lyrics.verses[verseId].lines[lineId].phrases.splice(workingIndex--, 1)[0]
+                // merge the lyrics
+                for (const tag in deletedPhrase) {
+                    if (Object.hasOwnProperty.call(deletedPhrase, tag)) {
+                        if (tag != 'chord' && tag != 'number'){
+                            const element = deletedPhrase[tag];
+                            newData.lyrics.verses[verseId].lines[lineId].phrases[workingIndex][tag] += element;
                         }
                     }
+                }
 
-                    console.log(phraseArray);
 
-                    newData.lyrics.verses[verseId].lines[lineId].phrases = phraseArray
-                    songCollection.db.setItem(songId, newData)
-                    song = newData;
-                    line = song.lyrics.verses[verseId].lines[lineId];
+                console.log({
+                    "removing": deletedPhrase
+                })
+                line = newData.lyrics.verses[verseId].lines[lineId]
+                songCollection.db.setItem(songId, newData).then(() =>{
                     self.clearSliders()
                     self.$setState({
                         loading: false,
                         song: newData,
                         line: newData.lyrics.verses[verseId].lines[lineId]
                     }, () => {
-                        self.displayLyricSliders()
                         console.log(newData.lyrics.verses[verseId].lines[lineId]);
+                        self.displayLyricSliders()
                         // TODO reload previous song page
-                    });
-                    // TODO update IS CHANGED variable
-                });
-            },
-            deletePhrase: function(e) {
-                if( line.phrases.length <= 1 ){
-                    return;
-                }
-                console.log(songId, verseId, lineId);
-                songCollection.get(songId).then(result => {
-                    let newData = result
-
-                    var workingIndex = (newData.lyrics.verses[verseId].lines[lineId].phrases).length - 1;
-                    let deletedPhrase = newData.lyrics.verses[verseId].lines[lineId].phrases.splice(workingIndex--, 1)[0]
-                    // merge the lyrics
-                    for (const tag in deletedPhrase) {
-                        if (Object.hasOwnProperty.call(deletedPhrase, tag)) {
-                            if (tag != 'chord' && tag != 'number'){
-                                const element = deletedPhrase[tag];
-                                newData.lyrics.verses[verseId].lines[lineId].phrases[workingIndex][tag] += element;
-                            }
-                        }
-                    }
-
-
-                    console.log({
-                        "removing": deletedPhrase
-                    })
-                    line = newData.lyrics.verses[verseId].lines[lineId]
-                    songCollection.db.setItem(songId, newData).then(() =>{
-                        self.clearSliders()
-                        self.$setState({
-                            loading: false,
-                            song: newData,
-                            line: newData.lyrics.verses[verseId].lines[lineId]
-                        }, () => {
-                            console.log(newData.lyrics.verses[verseId].lines[lineId]);
-                            self.displayLyricSliders()
-                            // TODO reload previous song page
-                        });
                     });
                 });
             },

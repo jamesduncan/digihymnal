@@ -10,7 +10,8 @@ export const customLocales = [
   {name:"Tibetan", local:"བོད་སྐད་", location: "", tag: "kt"},
   {name:"Central Tibetan", local:"དབུས་སྐད", location: "", tag: "ct"},
   {name:"Amdo Tibetan", local:"ཨ་མདོ་སྐད", location: "", tag: "at"},
-  {name:"Central Tibetan Romanized", local:"Central Tibetan Romanized", location: "", tag: "tr"},
+  {name:"English", local:"English", location: "", tag: "en"},
+  //{name:"Central Tibetan Romanized", local:"Central Tibetan Romanized", location: "", tag: "tr"},
   // {name:"Amdo Tibetan Romanized", local:"Amdo Tibetan", location: "", tag: "atr"},
 ];
 

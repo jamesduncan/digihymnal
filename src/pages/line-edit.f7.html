@@ -4,9 +4,9 @@
             <div class="navbar-bg"></div>
             <div class="navbar-inner sliding">
                 <div class="left">
-                    <a href="" class="link back">
-                        <i class="icon icon-back"></i>
-                        <span class="if-not-md">{{#if loading}}Back{{else}}{{translate "Back"}}{{/if}}</span>
+                    <a {{#if loading}}href=""{{else}}href="/song/view/{{this.songId}}/"{{/if}} class="link back" data-force="true" data-ignore-cache="true">
+                        <i class="icon icon-back"></i> 
+                        <span class="if-not-md" >{{#if loading}}Back{{else}}{{translate "Back"}}{{/if}}</span>
                     </a>
                 </div>
                 <div class="title">{{#if loading}}{{else}} {{song.title[defaultLanguage]}} : {{@root.verseLabel}} {{/if}}</div>

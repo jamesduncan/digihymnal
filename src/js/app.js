@@ -41,10 +41,10 @@ Template7.registerHelper('getKeyInParent', function(parent, keyArr) {
 // make a slider div for each language
 // (parentObject)
 Template7.registerHelper('printLyric', function(line) {
-    var results = ''
+    var results = '<br/><br/><br/><br/>'
     for (const key in line.phrases[0]) {
       if (key != "chord" && key != "number") { 
-        results = results.concat(`<div id="sliderContainer${key}" style="padding: 50px"><div type:"button" @click="linePanel(${key})"></div><div id="slider-${key}" class="slider-${key}"></div></div>`)
+        results = results.concat(`<div  href="#" class="button button-small item-link edit-phrase" style="padding: 5px" @click="linePanel(${key})">edit ${key}</div><div id="sliderContainer${key}" style="padding: 55px"><div id="slider-${key}" class="slider-${key}"></div></div>`)
       }
     }
     return results;
@@ -63,20 +63,32 @@ Template7.registerHelper('printEachPhrase', function(line, languages) {
     const validateNumber = `required pattern='1|2|3|4|5|6|7|8|9|10|11|12'`
     //
     results = results.concat(`<div class="line metadata">`)
-    line.phrases.forEach(phrase => {
-        results = results.concat(`<div class="phrase metadata"> `)
-        if (phrase["chord"]) {
-            results = results.concat(`<div class="chord"><div class="item-input-wrap"><input type="text" ${validateChords} value="${phrase["chord"]}"></div></div>`)
-        } else {
-            results = results.concat(`<div class="chord"><div class="item-input-wrap"><input type="text" ${validateChords} placeholder="*"></div></div>`)
-        }
-        if (phrase["number"]) {
-            results = results.concat(`<div class="number"><div class="item-input-wrap"><input type="text" ${validateNumber}value="${phrase["number"]}"></div></div>`)
-        } else {
-            results = results.concat(`<div class="number"><div class="item-input-wrap"><input type="text" ${validateNumber}placeholder="*"></div></div>`)
-        }
-        results = results.concat('</div>');
-    });
+    //if(line.phrases[0]["chord"]){
+        line.phrases.forEach(phrase => {
+            results = results.concat(`<div class="phrase metadata"> `)
+            if (phrase["chord"]) {
+                results = results.concat(`<div class="chord"><div class="item-input-wrap"><input type="text" ${validateChords} value="${phrase["chord"]}"></div></div>`)
+            } else {
+                results = results.concat(`<div class="chord"><div class="item-input-wrap"><input type="text" ${validateChords} placeholder="*"></div></div>`)
+            }
+            if (phrase["number"]) {
+                results = results.concat(`<div class="number"><div class="item-input-wrap"><input type="text" ${validateNumber}value="${phrase["number"]}"></div></div>`)
+            } else {
+                results = results.concat(`<div class="number"><div class="item-input-wrap"><input type="text" ${validateNumber}placeholder="*"></div></div>`)
+            }
+            results = results.concat('</div>');
+        });
+    // } else { // make an empty metadata
+    //     results = results.concat(`<div class="phrase metadata"> `) // line
+    //     line.phrases.forEach(phrase => {
+    //         results = results.concat(
+    //             `<div class="chord"><div class="item-input-wrap"><input type="text" placeholder="A"></div></div>
+    //              <div class="number"><div class="item-input-wrap"><input type="text" placeholder="1"></div></div>`
+    //             );
+    //         });
+    //     results = results.concat('</div>');
+    // }
+
     results = results.concat('</div>');
 
     return results;

@@ -247,7 +247,7 @@ export default class SongCollection {
     }
     async makeNewBlankSong() {
       // TODO get the next available ID...
-      return checkIdClear().then(() => {
+      return this.checkIdClear().then(() => {
         var id = this.nextAvailableId.toString()
         this.nextAvailableId += 1;
         // get blank data

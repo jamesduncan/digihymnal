@@ -843,9 +843,19 @@
                                 meta.number = element
                             } else { // language
                                 let elementAsArray = self.diacriticChecker(element.split(""), 0) // lets work with the 'true' length array
-                                lyric[key] = lyric[key].concat(elementAsArray)
+                                if(lyric[key]){
+                                    lyric[key] = lyric[key].concat(elementAsArray);
+                                } else{
+                                    lyric[key] = elementAsArray;
+                                }
                                 // 
-                                var chordEndIndex = chordStartLocations[key].length
+                                var chordEndIndex
+                                if (chordStartLocations[key]){
+                                    chordEndIndex = chordStartLocations[key].length;
+                                }else{
+                                    chordStartLocations[key] = [];
+                                    chordEndIndex = 0;
+                                }
                                 if (chordEndIndex == 0) {
                                     chordStartLocations[key].push(0)
                                     chordStartLocations[key].push(elementAsArray.length)

@@ -274,6 +274,7 @@
     var lastVerse
     var lastLine
     var firstLine
+    var chordStartLocations
     import DataManager from '../data/dataManager';
     import Song from '../data/song';
     import noUiSlider from 'nouislider';
@@ -342,7 +343,8 @@
                     songCollection.get(songId).then(result => {
                         languages = [];
                         lyricList = []
-                        var translationLangs = Object.keys(result.title);
+                        var translationLangs = Object.keys(result.lyrics.verses[verseId].lines[lineId].phrases[0]);
+                        //var translationLangs = Object.keys(result.title);
                         locale.customLocales.forEach((item) => {
                             if (translationLangs.indexOf(item.tag) > -1) {
                                 if (item.tag == lyric1) {
@@ -823,7 +825,7 @@
             displayLyricSliders: function(e) {
                 // 
                 var lyric = {};
-                var chordStartLocations = {}; //  {'en':[1,5,12]}
+                chordStartLocations = {}; //  {'en':[1,5,12]}
                 var chordList = [];           // tooltips: [ {to: function() {return "2<br/>A";} } ]
 
                 // init each language
@@ -931,6 +933,7 @@
                 var origins = slider.getElementsByClassName('noUi-origin');
                 origins[0].setAttribute('disabled', true);
             },
+            // Params: Array, 0
             diacriticChecker: function(array, index) {
                 var nextIndex = index + 1
                 if (nextIndex >= array.length) {
@@ -944,24 +947,101 @@
                 }
                 return self.diacriticChecker(array, index);
             },
-            linePanel: function(tag) {
+            lineEditPopup: function(tag) {
                 // app.panel.create(parameters)
                 // closeByBackdropClick
                 // el	:HTMLElementstring
 
                 // app.panel.open(panel, animate)
                 // Other option. pass app.js the line data to pre-generate this generated popup when a button it programatically generates is pressed. 
-                // onclick, it calls one of these suckers to update. 
-                // That's also the way to change lango on song edit
-                // this is cleaner, so hopefully it works???
-                var el = "<div>....."
-                line.forEach(phrase => {
-                    if (Object.hasOwnProperty.call(phrase, el)) { //whoop whoop
-                        el += phrase[el];
+                // onclick, it calls one of these to update. 
+                // That's also the way to change lang on song edit
+                
+                var langLine = ""
+                line.phrases.forEach(phrase => {
+                    if (phrase[tag]) {
+                        console.log(phrase[tag])
+                        langLine += phrase[tag];
                     }
                 });
-                el = "</div><save button @saveLine(mylocalelement)>"
-                app.panel.create(el)
+  
+                var el = `<div class="popup">
+                        <div class="block">
+                            <strong><h3>*edit line text here</h3></strong>
+                            <div class='tag'>${tag}</div>
+                            <form class="item-content item-input line-form" id="line-form">
+                                <div class="item-inner">
+                                    <div class="item-input-wrap" id="item-input-wrap">
+                                    <input type="text" class="lineText" style=''value="${langLine}"/>
+                                    <span class="input-clear-button"></span>
+                                    </div>
+                                </div>
+                            </form>
+                            <p><a  href="#" class="col popup-close button button-fill">*Save</a></p>
+                        </div>
+                    </div>`
+                var a = app.popup.create({
+                    content:el,
+                    'tag': tag,  
+                    closeByBackdropClick: true,
+                    on: {
+                        opened: function (popup) {
+                        console.log('Panel opened')
+                        },
+                        opened: function (popup) {
+                            console.log('Popup opened');
+                        },
+                        close: function (popup) {
+                            var tag = self.$$(".tag")[0].innerHTML
+                            var formData = self.$$(".lineText")[0].value
+                            self.updateLine(formData, tag)
+                        },
+                    }
+                }); 
+                a.open();
+            },
+            updateLine: function(data,tag){
+                console.log(data,tag);
+                if (self.validateTag(tag)){
+                    //update line and refresh
+                    var lineArr = self.diacriticChecker(data.split(""), 0)
+                    var chordPlacment = chordStartLocations[tag]
+
+                    let i = 0
+                    while (i < line.phrases.length) {
+                        let firstChord = chordPlacment[i];
+                        let startPhraseIndex = ((firstChord && firstChord < lineArr.length-1) ? firstChord : '0');
+                        let nextChord = chordPlacment[i+1];
+                        // checking that...
+                        // the array may be shorter than we expect, allow phrases to be at end of array
+                        // at end of array, include any extra characters
+                        let endPhraseIndex = ((nextChord && nextChord < lineArr.length-1 && i < line.phrases.length) ? nextChord : (lineArr.length));
+
+                        let phraseLength = endPhraseIndex - startPhraseIndex;
+                        let newPhrase = lineArr.splice(0,phraseLength).join('');
+
+                        //set it
+                        line.phrases[i][tag] = newPhrase;
+                        song.lyrics.verses[verseId].lines[lineId].phrases[i++][tag] = newPhrase;
+                    }
+                    self.clearSliders();
+                    self.$setState({
+                        loading: false,
+                        song: song,
+                        line: line
+                    }, () => {
+                        self.displayLyricSliders()
+                        console.log(song.lyrics.verses[verseId].lines[lineId]);
+                        // User will need to save....
+                    });                   
+                }
+            },
+            validateTag: function(tag){
+                if (languages.includes(tag)){
+                    return true;
+                }
+                debugger;
+                return false
             }
         }
     }

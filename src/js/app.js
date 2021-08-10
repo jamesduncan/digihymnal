@@ -41,10 +41,10 @@ Template7.registerHelper('getKeyInParent', function(parent, keyArr) {
 // make a slider div for each language
 // (parentObject)
 Template7.registerHelper('printLyric', function(line) {
-    var results = '<br/><br/><br/><br/>'
+    var results = '<br><br/><br /><br  />'
     for (const key in line.phrases[0]) {
       if (key != "chord" && key != "number") { 
-        results = results.concat(`<div  href="#" class="button button-small item-link edit-phrase" style="padding: 5px" @click="linePanel(${key})">edit ${key}</div><div id="sliderContainer${key}" style="padding: 55px"><div id="slider-${key}" class="slider-${key}"></div></div>`)
+        results = results.concat(`<div  href="#" class="button button-small item-link edit-phrase" style="padding: 5px" @click="lineEditPopup('${key}')">edit ${key}</div><div id="sliderContainer${key}" style="padding: 55px"><div id="slider-${key}" class="slider-${key}"></div></div>`)
       }
     }
     return results;

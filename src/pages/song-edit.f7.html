@@ -274,12 +274,12 @@
                 // //author
                 // console.log(this.$('#edit-author')[0].children[1].children[0].value)
                 var titleArray = Array.from((this.$('#edit-title').children()));
-                let delTitle = titleArray.splice(0, 1)
+                //let delTitle = titleArray.splice(0, 1)
                 var metadataArray = Array.from((this.$('#edit-metadata').children()));
-                delTitle = metadataArray.splice(0, 1)
+                //delTitle = metadataArray.splice(0, 1)
 
-                var key = this.$('input[name="key"]').value.trim()
-                var author = this.$('input[name="author"]').value.trim()
+                var key = this.$('input[name="key"]')[0].value.trim()
+                var author = this.$('input[name="author"]')[0].value.trim()
 
                 songCollection.get(songId).then(result => {
                     if (result.id != songId) {
@@ -293,14 +293,14 @@
                     // Language tag: metadataArray[x].lastElementChild.classList[1]
                     // Value: metadataArray[x].lastElementChild.firstChild.firstChild.value
                     metadataArray.forEach(dataElement => {
-                        var tag = dataElement.lastElementChild.classList[1]
-                        var value = dataElement.lastElementChild.firstChild.firstChild.value
+                        var tag = dataElement.firstElementChild.firstElementChild.innerText; //
+                        var value = dataElement.firstElementChild.lastElementChild.firstElementChild.value;// .lastElementChild.firstChild.firstChild.value //
                         newData.metadata[0][tag] = value.trim()
                     });
                     // console.log(newData.metadata[0])
                     titleArray.forEach(dataElement => {
-                        var tag = dataElement.lastElementChild.classList[1]
-                        var value = dataElement.lastElementChild.firstChild.firstChild.value
+                        var tag = dataElement.firstElementChild.firstElementChild.innerText; // dataElement.firstElementChild.firstElementChild.innerText
+                        var value = dataElement.firstElementChild.lastElementChild.firstElementChild.value;// dataElement.lastElementChild.firstChild.firstChild.value
                         newData.title[tag] = value.trim()
                     });
                     // console.log(newData.title)

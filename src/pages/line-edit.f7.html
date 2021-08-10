@@ -140,7 +140,7 @@
                                 </div>
                             </div>
                             <div class="item-title item-label">
-                                Phrase tools:
+                                Chord tools:
                             </div>
                             <!--
                               Add phrase
@@ -701,8 +701,6 @@
                 let newData = song;
                 // At index, add one element
 
-                //var phraseTemplate = newData.lyrics.verses[verseId].lines[lineId].phrases[0];
-                //var phraseTemplate = {};
                 var phraseTemplate = Object.assign({}, newData.lyrics.verses[verseId].lines[lineId].phrases[0]);
 
                 for (const tag in phraseTemplate) {
@@ -712,13 +710,11 @@
                     }
                 };
 
-                var lineArray = newData.lyrics.verses[verseId].lines;
-                var workingIndex = lineArray.length - 1; // tack it onto the end
-                lineArray.push({
-                    'phrases': [phraseTemplate]
-                }); // extend by copying the last
-                workingIndex += 1;
-
+                let lineArray = newData.lyrics.verses[verseId].lines;
+                let workingIndex = ++lineId; // tack it onto after current
+                let newLine = {'phrases': [phraseTemplate]};
+                // insert item into arr at the specified index (deleting 0 items first, it's just an insert).
+                lineArray.splice(workingIndex, 0, newLine);
                 newData.lyrics.verses[verseId].lines = lineArray;
                 console.log(newData);
                 songCollection.db.setItem(songId, newData);
@@ -733,7 +729,7 @@
                 self.$setState({
                     loading: false,
                     song: newData,
-                    line: newData.lyrics.verses[verseId].lines[workingIndex]
+                    line: newData.lyrics.verses[verseId].lines[lineId]
                 }, () => {
                     self.displayLyricSliders()
                     console.log(newData.lyrics.verses[verseId].lines[lineId]);

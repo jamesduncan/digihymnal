@@ -34,7 +34,7 @@ export default class SongCollection {
                                   {
                                       "chord": "C",
                                       "number": "4",
-                                      "at": "ttle st",
+                                      "en": "ttle st",
                                       "at": "ཀོན་མཆོ",
                                       "kt": "ཀོན་མཆོ ",
                                       "ct": "ཀོན་མཆོ"
@@ -165,7 +165,7 @@ export default class SongCollection {
                   "en": ".Copyright....  "
               }
           ],
-          "id": "99999999999"
+          "id": "70"
       }
     }
 
@@ -258,10 +258,8 @@ export default class SongCollection {
           console.log({"it worked!":id})
         }).then(() => {
           dataManager.putNewSong(id,data)
-          debugger
           this.get(id).then( data => {
             console.log(data)
-            debugger
           })
           return id;
         });

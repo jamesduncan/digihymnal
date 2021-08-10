@@ -269,14 +269,9 @@
                 var $form = this.$('#songMetaData')
                 var $ = $form.find("select[name='']")
 
-                // //key
-                // console.log(this.$('#edit-key')[0].children[1].children[0].value)
-                // //author
-                // console.log(this.$('#edit-author')[0].children[1].children[0].value)
                 var titleArray = Array.from((this.$('#edit-title').children()));
-                //let delTitle = titleArray.splice(0, 1)
                 var metadataArray = Array.from((this.$('#edit-metadata').children()));
-                //delTitle = metadataArray.splice(0, 1)
+                var verseLabelArray = Array.from((this.$('#edit-verseLabels').children()));
 
                 var key = this.$('input[name="key"]')[0].value.trim()
                 var author = this.$('input[name="author"]')[0].value.trim()
@@ -304,6 +299,12 @@
                         newData.title[tag] = value.trim()
                     });
                     // console.log(newData.title)
+                    let i = 0
+                    verseLabelArray.forEach(dataElement => {
+                        var value = dataElement.firstElementChild.lastElementChild.firstElementChild.value;// dataElement.lastElementChild.firstChild.firstChild.value
+                        newData.lyrics.verses[i++].label = value.trim()
+                    });
+                    console.log(newData.lyrics);
 
                     // save
                     songCollection.db.setItem(songId, newData)

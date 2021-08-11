@@ -94,13 +94,29 @@
                         <div class="song">
                             <div class="verse">
                                 {{#each song.lyrics.verses}}
-                                    <h3>{{#if label}}{{translate label}}{{else}}<br />{{/if}}</h3>
+                                    <h3>{{#if label}}{{translate label}} {{#if @root.editMode}}<a class="button button-small item-link edit-phrase"><i class="fas fa-bigger fa-dumpster-fire"></i></a>{{/if}}{{else}}<br />{{/if}} </h3>
                                     {{#each lines}}
                                         <div class="line">
                                             {{#if @root.editMode}}
+                                                <!-- move chords -->
                                                 <a href="/song/line/edit/{{ @root.songId}}/{{ ../../@index }}/{{@index}}/" class="button button-small item-link edit-phrase">
-                                                    <i class="fas fa-bigger fa-edit"></i>
+                                                    <span class="fa-stack fa-1x">
+                                                        <i class="fas fa-bigger fa-music fa-stack-.5x" style="font-size: 0.80em;  vertical-align:top !important;"></i>
+                                                        <i class="fas fa-arrows-alt-h fa-small fa-stack-1x" style="color:white; font-size: 0.85em; vertical-align:bottom !important;"></i>
+                                                    </span>
                                                 </a>
+                                                <!-- edit line text -->
+                                                <a @click=lineEditPopup({{../../@index}},{{@index}}) class="button button-small item-link edit-phrase"><i class="fas fa-bigger fa-edit"></i></a>
+                                                <!-- delete line -->
+                                                <a @click="deleteLine(this)" class="button button-small item-link edit-phrase"><i class="fas fa-bigger fa-trash"></i></a>
+                                                <!-- split verse -->
+                                                <a  @click="splitVerse(this)" class="button button-small item-link edit-phrase">
+                                                    <span class="fa-stack fa-1x">
+                                                        <i class="fas fa-bigger fa-file fa-stack-.5x"></i>
+                                                        <i class="fas fa-minus fa-small fa-stack-1x" style="color:white;"></i>
+                                                        <i class="fas fa-arrows-alt-v fa-small fa-stack-1x" style="color:white;"></i>
+                                                    </span>
+                                                </a> 
                                             {{/if}}
                                             {{#each phrases}}
                                                 <div class="phrase {{#if @root.showNumber}}{{else}}noNumbers{{/if}} {{#if @root.showChord}}{{else}}noChords{{/if}}">
@@ -123,6 +139,13 @@
                                             <div style="clear:both;"></div>
                                         </div>
                                     {{/each}}
+                                    {{#if @root.editMode}}
+                                    <a @click="addVerse(verseId)" class="button button-small item-link edit-phrase">
+                                        <span class="fa-stack fa-1x">
+                                            <i class="fas fa-bigger fa-file fa-stack-.5x"></i>
+                                            <i class="fas fa-plus fa-small fa-stack-1x" style="color:white;"></i>
+                                        </span>
+                                    </a><br>{{/if}}
                                 {{/each}}
                             </div>
                             <div class="chorus">
@@ -182,6 +205,9 @@
                         </div>
                     </div>
                 </div>
+                {{#js_if "@root.editMode AND savable"}}
+                <p><a @click="save"  class="col popup-close button button-fill">*Save</a></p>
+                {{/js_if}}
                 <div class="block text-align-right text-color-gray" style="margin-top: 10px;">
                     {{song.author[defaultLanguage]}}
                 </div>
@@ -286,15 +312,23 @@
 <script>
     self = this
     var songId
+    var verseId
+    var lineId
     var song
+    var line
+    var app
+    var phraseBreakLocations = {}
+    var self
+    var languageTags = [ ];
     console.log(songId)
+    import DataManager from '../data/dataManager';
     import Song from '../data/song';
     import Preference from "../data/preference";
     const preference = new Preference();
 
     // Import locales
     const locale = require('../js/locales.js');
-
+    const dataManager = new DataManager();
     const songCollection = new Song();
     // songCollection.initSample();
 
@@ -323,8 +357,8 @@
         // Page Events
         on: {
             pageInit: function(e, page) {
-                var self = this;
-                var app = self.$app;
+                self = this;
+                app = self.$app;
                 songId = this.$route.params.songId;
                 this.songId = songId
                 console.log(songId)
@@ -341,6 +375,7 @@
                     console.log('current lang: ' + lyric1);
                     songCollection.get(songId).then(result => {
                         let languages = [];
+                        song = result;
                         var translationLangs = Object.keys(result.title);
                         locale.customLocales.forEach((item) => {
                             if (translationLangs.indexOf(item.tag) > -1) {
@@ -348,6 +383,7 @@
                                     item.default = true;
                                 }
                                 languages.push(item)
+                                languageTags.push(item.tag)
                             }
                         });
 
@@ -464,7 +500,357 @@
                     lyric2: lyric2,
                     showLyric2: showLyric2
                 });
+            },
+            //
+            addLine: function(selectedVerse,selectedLine) {
+                let newData = song;
+                verseId = selectedLine;
+                lineId = selectedVerse;
+                // At index, add one element
+
+                var phraseTemplate = Object.assign({}, newData.lyrics.verses[verseId].lines[lineId].phrases[0]);
+
+                for (const tag in phraseTemplate) {
+                    if (Object.hasOwnProperty.call(phraseTemplate, tag)) {
+                        // set all data inside empty
+                        phraseTemplate[tag] = "*"
+                    }
+                };
+
+                let lineArray = newData.lyrics.verses[verseId].lines;
+                let workingIndex = ++lineId; // tack it onto after current
+                let newLine = {'phrases': [phraseTemplate]};
+                // insert item into arr at the specified index (deleting 0 items first, it's just an insert).
+                lineArray.splice(workingIndex, 0, newLine);
+                newData.lyrics.verses[verseId].lines = lineArray;
+                console.log(newData);
+                songCollection.db.setItem(songId, newData);
+
+                // send verse changes to server
+                dataManager.putVerse(songId, verseId, newData.lyrics.verses[verseId])
+                    .then(responseText => alert(JSON.stringify(responseText)));
+                // lastLine = (lineId===(newData.lyrics.verses[verseId].lines.length-1))
+                song = newData;
+                line = song.lyrics.verses[verseId].lines[lineId];
+                self.clearSliders();
+                self.$setState({
+                    loading: false,
+                    song: newData,
+                    savable: true,
+                    line: newData.lyrics.verses[verseId].lines[lineId]
+                }, () => {
+                    self.displayLyricSliders()
+                    console.log(newData.lyrics.verses[verseId].lines[lineId]);
+                    // TODO reload previous song page
+                });
+            },
+            
+            diacriticChecker: function(array, index) {
+                var nextIndex = index + 1
+                if (nextIndex >= array.length) {
+                    return array;
+                }
+                //if ([' ྱ', ' ེ', ' ོ', ].includes(array[nextIndex])){
+                if ([4017, 3962, 3964, 3954].includes((array[nextIndex]).charCodeAt(0))) {
+                    array[index] = array[index].concat(array.splice(nextIndex, 1)[0]);
+                } else { // only increase if no diacritic
+                    ++index;
+                }
+                return self.diacriticChecker(array, index);
+            },
+            lineEditPopup: function(selectedVerse,selectedLine) {
+                var tag = defaultLanguage;
+                verseId = selectedLine;
+                lineId = selectedVerse;
+                // app.panel.create(parameters)
+                // closeByBackdropClick
+                // el	:HTMLElementstring
+
+                // app.panel.open(panel, animate)
+                // Other option. pass app.js the line data to pre-generate this generated popup when a button it programatically generates is pressed. 
+                // onclick, it calls one of these to update. 
+                // That's also the way to change lang on song edit
+                
+                var langLine = ""
+                if(!phraseBreakLocations[tag]){ // is is not set
+                    phraseBreakLocations[tag] = [];
+                }
+                line = song.lyrics.verses[verseId].lines[lineId]
+                line.phrases.forEach(phrase => {
+                    if (phrase[tag]) {
+                        console.log(phrase[tag])
+                        langLine += phrase[tag];
+                        let elementAsArray = self.diacriticChecker(phrase[tag].split(""), 0) ;
+                        phraseBreakLocations[tag].push(elementAsArray.length);
+                    }
+                });
+  
+                var el = `<div class="popup">
+                        <div class="block">
+                            <strong><h3>*edit line text here</h3></strong>
+                            <div class='tag'>${tag}</div>
+                            <form class="item-content item-input line-form" id="line-form">
+                                <div class="item-inner">
+                                    <div class="item-input-wrap" id="item-input-wrap">
+                                    <input type="text" class="lineText" style=''value="${langLine}"/>
+                                    <span class="input-clear-button"></span>
+                                    </div>
+                                </div>
+                            </form>
+                            <p><a  href="#" class="col popup-close button button-fill">*Save</a></p>
+                        </div>
+                    </div>`
+                var a = app.popup.create({
+                    content:el,
+                    'tag': tag,  
+                    closeByBackdropClick: true,
+                    on: {
+                        opened: function (popup) {
+                        console.log('Panel opened')
+                        },
+                        opened: function (popup) {
+                            console.log('Popup opened');
+                        },
+                        close: function (popup) {
+                            var tag = self.$$(".tag")[0].innerHTML
+                            var formData = self.$$(".lineText")[0].value
+                            self.updateLine(formData, tag)
+                        },
+                    }
+                }); 
+                a.open();
+            },
+            updateLine: function(data,tag){
+                console.log(data,tag);
+                if (self.validateTag(tag)){
+                    //update line and refresh
+                    var lineArr = self.diacriticChecker(data.split(""), 0)
+                    var chordPlacment = phraseBreakLocations[tag]
+
+                    let i = 0
+                    while (i < line.phrases.length) {
+                        let expectPhraseLength = chordPlacment[i];
+                        // the array may be shorter than we expect, allow phrases to be at end of array
+                        // at end of array, include any extra characters
+                        // if exists,           is less than remaining length,           on last index, grab remainder => set. otherwise is remaining length. remaining length can be 0
+                        let phraseLength = ((expectPhraseLength && expectPhraseLength < lineArr.length-1 && (i+1) < line.phrases.length) ? expectPhraseLength : (lineArr.length));
+                        let newPhrase = lineArr.splice(0,phraseLength).join('');
+
+                        //set it
+                        line.phrases[i][tag] = newPhrase;
+                        song.lyrics.verses[verseId].lines[lineId].phrases[i++][tag] = newPhrase;
+                    }
+                    self.$setState({
+                        loading: false,
+                        song: song,
+                        savable: true,
+                        line: line
+                    }, () => {
+                        console.log(song.lyrics.verses[verseId].lines[lineId]);
+                        // User will need to save....
+                    });                   
+                }
+            },
+            deleteLine: function(selectedVerse,selectedLine) {
+                verseId = selectedLine;
+                lineId = selectedVerse;
+                debugger;
+                console.log(songId, verseId, lineId);
+                // TODO pre-delete confirmation prompt
+                let newData = song
+                // At index, remove one element
+                let deletedLine = newData.lyrics.verses[verseId].lines.splice(lineId, 1)
+
+                // default to changing nothing, wil auto set to the right line
+                if ((verseId != 0) && lineId == 0 && (0 == newData.lyrics.verses[verseId].lines.length)) {
+                    // if last remaining line of not last verse
+                    let deletedVerse = newData.lyrics.verses.splice(verseId, 1)
+                    if (lastVerse) {
+                        --verseId;
+                    }
+                    lineId = newData.lyrics.verses[verseId].lines.length - 1;
+                } else if (lastLine) {
+                    // set lineId to an existing line
+                    --lineId;
+                } else {
+                    console.error("You tried to delete the last line of the last verse!!!")
+                }
+
+                song = newData;
+                line = song.lyrics.verses[verseId].lines[lineId]
+                songCollection.db.setItem(songId, newData)
+                self.clearSliders()
+                self.$setState({
+                    line: newData.lyrics.verses[verseId].lines[lineId],
+                    firstLine: (lineId == 0 && verseId == 0),
+                    lastLine: (lineId >= (song.lyrics.verses[verseId].lines.length - 1)),
+                    song: newData,
+                    savable: true,
+                    loading: false,
+                }, () => {
+                    self.displayLyricSliders()
+                    // TODO reload previous song page
+                });
+            },
+            addVerse: function(selectedVerse,selectedLine) {
+                verseId = selectedLine;
+                lineId = selectedVerse;
+                debugger;
+                console.log(songId, verseId, lineId);
+                let newData = song;
+                var phraseTemplate = Object.assign({}, newData.lyrics.verses[verseId].lines[lineId].phrases[0]);
+                for (const tag in phraseTemplate) {
+                    if (Object.hasOwnProperty.call(phraseTemplate, tag)) {
+                        // set all data inside empty
+                        phraseTemplate[tag] = "*"
+                    }
+                };
+                var lineObj = {
+                    "lines": [{
+                        'phrases': [phraseTemplate]
+                    }]
+                }; // make a new template
+
+                var currentVerse = newData.lyrics.verses[verseId];
+
+                var newId = ((parseInt(currentVerse.id) !== NaN) ? (parseInt(currentVerse.id) + 1) : 1);
+
+                // 'verse 3'
+                let myArr = currentVerse.label.split(" ");
+                let verseNumber = (typeof(parseInt(myArr[(myArr.length - 1)])) == 'number' ? (parseInt(myArr[(myArr.length - 1)])) : 1)
+
+                var newLabel = 'verse'.concat(verseNumber);
+                console.log(newLabel)
+
+                var newVerse = {
+                    "lines": lineObj,
+                    "label": newLabel,
+                    "id": newId
+                }
+
+                newData.lyrics.verses.push(newVerse);
+                console.log(newData);
+                song = newData;
+                line = song.lyrics.verses[verseId].lines[lineId];
+                songCollection.db.setItem(songId, newData);
+
+                // send ovreall song changes to server
+                dataManager.putSong(songId, newData)
+                    .then(responseText => alert(JSON.stringify(responseText)));
+                lastLine = true;
+                song = newData;
+                line = newData.lyrics.verses[verseId].lines[lineId];
+                self.clearSliders();
+                self.$setState({
+                    loading: false,
+                    song: newData,
+                    lastLine: true,
+                    savable: true,
+                    line: newData.lyrics.verses[verseId + 1].lines[0]
+                }, () => {
+                    console.log(newData.lyrics.verses[verseId].lines[lineId]);
+                    self.displayLyricSliders()
+                    // TODO reload previous song page
+                });
+            },
+            splitVerse: function(selectedVerse,selectedLine) {
+                verseId = selectedLine;
+                lineId = selectedVerse;
+                debugger;
+                console.log(songId, verseId, lineId);
+                let newData = song;
+
+                var currentVerse = newData.lyrics.verses[verseId];
+
+                // 'verse 3'
+                let myArr = currentVerse.label.split(" ");
+                let verseNumber = (typeof(parseInt(myArr[(myArr.length - 1)])) == 'number' ? (parseInt(myArr[(myArr.length - 1)])) : 1)
+                var newLabel = 'verse'.concat(verseNumber);
+                console.log(newLabel)
+
+                let toRemove = (currentVerse.lines.length - lineId)
+                var lineObj = currentVerse.lines.splice(lineId, toRemove, currentVerse);
+
+                var newVerse = {
+                    "lines": lineObj,
+                    "label": newLabel,
+                    "id": newId
+                }
+
+                //let newLine = {'phrases': [phraseTemplate]};
+                let vArray = newData.lyrics.verses
+
+                vArray.splice(verseId, 1, currentVerse); // update current to be missing lines...
+
+                let workingIndex = ++verseId; 
+                vArray.splice(workingIndex, 0, newLine);// after current
+
+                // clean up labels
+                vArray.forEach(verse => {
+                    if (Object.hasOwnProperty.call(verse, label)) {
+                        const element = verse[label];
+                        if(element!='chorus'){
+                            //split it and increase the counter
+                        }
+                        
+                    }
+                });
+                newData.lyrics.verses = vArray;
+
+                console.log(newData);
+                song = newData;
+                line = song.lyrics.verses[verseId].lines[lineId];
+                songCollection.db.setItem(songId, newData);
+
+                // send ovreall song changes to server
+                dataManager.putSong(songId, newData)
+                    .then(responseText => alert(JSON.stringify(responseText)));
+                lastLine = true;
+                song = newData;
+                line = newData.lyrics.verses[verseId].lines[lineId];
+                self.clearSliders();
+                self.$setState({
+                    loading: false,
+                    song: newData,
+                    lastLine: true,
+                    savable: true,
+                    line: newData.lyrics.verses[verseId + 1].lines[0]
+                }, () => {
+                    console.log(newData.lyrics.verses[verseId].lines[lineId]);
+                    self.displayLyricSliders()
+                    // TODO reload previous song page
+                });
+            },
+            deleteVerse: function(selectedVerse){
+                verseId = selectedLine;
+                console.log(verseId);                
+                debugger;
+            },
+            validateTag: function(tag){
+                if (languageTags.includes(tag)){
+                    return true;
+                }
+                debugger;
+                return false
+            },
+            save: function(e) {
+                console.log(songId);
+                songCollection.db.setItem(songId, song);
+                self.clearSliders();
+                self.$setState({
+                    loading: false,
+                    savable: false,
+                    song: newData
+                }, () => {
+                    // self.displayLyricSliders();
+                });
+                // send line changes to server
+                dataManager.putLine(songId, verseId, lineId, newData.lyrics.verses[verseId].lines[lineId])
+                    .then(responseText => alert(JSON.stringify(responseText)));
+            
+            
             }
+            //
         }
     }
 </script>

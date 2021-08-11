@@ -148,7 +148,7 @@
                             <div class="menu-item">
                                 <div class="menu-item-content icon-only">
                                     <div class="menu-item-content">
-                                        <a @click="addPhrase" class="col button button-fill">
+                                        <a @click="addPhrase" class="col button">
                                             <i class="text-color-gray fas fa-plus"></i>
                                         </a>
                                     </div>
@@ -160,7 +160,7 @@
                             <div class="menu-item">
                                 <div class="menu-item-content icon-only">
                                     <div class="menu-item-content">
-                                        <a @click="deletePhrase" class="col button button-fill">
+                                        <a @click="deletePhrase" class="col button">
                                             <i class="text-color-gray fas fa-trash"></i>
                                         </a>
                                     </div>
@@ -697,6 +697,70 @@
                     // TODO reload previous song page
                 });
             },
+            splitVerse: function(e) {
+                console.log(songId, verseId, lineId);
+                let newData = song;
+
+                var currentVerse = newData.lyrics.verses[verseId];
+
+                // 'verse 3'
+                let myArr = currentVerse.label.split(" ");
+                let verseNumber = (typeof(parseInt(myArr[(myArr.length - 1)])) == 'number' ? (parseInt(myArr[(myArr.length - 1)])) : 1)
+                var newLabel = 'verse'.concat(verseNumber);
+                console.log(newLabel)
+
+                let toRemove = (currentVerse.lines.length - lineId)
+                var lineObj = currentVerse.lines.splice(lineId, toRemove, currentVerse);
+
+                var newVerse = {
+                    "lines": lineObj,
+                    "label": newLabel,
+                    "id": newId
+                }
+
+                //let newLine = {'phrases': [phraseTemplate]};
+                let vArray = newData.lyrics.verses
+
+                vArray.splice(verseId, 1, currentVerse); // update current to be missing lines...
+
+                let workingIndex = ++verseId; 
+                vArray.splice(workingIndex, 0, newLine);// after current
+
+                // clean up labels
+                vArray.forEach(verse => {
+                    if (Object.hasOwnProperty.call(verse, label)) {
+                        const element = verse[label];
+                        if(element!='chorus'){
+                            //split it and increase the counter
+                        }
+                        
+                    }
+                });
+                newData.lyrics.verses = vArray;
+
+                console.log(newData);
+                song = newData;
+                line = song.lyrics.verses[verseId].lines[lineId];
+                songCollection.db.setItem(songId, newData);
+
+                // send ovreall song changes to server
+                dataManager.putSong(songId, newData)
+                    .then(responseText => alert(JSON.stringify(responseText)));
+                lastLine = true;
+                song = newData;
+                line = newData.lyrics.verses[verseId].lines[lineId];
+                self.clearSliders();
+                self.$setState({
+                    loading: false,
+                    song: newData,
+                    lastLine: true,
+                    line: newData.lyrics.verses[verseId + 1].lines[0]
+                }, () => {
+                    console.log(newData.lyrics.verses[verseId].lines[lineId]);
+                    self.displayLyricSliders()
+                    // TODO reload previous song page
+                });
+            },
             addLine: function(e) {
                 let newData = song;
                 // At index, add one element
@@ -905,7 +969,6 @@
                     }
                 };
             },
-
             makeSlider: function(tag, pipFormats, lyricRange, chordStartLocations, chordDataObject) {
                 //  Make the slider
                 if(chordDataObject.length > chordStartLocations.length){

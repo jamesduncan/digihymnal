@@ -343,6 +343,7 @@
                     songCollection.get(songId).then(result => {
                         languages = [];
                         lyricList = []
+                        result = app.song;
                         var translationLangs = Object.keys(result.lyrics.verses[verseId].lines[lineId].phrases[0]);
                         //var translationLangs = Object.keys(result.title);
                         locale.customLocales.forEach((item) => {
@@ -362,7 +363,6 @@
                         // song is used to get next line
                         song = result
 
-
                         self.$setState({
                             loading: false,
                             songId: songId,
@@ -370,7 +370,7 @@
                             lastVerse: lastVerse,
                             verseLabel: result.lyrics.verses[verseId].label,
                             firstLine: (lineId == 0 && verseId == 0),
-                            song: result,
+                            song: song,
                             // verse: result.verse[verseId],
                             line: line,
                             steps: steps,

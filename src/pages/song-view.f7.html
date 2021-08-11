@@ -374,9 +374,17 @@
                     lyric1 = languageCode;
                     defaultLanguage = languageCode;
                     console.log('current lang: ' + lyric1);
+                    // if global variable does not equaldesired song
+                    if( song.id != songId){
+
+                    } // else keep global var
+
                     songCollection.get(songId).then(result => {
                         let languages = [];
                         song = result;
+                        debugger;
+                        console.log(app.song)
+                        app.song = result;
                         var translationLangs = Object.keys(result.title);
                         locale.customLocales.forEach((item) => {
                             if (translationLangs.indexOf(item.tag) > -1) {
@@ -850,6 +858,16 @@
                     .then(responseText => alert(JSON.stringify(responseText)));
             
             
+            },
+            backChecker: function(e) {
+                // Check if there have been changes to the current song
+                if (savable){
+                    // prompt them to save>?
+                    console.log("Ask user if they wanna save")
+                } else {
+                    // just send them back
+                    app.router.back()
+                }
             }
             //
         }

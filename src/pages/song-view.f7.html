@@ -205,7 +205,7 @@
                         </div>
                     </div>
                 </div>
-                {{#js_if "@root.editMode AND savable"}}
+                {{#js_if "@root.editMode && @root.savable"}}
                 <p><a @click="save"  class="col popup-close button button-fill">*Save</a></p>
                 {{/js_if}}
                 <div class="block text-align-right text-color-gray" style="margin-top: 10px;">
@@ -365,7 +365,8 @@
 
                 preference.getEditMode().then((mode) => {
                     self.$setState({
-                        editMode: mode
+                        editMode: mode,
+                        savable: false
                     })
                 });
 

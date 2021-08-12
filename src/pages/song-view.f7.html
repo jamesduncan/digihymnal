@@ -861,11 +861,36 @@
             },
             backChecker: function(e) {
                 // Check if there have been changes to the current song
+                ev.preventDefault();
                 if (savable){
                     // prompt them to save>?
-                    console.log("Ask user if they wanna save")
+                    // 
+                    var dialog = app.dialog.create({
+                        backdrop: true,
+                        closeByBackdropClick: false,
+                        title: "<t>Leave this page?</t>",
+                        text: "<t>Do you want to save your changes?</t>",
+                        buttons: [{
+                                text: "<t>Don't Save</t>",
+                                onClick: (dialog, ev) => {
+                                    this.$router.back();
+                                }
+                            },
+                            {
+                                text: "<t>Save</t>",
+                                onClick: (dialog, ev) => {
+                                    self.save()
+                                    this.$router.back();
+                                }
+                            }
+                        ],
+                        verticalButtons: true
+                    });
+                    dialog.open();
+                    // If form is empty, go back immediately
                 } else {
                     // just send them back
+                    this.$router.back();
                     app.router.back()
                 }
             }

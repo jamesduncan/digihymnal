@@ -1101,6 +1101,44 @@
                 }
                 debugger;
                 return false
+            },
+            backChecker: funciton(e){
+                let newStatus = app.form.convertToData('#edit-donation')
+                // Dirty is True if they don't match
+                return (JSON.stringify(saveStatus) != JSON.stringify(newStatus))
+                ev.preventDefault();
+                // If status means form can be edited AND If form is dirty
+                // then ask for confirmation 
+                // complete 1581051573142 Submitted 1581051573215
+                if (isDirty()) {
+                    // 
+                    var dialog = app.dialog.create({
+                        backdrop: true,
+                        closeByBackdropClick: false,
+                        title: "<t>Leave this page?</t>",
+                        text: "<t>Do you want to save your changes?</t>",
+                        buttons: [{
+                                text: "<t>Don't Save</t>",
+                                onClick: (dialog, ev) => {
+                                    this.$router.back();
+                                }
+                            },
+                            {
+                                text: "<t>Save</t>",
+                                onClick: (dialog, ev) => {
+                                    app.dialog.close()
+                                    setStatus()
+                                }
+                            }
+                        ],
+                        verticalButtons: true
+                    });
+                    dialog.open();
+                }
+                // If form is empty, go back immediately
+                else {
+                    this.$router.back();
+                }
             }
         }
     }

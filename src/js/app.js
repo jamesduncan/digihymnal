@@ -117,7 +117,16 @@ Template7.registerHelper('printEachLanguage', function(dataArray, languages, nam
 // print all languages for passed div
 // (parentObject)
 Template7.registerHelper('printObjectPropertyByKey', function(dataObject, language) {
-    return dataObject[language];
+    if(dataObject && language){
+        // check if there's supposed to be a space
+        let lastIndex = (dataObject[language].length-1);
+        let c = dataObject[language][lastIndex]; // last character
+        if ((c <= 32 && c >= 0) || c == 127){
+            return (dataObject[language].concat( `&nbsp;` ));
+        }
+        return dataObject[language];
+    } 
+    return ""
 })
 
 var app = new Framework7({

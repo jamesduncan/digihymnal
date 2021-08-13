@@ -130,9 +130,9 @@
                                                             <div class="number">{{number}}</div>
                                                         {{/if}}
                                                     {{/if}}
-                                                    <div class="lyric">{{this[lyric1]}}</div>
+                                                    <div class="lyric">{{printObjectPropertyByKey this @root.lyric1 }}</div>  
                                                     {{#if @root.showLyric2}}
-                                                        <div class="lyric">{{this[lyric2]}}</div>
+                                                        <div class="lyric">{{printObjectPropertyByKey this @root.lyric2 }}</div>
                                                     {{/if}}
                                                 </div>
                                             {{/each}}
@@ -254,9 +254,9 @@
     .phrase {
         position: relative;
         display: inline;
-        margin: 55px 10px 0 0;
+        margin: 55px 0 0 0;
         min-width: none !important;
-        padding: 1px !important;
+        padding: 0px !important;
         float: left;
     }
 
@@ -402,6 +402,7 @@
                         self.$setState({
                             loading: false,
                             song: song,
+                            lyric1: lyric1,
                             steps: steps,
                             languages: languages,
                             defaultLanguage: defaultLanguage
@@ -809,14 +810,8 @@
                 songCollection.db.setItem(songId, song);
                 self.clearSliders();
                 self.savableUpdate(false)
-                self.$setState({
-                    loading: false,
-                    song: newData
-                }, () => {
-                    // self.displayLyricSliders();
-                });
-                // send line changes to server
-                dataManager.putLine(songId, verseId, lineId, newData.lyrics.verses[verseId].lines[lineId])
+                // send ovreall song changes to server
+                dataManager.putSong(songId, newData)
                     .then(responseText => alert(JSON.stringify(responseText)));
             
             

@@ -181,6 +181,9 @@
                             </div>
                         </div>
                     </div>
+                {{#js_if "@root.savable"}}
+                    <p><a @click="save"  class="col popup-close button button-fill">*Save</a></p>
+                {{/js_if}}
                 </div>
                 <div class="block text-align-right text-color-gray" style="margin-top: 10px;">
                     {{song.author[defaultLanguage]}}
@@ -263,6 +266,7 @@
 <script>
     var songId
     var loading
+    var savable = false;
     var verseId
     var verseLabel
     var lineId
@@ -315,6 +319,7 @@
             self = this;
             return {
                 loading: true,
+                savable: savable,
                 lastVerse: false,
                 lastLine: false,
                 firstLine: false,
@@ -328,88 +333,83 @@
                 self = this;
                 app = self.$app;
                 var $form = this.$('#edit-line')
-
+                
                 songId = this.$route.params.songId;
-                // console.log(songId)
                 verseId = this.$route.params.verseId;
-                // console.log(verseId)
                 lineId = this.$route.params.lineId;
-                // console.log(lineId)
+                
+                // get global savable
+                self.savableUpdate(app.savable);
 
                 preference.getLanguage().then((languageCode) => {
                     lyric1 = languageCode;
                     defaultLanguage = languageCode;
-                    console.log('current lang: ' + lyric1);
-                    songCollection.get(songId).then(result => {
-                        languages = [];
-                        lyricList = []
-                        result = app.song;
-                        var translationLangs = Object.keys(result.lyrics.verses[verseId].lines[lineId].phrases[0]);
-                        //var translationLangs = Object.keys(result.title);
-                        locale.customLocales.forEach((item) => {
-                            if (translationLangs.indexOf(item.tag) > -1) {
-                                if (item.tag == lyric1) {
-                                    item.default = true;
-                                }
-                                languages.push(item.tag)
+                    languages = [];
+                    lyricList = []
+                    var result = app.song;
+                    var translationLangs = Object.keys(result.lyrics.verses[verseId].lines[lineId].phrases[0]);
+                    //var translationLangs = Object.keys(result.title);
+                    locale.customLocales.forEach((item) => {
+                        if (translationLangs.indexOf(item.tag) > -1) {
+                            if (item.tag == lyric1) {
+                                item.default = true;
                             }
+                            languages.push(item.tag)
+                        }
+                    });
+                    line = result.lyrics.verses[verseId].lines[lineId]
+
+                    // check if last line
+                    lastLine = (lineId >= (result.lyrics.verses[verseId].lines.length - 1));
+                    lastVerse = (verseId >= (result.lyrics.verses.length - 1));
+                    // song is used to get next line
+                    song = result
+
+                    self.$setState({
+                        loading: false,
+                        savable: savable,
+                        songId: songId,
+                        lastLine: lastLine,
+                        lastVerse: lastVerse,
+                        verseLabel: result.lyrics.verses[verseId].label,
+                        firstLine: (lineId == 0 && verseId == 0),
+                        song: song,
+                        // verse: result.verse[verseId],
+                        line: line,
+                        steps: steps,
+                        languages: languages,
+                        lyricList: lyricList,
+                        defaultLanguage: defaultLanguage
+                    }, () => {
+                        self.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                        self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+
+                        // make the sliders
+                        self.displayLyricSliders()
+
+                        languages.forEach(lang => {
+                            line.phrases.forEach(phrase => {
+                                lyricList.push({
+                                    "tag": lang,
+                                    "lyric": line[lang]
+                                })
+                            });
                         });
-                        line = result.lyrics.verses[verseId].lines[lineId]
-                        console.log(line)
 
-                        // check if last line
-                        lastLine = (lineId >= (result.lyrics.verses[verseId].lines.length - 1));
-                        lastVerse = (verseId >= (result.lyrics.verses.length - 1));
-                        // song is used to get next line
-                        song = result
-
-                        self.$setState({
-                            loading: false,
-                            songId: songId,
-                            lastLine: lastLine,
-                            lastVerse: lastVerse,
-                            verseLabel: result.lyrics.verses[verseId].label,
-                            firstLine: (lineId == 0 && verseId == 0),
-                            song: song,
-                            // verse: result.verse[verseId],
-                            line: line,
-                            steps: steps,
-                            languages: languages,
-                            lyricList: lyricList,
-                            defaultLanguage: defaultLanguage
-                        }, () => {
-                            self.$(".song")[0].style.transform = "scale(" + initScale + ")";
-                            self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
-
-                            // make the sliders
-                            self.displayLyricSliders()
-
-                            languages.forEach(lang => {
-                                line.phrases.forEach(phrase => {
-                                    console.log(phrase[lang])
-                                    lyricList.push({
-                                        "tag": lang,
-                                        "lyric": line[lang]
-                                    })
-                                });
-                            });
-                            console.log(result.lyrics.verses[verseId].lines[lineId])
-
-                            var stepper = app.stepper.create({
-                                el: '.stepper',
-                                value: steps,
-                                min: 0,
-                                max: 11,
-                                wraps: true,
-                                on: {
-                                    change: function(e) {
-                                        steps = e.value;
-                                        self.$setState({
-                                            steps: steps,
-                                        });
-                                    }
+                        var stepper = app.stepper.create({
+                            el: '.stepper',
+                            value: steps,
+                            min: 0,
+                            max: 11,
+                            wraps: true,
+                            on: {
+                                change: function(e) {
+                                    steps = e.value;
+                                    self.$setState({
+                                        steps: steps,
+                                    });
                                 }
-                            });
+                            }
                         });
                     });
                 });
@@ -427,7 +427,6 @@
                 this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
             },
             save: function(e) {
-                console.log(songId, verseId, lineId)
                 var $form = this.$('#edit-line')
                 var $ = $form.find("select[name='']") //relation
                 if (!self.$app.input.validateInputs('#edit-line')) {
@@ -473,7 +472,9 @@
                     // save
                     line = newData.lyrics.verses[verseId].lines[lineId];
                     song = newData;
+                    app.song = newData;
                     songCollection.db.setItem(songId, newData);
+                    self.savableUpdate(false);
                     self.clearSliders();
                     self.$setState({
                         loading: false,
@@ -545,13 +546,11 @@
                     });
                     // push remaining text...
                     phraseArray.push( parsedLineArr.join("") )
-                    console.log({tag: phraseArray})
                 }
                 return phraseArray;
             },
             nextLine: function(e) {
                 // only get index forward if it exists in song
-                console.log(lastVerse)
                 if (lastLine && !lastVerse) { // if at end of NOTlastVerse, check next verse
                     lastVerse = ((verseId + 1) >= (song.lyrics.verses.length - 1)); // is next verse last verse?
                     lastLine = ((song.lyrics.verses[parseInt(verseId) + 1].lines[1]) == undefined); // is there only one line in next verse?
@@ -576,7 +575,6 @@
                 }, () => {
                     self.clearSliders()
                     self.displayLyricSliders()
-                    console.log(song.lyrics.verses[verseId].lines[lineId])
                 });
             },
             prevLine: function(e) {
@@ -600,11 +598,9 @@
                     line: song.lyrics.verses[verseId].lines[lineId]
                 }, () => {
                     self.displayLyricSliders()
-                    console.log(song.lyrics.verses[verseId].lines[lineId])
                 });
             },
             deleteLine: function(e) {
-                console.log(songId, verseId, lineId);
                 // TODO pre-delete confirmation prompt
                 let newData = song
                 // At index, remove one element
@@ -626,8 +622,10 @@
                 }
 
                 song = newData;
+                app.song = newData;
                 line = song.lyrics.verses[verseId].lines[lineId]
-                songCollection.db.setItem(songId, newData)
+                self.savableUpdate(true);
+                //songCollection.db.setItem(songId, newData)
                 self.clearSliders()
                 self.$setState({
                     line: newData.lyrics.verses[verseId].lines[lineId],
@@ -637,11 +635,9 @@
                     loading: false,
                 }, () => {
                     self.displayLyricSliders()
-                    // TODO reload previous song page
                 });
             },
             addVerse: function(e) {
-                console.log(songId, verseId, lineId);
                 let newData = song;
                 var phraseTemplate = Object.assign({}, newData.lyrics.verses[verseId].lines[lineId].phrases[0]);
                 for (const tag in phraseTemplate) {
@@ -665,7 +661,6 @@
                 let verseNumber = (typeof(parseInt(myArr[(myArr.length - 1)])) == 'number' ? (parseInt(myArr[(myArr.length - 1)])) : 1)
 
                 var newLabel = 'verse'.concat(verseNumber);
-                console.log(newLabel)
 
                 var newVerse = {
                     "lines": lineObj,
@@ -674,10 +669,11 @@
                 }
 
                 newData.lyrics.verses.push(newVerse);
-                console.log(newData);
                 song = newData;
+                app.song = newData;
                 line = song.lyrics.verses[verseId].lines[lineId];
-                songCollection.db.setItem(songId, newData);
+                self.savableUpdate(true);
+                //songCollection.db.setItem(songId, newData);
 
                 // send ovreall song changes to server
                 dataManager.putSong(songId, newData)
@@ -692,13 +688,10 @@
                     lastLine: true,
                     line: newData.lyrics.verses[verseId + 1].lines[0]
                 }, () => {
-                    console.log(newData.lyrics.verses[verseId].lines[lineId]);
                     self.displayLyricSliders()
-                    // TODO reload previous song page
                 });
             },
             splitVerse: function(e) {
-                console.log(songId, verseId, lineId);
                 let newData = song;
 
                 var currentVerse = newData.lyrics.verses[verseId];
@@ -707,7 +700,6 @@
                 let myArr = currentVerse.label.split(" ");
                 let verseNumber = (typeof(parseInt(myArr[(myArr.length - 1)])) == 'number' ? (parseInt(myArr[(myArr.length - 1)])) : 1)
                 var newLabel = 'verse'.concat(verseNumber);
-                console.log(newLabel)
 
                 let toRemove = (currentVerse.lines.length - lineId)
                 var lineObj = currentVerse.lines.splice(lineId, toRemove, currentVerse);
@@ -738,10 +730,11 @@
                 });
                 newData.lyrics.verses = vArray;
 
-                console.log(newData);
                 song = newData;
+                app.song = newData;
                 line = song.lyrics.verses[verseId].lines[lineId];
-                songCollection.db.setItem(songId, newData);
+                self.savableUpdate(true)
+                //songCollection.db.setItem(songId, newData);
 
                 // send ovreall song changes to server
                 dataManager.putSong(songId, newData)
@@ -756,9 +749,7 @@
                     lastLine: true,
                     line: newData.lyrics.verses[verseId + 1].lines[0]
                 }, () => {
-                    console.log(newData.lyrics.verses[verseId].lines[lineId]);
                     self.displayLyricSliders()
-                    // TODO reload previous song page
                 });
             },
             addLine: function(e) {
@@ -780,8 +771,9 @@
                 // insert item into arr at the specified index (deleting 0 items first, it's just an insert).
                 lineArray.splice(workingIndex, 0, newLine);
                 newData.lyrics.verses[verseId].lines = lineArray;
-                console.log(newData);
-                songCollection.db.setItem(songId, newData);
+                app.song = newData;
+                self.savableUpdate(true)
+                //songCollection.db.setItem(songId, newData);
 
                 // send verse changes to server
                 dataManager.putVerse(songId, verseId, newData.lyrics.verses[verseId])
@@ -795,9 +787,7 @@
                     song: newData,
                     line: newData.lyrics.verses[verseId].lines[lineId]
                 }, () => {
-                    self.displayLyricSliders()
-                    console.log(newData.lyrics.verses[verseId].lines[lineId]);
-                    // TODO reload previous song page
+                    self.displayLyricSliders();
                 });
             },
             addPhrase: function(e) {
@@ -818,10 +808,10 @@
                     }
                 }
 
-                console.log(phraseArray);
-
                 newData.lyrics.verses[verseId].lines[lineId].phrases = phraseArray
-                songCollection.db.setItem(songId, newData)
+                app.song = newData;
+                self.savableUpdate(true);
+                //songCollection.db.setItem(songId, newData)
                 song = newData;
                 line = song.lyrics.verses[verseId].lines[lineId];
                 self.clearSliders()
@@ -831,10 +821,17 @@
                     line: newData.lyrics.verses[verseId].lines[lineId]
                 }, () => {
                     self.displayLyricSliders()
-                    console.log(newData.lyrics.verses[verseId].lines[lineId]);
-                    // TODO reload previous song page
                 });
-                // TODO update IS CHANGED variable
+            },
+            savableUpdate: function(bool) {
+                if (typeof(bool) != 'boolean'){
+                    bool = false;
+                }
+                app.savable = bool;
+                savable = bool;
+                self.$setState({
+                    savable: bool
+                });
             },
             deletePhrase: function(e) {
                 if( line.phrases.length <= 1 ){
@@ -854,22 +851,16 @@
                     }
                 }
 
-
-                console.log({
-                    "removing": deletedPhrase
-                })
                 line = newData.lyrics.verses[verseId].lines[lineId]
-                songCollection.db.setItem(songId, newData).then(() =>{
-                    self.clearSliders()
-                    self.$setState({
-                        loading: false,
-                        song: newData,
-                        line: newData.lyrics.verses[verseId].lines[lineId]
-                    }, () => {
-                        console.log(newData.lyrics.verses[verseId].lines[lineId]);
-                        self.displayLyricSliders()
-                        // TODO reload previous song page
-                    });
+                app.song = newData;
+                self.savableUpdate(true)
+                self.clearSliders()
+                self.$setState({
+                    loading: false,
+                    song: newData,
+                    line: newData.lyrics.verses[verseId].lines[lineId]
+                }, () => {
+                    self.displayLyricSliders()
                 });
             },
             clearSliders: function() {
@@ -911,8 +902,8 @@
                                     lyric[key] = elementAsArray;
                                 }
                                 // 
-                                var chordEndIndex
-                                if (chordStartLocations[key]){
+                                var chordEndIndex // falsy
+                                if (chordStartLocations[key]){  // if already exists
                                     chordEndIndex = chordStartLocations[key].length;
                                 }else{
                                     chordStartLocations[key] = [];
@@ -1019,7 +1010,6 @@
                 var langLine = ""
                 line.phrases.forEach(phrase => {
                     if (phrase[tag]) {
-                        console.log(phrase[tag])
                         langLine += phrase[tag];
                     }
                 });
@@ -1060,7 +1050,6 @@
                 a.open();
             },
             updateLine: function(data,tag){
-                console.log(data,tag);
                 if (self.validateTag(tag)){
                     //update line and refresh
                     var lineArr = self.diacriticChecker(data.split(""), 0)
@@ -1090,7 +1079,6 @@
                         line: line
                     }, () => {
                         self.displayLyricSliders()
-                        console.log(song.lyrics.verses[verseId].lines[lineId]);
                         // User will need to save....
                     });                   
                 }
@@ -1102,7 +1090,7 @@
                 debugger;
                 return false
             },
-            backChecker: funciton(e){
+            backChecker: function(e){
                 let newStatus = app.form.convertToData('#edit-donation')
                 // Dirty is True if they don't match
                 return (JSON.stringify(saveStatus) != JSON.stringify(newStatus))

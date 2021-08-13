@@ -213,59 +213,51 @@
                 songId = this.$route.params.songId;
                 // var $form = this.$('#songMetaData')
 
-                // console.log(songId)
-
                 preference.getLanguage().then((languageCode) => {
                     lyric1 = languageCode;
                     defaultLanguage = languageCode;
-                    console.log('current lang: ' + lyric1);
-                    songCollection.get(songId).then(result => {
-                        languages = [];
-                        var translationLangs = Object.keys(result.title);
-                        locale.customLocales.forEach((item) => {
-                            if (translationLangs.indexOf(item.tag) > -1) {
-                                if (item.tag == lyric1) {
-                                    item.default = true;
-                                }
-                                languages.push(item.tag)
+                    var result = app.song;
+                    languages = [];
+                    var translationLangs = Object.keys(result.title);
+                    locale.customLocales.forEach((item) => {
+                        if (translationLangs.indexOf(item.tag) > -1) {
+                            if (item.tag == lyric1) {
+                                item.default = true;
                             }
-                        });
-                        // song is used to get next line
-                        song = result
+                            languages.push(item.tag)
+                        }
+                    });
+                    // song is used to get next line
+                    song = result
 
-                        // Get Verse Labels
-                        verseLabels = []
-                        song.lyrics.verses.forEach(verse => {
-                            // [{1, 'Verse 1'},{...}]
-                            console.log(verse.label)
-                            //verseLabels.push({'id':verse.id, 'label':verse.label})
-                            verseLabels.push({
-                                'label': String(verse.label)
-                            })
-                        });
-                        console.log("verse labels", verseLabels)
+                    // Get Verse Labels
+                    verseLabels = []
+                    song.lyrics.verses.forEach(verse => {
+                        // [{1, 'Verse 1'},{...}]
+                        //verseLabels.push({'id':verse.id, 'label':verse.label})
+                        verseLabels.push({
+                            'label': String(verse.label)
+                        })
+                    });
 
-                        self.$setState({
-                            loading: false,
-                            song: result,
-                            author: result.author, // string
-                            key: result.key, // string
-                            title: result.title, // obj
-                            metadata: result.metadata[0], // obj
-                            verseLabels: verseLabels,
-                            languages: languages
-                        });
-                        self.$tick(function() {
-                            console.log('DOM and state updated');
-                            self.$('textarea').trigger('change');
-                        });
+                    self.$setState({
+                        loading: false,
+                        song: result,
+                        author: result.author, // string
+                        key: result.key, // string
+                        title: result.title, // obj
+                        metadata: result.metadata[0], // obj
+                        verseLabels: verseLabels,
+                        languages: languages
+                    });
+                    self.$tick(function() {
+                        self.$('textarea').trigger('change');
                     });
                 });
             },
         },
         methods: {
             save: function(e) {
-                console.log(songId)
                 var $form = this.$('#songMetaData')
                 var $ = $form.find("select[name='']")
 
@@ -276,52 +268,45 @@
                 var key = this.$('input[name="key"]')[0].value.trim()
                 var author = this.$('input[name="author"]')[0].value.trim()
 
-                songCollection.get(songId).then(result => {
-                    if (result.id != songId) {
-                        console.log("This is going to cause problems")
-                        debugger;
-                    }
-                    let newData = result;
-                    newData.key = key;
-                    newData.author = author;
+                if (app.song.id != songId) {
+                    console.log("This is going to cause problems")
+                    debugger;
+                }
+                let newData = song;
+                newData.key = key;
+                newData.author = author;
 
-                    // Language tag: metadataArray[x].lastElementChild.classList[1]
-                    // Value: metadataArray[x].lastElementChild.firstChild.firstChild.value
-                    metadataArray.forEach(dataElement => {
-                        var tag = dataElement.firstElementChild.firstElementChild.innerText; //
-                        var value = dataElement.firstElementChild.lastElementChild.firstElementChild.value;// .lastElementChild.firstChild.firstChild.value //
-                        newData.metadata[0][tag] = value.trim()
-                    });
-                    // console.log(newData.metadata[0])
-                    titleArray.forEach(dataElement => {
-                        var tag = dataElement.firstElementChild.firstElementChild.innerText; // dataElement.firstElementChild.firstElementChild.innerText
-                        var value = dataElement.firstElementChild.lastElementChild.firstElementChild.value;// dataElement.lastElementChild.firstChild.firstChild.value
-                        newData.title[tag] = value.trim()
-                    });
-                    // console.log(newData.title)
-                    let i = 0
-                    verseLabelArray.forEach(dataElement => {
-                        var value = dataElement.firstElementChild.lastElementChild.firstElementChild.value;// dataElement.lastElementChild.firstChild.firstChild.value
-                        newData.lyrics.verses[i++].label = value.trim()
-                    });
-                    console.log(newData.lyrics);
-
-                    // save
-                    songCollection.db.setItem(songId, newData)
-                    // save to server
-                    console.log({
-                        "Song ID": songId,
-                        "song": newData
-                    })
-                    dataManager.putSong(songId, newData)
-                        .then(responseText => alert(JSON.stringify(responseText)));
-                    self.$setState({
-                        loading: false,
-                        song: newData,
-                    }, () => {
-                        console.log(newData)
-                    });
+                // Language tag: metadataArray[x].lastElementChild.classList[1]
+                // Value: metadataArray[x].lastElementChild.firstChild.firstChild.value
+                metadataArray.forEach(dataElement => {
+                    var tag = dataElement.firstElementChild.firstElementChild.innerText; //
+                    var value = dataElement.firstElementChild.lastElementChild.firstElementChild.value;// .lastElementChild.firstChild.firstChild.value //
+                    newData.metadata[0][tag] = value.trim()
                 });
+                titleArray.forEach(dataElement => {
+                    var tag = dataElement.firstElementChild.firstElementChild.innerText; // dataElement.firstElementChild.firstElementChild.innerText
+                    var value = dataElement.firstElementChild.lastElementChild.firstElementChild.value;// dataElement.lastElementChild.firstChild.firstChild.value
+                    newData.title[tag] = value.trim()
+                });
+                let i = 0
+                verseLabelArray.forEach(dataElement => {
+                    var value = dataElement.firstElementChild.lastElementChild.firstElementChild.value;// dataElement.lastElementChild.firstChild.firstChild.value
+                    newData.lyrics.verses[i++].label = value.trim()
+                });
+
+                // save
+                app.song = newData;
+                songCollection.db.setItem(songId, newData)
+                // save to server
+                console.log({
+                    "Song ID": songId,
+                    "song": newData
+                })
+                dataManager.putSong(songId, newData)
+                    .then(responseText => {
+                        alert(JSON.stringify(responseText))
+                        this.$router.back();
+                    });
             },
             pickLanguageCode: function() {
                 // TODO add logic here for picking a language
@@ -331,35 +316,32 @@
             },
             addLanguageCode: function(newLanguageTag) {
                 // var newLanguageTag = 'en';
-                songCollection.get(songId).then(result => {
-                    let newData = result;
-                    var languageTag = newLanguageTag;
+                let newData = app.song;
+                var languageTag = newLanguageTag;
 
 
-                    // Language tag
-                    newData.metadata.forEach(metaDataLine => {
-                        metaDataLine[languageTag] = "*";
-                    });
-                    newData.title[languageTag] = "*";
-                    // add tag to every phrase
-                    newData.lyrics.verses.forEach(verse => {
-                        verse.lines.forEach(line => {
-                            line.phrases.forEach(phrase => {
-                                phrase[languageTag] = "*";
-                            });
+                // Language tag
+                newData.metadata.forEach(metaDataLine => {
+                    metaDataLine[languageTag] = "*";
+                });
+                newData.title[languageTag] = "*";
+                // add tag to every phrase
+                newData.lyrics.verses.forEach(verse => {
+                    verse.lines.forEach(line => {
+                        line.phrases.forEach(phrase => {
+                            phrase[languageTag] = "*";
                         });
                     });
-                    songCollection.db.setItem(songId, newData)
-                    debugger;
-                    self.$setState({
-                        loading: false,
-                        song: newData,
-                    }, () => {
-                        console.log(newData)
-                    });
-                    // TODO send changes to server
-                    //
                 });
+                app.song = newData;
+                songCollection.db.setItem(songId, newData)
+                debugger;
+                self.$setState({
+                    loading: false,
+                    song: newData,
+                });
+                // TODO send changes to server
+                //
                 return;
             }
         },

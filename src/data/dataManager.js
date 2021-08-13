@@ -49,7 +49,6 @@ export default class dataManager {
     }
     // TODO update entire song. Needed when deleting verse, adding language, ?changeing metadata?
     async putSong(songId, newData) {
-      debugger
       const body = { 'songId': songId,'newData': newData };
 
       fetch(`https://dhapi.achoobert.repl.co/handle/update/${songId}`, {

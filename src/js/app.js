@@ -60,7 +60,7 @@ Template7.registerHelper('printEachPhrase', function(line, languages) {
     }
     var results = ''
     const validateChords = `required pattern='[ABCDEFG]|[ABCDEFG]m|[ABCDEFG]#|[ABCDEFG]b|[ABCDEFG]#m|[ABCDEFG]bm|[ABCDEFG]m7|[ABCDEFG]7|[ABCDEFG]sus|[ABCDEFG]#7|[ABCDEFG]#sus|[ABCDEFG]b7|[ABCDEFG]bsus'`
-    const validateNumber = `required pattern='1|2|3|4|5|6|7|8|9|10|11|12'`
+    const validateNumber = `required pattern='1|2|3|4|5|6|7|8|9|10|11|12||'`
     //
     results = results.concat(`<div class="line metadata">`)
     //if(line.phrases[0]["chord"]){

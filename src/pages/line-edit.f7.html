@@ -436,39 +436,64 @@
                 } else {
                     let newData = song;
 
-                    // get data from the dom
-                    var newLanguageLineData = {}
-                    debugger;
-                    languages.forEach(langTag => {
-                        newLanguageLineData[langTag] = self.parseLanguageText(langTag);
-                    });
-
                     // metadata getter
-                    var listOfLines = Array.from(this.$('#edit-line')[0].children)// iterate horizontally
-                    listOfLines.forEach(lineElement => {// each chord, number, and language
-                        var tag = ""
-                        if (lineElement.classList.value.includes("metadata")) { // is chords/nums, both chords and nums are in same place in dom.
-                            tag = 'metadata'
-                        } // now, we have "chords": ['a','b','c']
-                        let elementChildrenArray = Array.from(lineElement.children)
-                        var i = 0
-                        while (i < elementChildrenArray.length) {
-                            if (tag === "metadata") {
-                                // setting chord
-                                newData.lyrics.verses[verseId].lines[lineId].phrases[i]['chord'] = elementChildrenArray[i].children[0].children[0].children[0].value
-                                // setting number
-                                newData.lyrics.verses[verseId].lines[lineId].phrases[i]['number'] = elementChildrenArray[i].children[1].children[0].children[0].value
-                                for (const langTag in newLanguageLineData) {
-                                    if (Object.hasOwnProperty.call(newLanguageLineData, langTag)) {
-                                        const element = newLanguageLineData[langTag][i];
-                                        newData.lyrics.verses[verseId].lines[lineId].phrases[i][langTag] = element;
-                                    }
-                                }
-                            } 
+                    let metadataArray = Array.from(self.$('.metadata')[0].children);
+                    var newLanguageLineData = {}
+                    //var workingIndex = 0;
+                    var chordPlacerIndex = 0; // if first phrase is chordless, this starts on second phrase
+                    // if (!Object.hasOwnProperty.call(newData.lyrics.verses[verseId].lines[lineId].phrases[0], 'chord')) { // if 0 has chord, need to insert new chordless phrase
+                    //     debugger;
+                    //     chordPlacerIndex = 1;
+                    // }
+
+                    languages.forEach(langTag => {
+                        // selected language
+                        debugger;
+                        newLanguageLineData[langTag] = self.parseLanguageText(langTag);
+                        newLanguageLineData[langTag].index = 0;
+                        if (( metadataArray.length + 1 ) == newLanguageLineData[langTag].length){ // I'm expecting there to be max variance of one
+                            if (Object.hasOwnProperty.call(newData.lyrics.verses[verseId].lines[lineId].phrases[0], 'chord')) { // if 0 has chord, need to insert new chordless phrase
+                                let newPhrase = {}
+                                languages.forEach(langTag => {newPhrase[langTag] = ''}); //
+                                newPhrase[langTag] = newLanguageLineData[langTag][0];
+                                newData.lyrics.verses[verseId].lines[lineId].phrases.splice(0, 0, newPhrase);
+                            } else {
+                                newData.lyrics.verses[verseId].lines[lineId].phrases[0][langTag] = newLanguageLineData[langTag][0];
+                            };
+                            newLanguageLineData[langTag].index = 1;
+                            chordPlacerIndex = 1;
+                        } else if (chordPlacerIndex) { // this language doesn't have no-chord phrase. Start at 1
+                            newData.lyrics.verses[verseId].lines[lineId].phrases[0][langTag] = '';
+                            newLanguageLineData[langTag].index = chordPlacerIndex;
+                        };
+                        let i = newLanguageLineData[langTag].index;
+                        if(newLanguageLineData[langTag].length != newData.lyrics.verses[verseId].lines[lineId].phrases.length){
+                            if ( !(newLanguageLineData[langTag][( newLanguageLineData[langTag].length -1)]) ){
+                                newLanguageLineData[langTag].pop();
+                            } else {
+                                console.error("There is an extra phrase and it isn't blank")
+                                debugger;
+                            }
+                        }
+                        while (i < newLanguageLineData[langTag].length){ // insert this language to the song data
+                            const element = newLanguageLineData[langTag][i];
+                            newData.lyrics.verses[verseId].lines[lineId].phrases[i][langTag] = element;
                             i++;
                         }
                     });
-
+                    var i = 0;
+                    while (i < metadataArray.length) {
+                        if (metadataArray[i].children.length) { // If phrase is chordless, might be blank
+                            // setting chord
+                            newData.lyrics.verses[verseId].lines[lineId].phrases[chordPlacerIndex]['chord'] = metadataArray[i].children[0].children[0].children[0].value
+                            // setting number
+                            newData.lyrics.verses[verseId].lines[lineId].phrases[chordPlacerIndex]['number'] = metadataArray[i].children[1].children[0].children[0].value
+                        } else {
+                            debugger;
+                        }
+                        chordPlacerIndex++;
+                        i++;
+                    };
                     // save
                     line = newData.lyrics.verses[verseId].lines[lineId];
                     song = newData;
@@ -492,7 +517,8 @@
             parseLanguageText: function(tag, languageLine, chordArray){
                 // I need the full string "Twinkle, twinkle, little star"
                 // I need placment of phrase breaks ["0.00", "10.00", "15.00"]
-                if(!chordArray){
+                // return [('Twinkle, tw'),('inkle'),(', little star')]
+                if(!chordArray){ // get from dom
                     try {
                         chordArray = this.$$(`#slider-${tag}`)[0].noUiSlider.get()
                     } catch (error) {
@@ -502,7 +528,7 @@
                         console.error({"no div for tag":tag})
                     }
                 }
-                if(!languageLine){
+                if(!languageLine){ // get from global var
                     try {
                         languageLine = ''
                         line.phrases.forEach(phrase => {
@@ -520,56 +546,51 @@
                 var phraseArray = [] ;// ["Twin","kle, twinkle,", " little star"]
                 
                 if (typeof chordArray === 'string'){// there's only the one chord
-                    phraseArray.push(languageLine)
+                    if (parseInt(chordArray) != 0){ // we need two phrases
+                        var parsedLineArr = self.diacriticChecker(languageLine.split(""), 0);
+                        phraseArray.push( (parsedLineArr.splice(0, parseInt(chordArray) )).join("") ); 
+                        phraseArray.push( parsedLineArr.join("") ); // remaining
+                    } else {
+                        phraseArray.push(languageLine);
+                    }
                 } else {
                     if( typeof languageLine == 'string'){
                         languageLine = languageLine.split("");
                     }
                     var parsedLineArr =  self.diacriticChecker(languageLine, 0);
-                    var lastDivider = 0;
+                    var lastPhraseLength = 0;
                     var firstChord = true;
 
-                    //  [0,4,10]
-                    //  [0,4,10]
-
-                    //  [2,8,12]
-                    //  [0,2,8,12]
-
-                    // each chord
-                    // if first and not 0, add extra chordless phrase
-                    // length of each phrase is
-                       1    3   4
-                    sdfasdasdfasdfsadf
-
+                    var i = 0;
                     while (chordArray[i]) {
-                        
-                    }
-                    chordArray.forEach(chord => { 
-                        var currentIndex = parseInt(chord);
+                        let chord = (chordArray[i]);
+                        var currentIndexValue = parseInt(chord);
+                        var currentPhraseLength
                         // to chop off index
-                        var nextIndex = (parseInt(chordArray[1])-1)
-                        if // we're at end of chords, claim rest of phrase
-
-                        var currentPhraseLength = nextIndex - currentIndex;
-
-                        if(firstChord && parseInt(chord) != 0){
+                        
+                         
+                        if(firstChord && currentIndexValue != 0){ // first and skipping phrase
                             firstChord = false;
-                            // put a chordless phrase
-                            divider = (parseInt(chordArray[1])-1) // end of chordless is start of next
-                            let toInsert = (parsedLineArr.splice(0,divider)).join(""); // splice(start, deleteCount)
+                            // put a chordless phrase end of chordless is start of next
+                            let toInsert = (parsedLineArr.splice(0,currentIndexValue)).join(""); // splice(start, deleteCount)
                             phraseArray.push( toInsert );
-                        } else {
-                            if ( lastDivider === divider){ // chords are tightly packed, insert empty string
-                                phraseArray.push( '' );
-                            }
-                            let divider = (parseInt(chord) - lastDivider)
+                        } else if(firstChord && currentIndexValue === 0){ // There is always a chordless phrase
+                            phraseArray.push( '' )
                         }
-                        lastDivider = divider
+                        if (!chordArray[i+1]){ // last, we're at end of chords, claim rest of phrase
+                            debugger;
+                            currentPhraseLength = parsedLineArr.length;
+                            i++;
+                        } else { // middle
+                            currentPhraseLength = parseInt(chordArray[i+1]) - currentIndexValue;
+                            i++;
+                        }
+                        
+                        
+                        lastPhraseLength = currentPhraseLength;
                         let toInsert = (parsedLineArr.splice(0,currentPhraseLength)).join(""); // splice(start, deleteCount)
                         phraseArray.push( toInsert );
-                    });
-                    // push remaining text...
-                    phraseArray.push( parsedLineArr.join("") )
+                    }
                 }
                 return phraseArray;
             },
@@ -831,6 +852,11 @@
                         phraseArray[workingIndex][tag] = ""
                     }
                 }
+                
+                if (!Object.hasOwnProperty.call(phraseArray[workingIndex], 'chord')) {
+                    phraseArray[workingIndex].chord = '*';
+                    phraseArray[workingIndex].number = 1;
+                }
 
                 newData.lyrics.verses[verseId].lines[lineId].phrases = phraseArray
                 app.song = newData;
@@ -941,12 +967,14 @@
                             }
                         }
                     }
-                    // push to chord/num list
-                    chordList.push({
-                        'to': function() {
-                            return `${meta.number}<br/>${meta.chord}`
-                        }
-                    })
+                    if (meta.chord){ // if meta is set
+                        // push to chord/num list
+                        chordList.push({
+                            'to': function() {
+                                return `${meta.chord}<br/>${meta.number}`
+                            }
+                        })
+                    }
                 });
 
                 var pipFormatter = {}; //var pipFormats = {'0':'abc', '1':'pqr', '2':'xyz'};
@@ -982,24 +1010,46 @@
                 };
             },
             makeSlider: function(tag, pipFormats, lyricRange, chordStartLocations, chordDataObject) {
-                //  Make the slider
-                if(chordDataObject.length > chordStartLocations.length){
+                if(chordStartLocations.length != chordDataObject.length){
+                    chordStartLocations.pop()
+                }
+                while(chordDataObject.length > chordStartLocations.length){
                     chordStartLocations.push(lyricRange.max[0])
                 }
-                var slider = self.$(`.slider-${tag}`)[0];  
-                noUiSlider.create(slider, {
-                    start: chordStartLocations,
-                    tooltips: chordDataObject,
-                    range: lyricRange,
-                    pips: {
-                        mode: 'range',
-                        format: {
-                            to: function(a) {
-                                return pipFormats[a];
-                            }
+                var options = {}
+                options.range = lyricRange;
+                options.pips= {
+                    mode: 'range',
+                    format: {
+                        to: function(a) {
+                            return pipFormats[a];
                         }
                     }
-                });
+                }
+                if (chordDataObject.length){
+                    options.tooltips = chordDataObject;
+                    options.start= chordStartLocations;
+                    options.tooltips= chordDataObject;
+                } else {
+                    // no chords on this song
+                    options.start= [lyricRange.max[0]];
+                }
+                //  Make the slider
+                var slider = self.$(`.slider-${tag}`)[0];  
+                noUiSlider.create(slider, options);
+                // noUiSlider.create(slider, {
+                //     start: chordStartLocations,
+                //     tooltips: chordDataObject,
+                //     range: lyricRange,
+                //     pips: {
+                //         mode: 'range',
+                //         format: {
+                //             to: function(a) {
+                //                 return pipFormats[a];
+                //             }
+                //         }
+                //     }
+                // });
             },
             // Params: Array, 0
             diacriticChecker: function(array, index) {

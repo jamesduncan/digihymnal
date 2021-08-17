@@ -54,7 +54,6 @@ Template7.registerHelper('printLyric', function(line) {
 Template7.registerHelper('printEachPhrase', function(line, languages) {
     console.log(line, languages)
     if (line === undefined) {
-        // debugger;
         console.error('undefined line')
         return "";
     }
@@ -63,18 +62,18 @@ Template7.registerHelper('printEachPhrase', function(line, languages) {
     const validateNumber = `required pattern='1|2|3|4|5|6|7|8|9|10|11|12||'`
     //
     results = results.concat(`<div class="line metadata">`)
-    line.phrases.forEach(phrase => {
-        results = results.concat(`<div class="phrase metadata"> `)
+    line.phrases.forEach((phrase, index) => {
+        results = results.concat(`<div class="phrase metadata phraseMetadata"> `)
         if(phrase["chord"]) {
                 if (phrase["chord"]) {
-                    results = results.concat(`<div class="chord"><div class="item-input-wrap"><input type="text" ${validateChords} value="${phrase["chord"]}"></div></div>`)
+                    results = results.concat(`<div class="chord ${index}"><div class="item-input-wrap"><input class="chord${index}" type="text" ${validateChords} value="${phrase["chord"]}"></div></div>`)
                 } else {
-                    results = results.concat(`<div class="chord"><div class="item-input-wrap"><input type="text" ${validateChords} placeholder="*"></div></div>`)
+                    results = results.concat(`<div class="chord ${index}"><div class="item-input-wrap"><input class="chord${index}" type="text" ${validateChords} placeholder="*"></div></div>`)
                 }
                 if (phrase["number"]) {
-                    results = results.concat(`<div class="number"><div class="item-input-wrap"><input type="text" ${validateNumber}value="${phrase["number"]}"></div></div>`)
+                    results = results.concat(`<div class="number ${index}"><div class="item-input-wrap"><input class="number${index}" type="text" ${validateNumber}value="${phrase["number"]}"></div></div>`)
                 } else {
-                    results = results.concat(`<div class="number"><div class="item-input-wrap"><input type="text" ${validateNumber}placeholder="*"></div></div>`)
+                    results = results.concat(`<div class="number ${index}"><div class="item-input-wrap"><input class="number${index}" type="text" ${validateNumber}placeholder="*"></div></div>`)
                 }
             }
             results = results.concat('</div>');

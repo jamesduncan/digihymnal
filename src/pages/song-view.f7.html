@@ -140,7 +140,7 @@
                                         </div>
                                     {{/each}}
                                     {{#if @root.editMode}}
-                                    <a @click=addVerse({{../../@index}},{{@index}}) class="button button-small item-link edit-phrase">
+                                    <a @click=addVerse({{@index}}) class="button button-small item-link edit-phrase">
                                         <span class="fa-stack fa-1x">
                                             <i class="fas fa-bigger fa-file fa-stack-.5x"></i>
                                             <i class="fas fa-plus fa-small fa-stack-1x" style="color:white;"></i>
@@ -543,7 +543,6 @@
                 // lastLine = (lineId===(newData.lyrics.verses[verseId].lines.length-1))
                 song = newData;
                 line = song.lyrics.verses[verseId].lines[lineId];
-                self.clearSliders();
                 self.savableUpdate(true);
                 self.$setState({
                     loading: false,
@@ -666,7 +665,6 @@
 
                 song = newData;
                 app.song = newData;
-                self.clearSliders()
                 self.savableUpdate(true);
                 self.$setState({
                     song: newData,
@@ -684,11 +682,9 @@
                         phraseTemplate[tag] = "*"
                     }
                 };
-                var lineObj = {
-                    "lines": [{
+                var lineObj = [{
                         'phrases': [phraseTemplate]
-                    }]
-                }; // make a new template
+                    }]; // make a new template
 
                 var currentVerse = newData.lyrics.verses[verseId];
 
@@ -696,9 +692,9 @@
 
                 // 'verse 3'
                 let myArr = currentVerse.label.split(" ");
-                let verseNumber = (typeof(parseInt(myArr[(myArr.length - 1)])) == 'number' ? (parseInt(myArr[(myArr.length - 1)])) : 1)
+                let verseNumber = ( typeof(parseInt(myArr[(myArr.length - 1)])) == 'number' ? ( (parseInt(myArr[(myArr.length - 1)])) + 1) : 1)
 
-                var newLabel = 'verse'.concat(verseNumber);
+                var newLabel = 'verse '.concat(verseNumber);
 
                 var newVerse = {
                     "lines": lineObj,
@@ -706,7 +702,8 @@
                     "id": newId
                 }
 
-                newData.lyrics.verses.push(newVerse);
+                // insert item into arr at the specified index (deleting 0 items first, it's just an insert).
+                newData.lyrics.verses.splice(( verseId + 1 ) ,0,newVerse);
                 
                 // fix the ids
                 var i = 0;
@@ -715,7 +712,7 @@
                 });
 
                 song = newData;
-                self.clearSliders();
+                app.song = newData;
                 self.savableUpdate(true);
                 self.$setState({
                     loading: false,
@@ -761,6 +758,7 @@
 
                 newData.lyrics.verses = vArray;
                 song = newData;
+                app.song = newData;
                 line = song.lyrics.verses[verseId].lines[lineId];
                 songCollection.db.setItem(songId, newData);
 
@@ -771,7 +769,6 @@
                 song = newData;
                 line = newData.lyrics.verses[verseId].lines[lineId];
                 self.savableUpdate(true);
-                self.clearSliders();
                 self.$setState({
                     loading: false,
                     song: newData,
@@ -791,8 +788,7 @@
                 let deletedVerse = newData.lyrics.verses.splice(verseId, 1)
 
                 song = newData;
-                app.song = newData;
-                self.clearSliders()
+                app.song = newData;                
                 self.savableUpdate(true);
                 self.$setState({
                     song: newData,
@@ -808,7 +804,6 @@
             },
             save: function(e) {
                 songCollection.db.setItem(songId, song);
-                self.clearSliders();
                 self.savableUpdate(false)
                 // send ovreall song changes to server
                 dataManager.putSong(songId, newData)

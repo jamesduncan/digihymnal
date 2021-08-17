@@ -4,7 +4,7 @@
             <div class="navbar-bg"></div>
             <div class="navbar-inner sliding">
                 <div class="left">
-                    <a href="#" class="link back">
+                    <a @click="backChecker" class="link">
                         <i class="icon icon-back"></i>
                         <span class="if-not-md">{{#if loading}}Back{{else}}{{translate "Back"}}{{/if}}</span>
                     </a>
@@ -827,8 +827,8 @@
                 });
             },
             backChecker: function(e) {
+                debugger;
                 // Check if there have been changes to the current song
-                ev.preventDefault();
                 if (savable){
                     // prompt them to save>?
                     // 
@@ -844,10 +844,9 @@
                                 }
                             },
                             {
-                                text: "<t>Save</t>",
+                                text: "<t>Return and Save Changes</t>",
                                 onClick: (dialog, ev) => {
-                                    self.save()
-                                    this.$router.back();
+                                    dialog.close();
                                 }
                             }
                         ],
@@ -858,7 +857,6 @@
                 } else {
                     // just send them back
                     this.$router.back();
-                    app.router.back()
                 }
             }
             //

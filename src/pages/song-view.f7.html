@@ -827,7 +827,6 @@
                 });
             },
             backChecker: function(e) {
-                debugger;
                 // Check if there have been changes to the current song
                 if (savable){
                     // prompt them to save>?
@@ -840,6 +839,7 @@
                         buttons: [{
                                 text: "<t>Don't Save</t>",
                                 onClick: (dialog, ev) => {
+                                    app.song = {}
                                     this.$router.back();
                                 }
                             },
@@ -856,6 +856,7 @@
                     // If form is empty, go back immediately
                 } else {
                     // just send them back
+                    app.song = {}
                     this.$router.back();
                 }
             }

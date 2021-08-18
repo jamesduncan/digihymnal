@@ -45,105 +45,24 @@
                                     </div>
                                 </div>
                             </div>
-                            {{#js_if "@root.lastLine && @root.lastVerse"}}
-                                <!--  
-                              goto next verse
+                            <!--
+                            goto next
                             -->
-                                <div class="menu-item">
-                                    <div class="menu-item-content icon-only">
-                                        <div class="menu-item-content">
-                                            <a class="col button button-fill disable disabled" disable>
-                                                <i class="text-color-gray fa-bigger fas fa-arrow-right"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="item-title item-label">
-                                    <t>Verse tools:</t>
-                                </div>
-                                <!-- ADD VERSE -->
-                                <div class="menu-item">
-                                    <div class="menu-item-content icon-only">
-                                        <div class="menu-item-content">
-                                            <a @click="addVerse" class="col button button-fill">
-                                                <i class="text-color-gray fa-bigger fas fa-plus"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="item-title item-label">
-                                    <t>Line tools:</t>
-                                </div>
-                                <!-- ADD LINE -->
-                                <div class="menu-item">
-                                    <div class="menu-item-content icon-only">
-                                        <div class="menu-item-content">
-                                            <a @click="addLine" class="col button button-fill">
-                                                <i class="text-color-gray fa-bigger fas fa-plus"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {{else}}
-                                    {{#if lastLine}}
-                                        <!--
-                              goto next verse
-                            -->
-                                        <div class="menu-item">
-                                            <div class="menu-item-content icon-only">
-                                                <div class="menu-item-content">
-                                                    <a @click="nextLine" class="col button button-fill">
-                                                        <i class="text-color-gray fa-bigger fas fa-arrow-right"></i>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="item-title item-label">
-                                            <t>Line tools:</t>
-                                        </div>
-                                        <!--
-                              ADD LINE
-                              -->
-                                        <div class="menu-item">
-                                            <div class="menu-item-content icon-only">
-                                                <div class="menu-item-content">
-                                                    <a @click="addLine" class="col button button-fill">
-                                                        <i class="text-color-gray fa-bigger fas fa-plus"></i>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    {{else}}
-                                        <div class="menu-item">
-                                            <div class="menu-item-content icon-only">
-                                                <div class="menu-item-content">
-                                                    <a @click="nextLine" class="col button button-fill">
-                                                        <i class="text-color-gray fa-bigger fas fa-arrow-right"></i>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="item-title item-label">
-                                            <t>Line tools:</t>
-                                        </div>
-                                    {{/if}}
-                            {{/js_if}}
-
                             <div class="menu-item">
                                 <div class="menu-item-content icon-only">
                                     <div class="menu-item-content">
-                                        <a class="col button button-fill" @click="deleteLine">
-                                            <i class="text-color-gray fa-bigger fas fa-trash"></i>
+                                        <a @click="nextLine" class="col button button-fill{{#js_if "@root.lastLine && @root.lastVerse"}} disabled{{/js_if}}">
+                                            <i class="text-color-gray fa-bigger fas fa-arrow-right"></i>
                                         </a>
                                     </div>
                                 </div>
                             </div>
+                            
                             <div class="item-title item-label">
                                 Chord tools:
                             </div>
                             <!--
-                              Add phrase
+                                phrase
                             -->
                             <div class="menu-item">
                                 <div class="menu-item-content icon-only">
@@ -155,13 +74,37 @@
                                 </div>
                             </div>
                             <!--
-                              delete phrase, only show if totally empty??????
+                                delete phrase, only show if totally empty??????
                             -->
                             <div class="menu-item">
                                 <div class="menu-item-content icon-only">
                                     <div class="menu-item-content">
                                         <a @click="deletePhrase" class="col button">
                                             <i class="text-color-gray fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--
+                            LINE
+                            -->
+                            <div class="item-title item-label">
+                                <t>Line tools:</t>
+                            </div>
+                            <div class="menu-item">
+                                <div class="menu-item-content icon-only">
+                                    <div class="menu-item-content">
+                                        <a @click="addLine" class="col button button-fill">
+                                            <i class="text-color-gray fa-bigger fas fa-plus"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="menu-item">
+                                <div class="menu-item-content icon-only">
+                                    <div class="menu-item-content">
+                                        <a class="col button button-fill" @click="deleteLine">
+                                            <i class="text-color-gray fa-bigger fas fa-trash"></i>
                                         </a>
                                     </div>
                                 </div>

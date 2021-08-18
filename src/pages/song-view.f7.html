@@ -108,7 +108,7 @@
                                                 <!-- edit line text -->
                                                 <a @click=lineEditPopup({{../../@index}},{{@index}}) class="button button-small item-link edit-phrase"><i class="fas fa-bigger fa-edit"></i></a>
                                                 <!-- delete line -->
-                                                <a @click=deleteLine({{@index}}) class="button button-small item-link edit-phrase"><i class="fas fa-bigger fa-trash"></i></a>
+                                                <a @click=deleteLine({{../../@index}},{{@index}}) class="button button-small item-link edit-phrase"><i class="fas fa-bigger fa-trash"></i></a>
                                                 <!-- split verse -->
                                                 <a  @click=splitVerse({{../../@index}},{{@index}}) class="button button-small item-link edit-phrase">
                                                     <span class="fa-stack fa-1x">
@@ -657,19 +657,43 @@
             deleteLine: function(selectedVerse,selectedLine) {
                 verseId = selectedVerse;
                 lineId = selectedLine;
-                debugger;
-                // TODO pre-delete confirmation prompt
-                let newData = song
-                // At index, remove one element
-                let deletedLine = newData.lyrics.verses[verseId].lines.splice(lineId, 1)
-
-                song = newData;
-                app.song = newData;
-                self.savableUpdate(true);
-                self.$setState({
-                    song: newData,
-                    loading: false,
-                });
+                var dialog = app.dialog.create({
+                        backdrop: true,
+                        closeByBackdropClick: false,
+                        title: "<t>Delete this line?</t>",
+                        buttons: [{
+                                text: "<t>Yes</t>",
+                                onClick: (dialog, ev) => {
+                                    dialog.close();
+                                    // app.song = {}
+                                    // this.$router.back();
+                                    // TODO pre-delete confirmation prompt
+                                    let newData = song
+                                    // At index, remove one element
+                                    let deletedLine = newData.lyrics.verses[verseId].lines.splice(lineId, 1)
+                    
+                                    song = newData;
+                                    app.song = newData;
+                                    self.savableUpdate(true);
+                                    self.$setState({
+                                        song: newData,
+                                        loading: false,
+                                    }, () => {
+                                        self.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                                        self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+                                    });
+                                }
+                            },
+                            {
+                                text: "<t>No</t>",
+                                onClick: (dialog, ev) => {
+                                    dialog.close();
+                                }
+                            }
+                        ],
+                        verticalButtons: true
+                    });
+                dialog.open();
             },
             addVerse: function(selectedVerse) {
                 verseId = selectedVerse;
@@ -771,22 +795,42 @@
                 });
             },
             deleteVerse: function(selectedVerse){
-                verseId = selectedVerse;
-                // TODO pre-delete confirmation prompt
-                let newData = song
-                // At index, remove one element
-                let deletedVerse = newData.lyrics.verses.splice(verseId, 1)
-
-                song = newData;
-                app.song = newData;                
-                self.savableUpdate(true);
-                self.$setState({
-                    song: newData,
-                    loading: false,
-                }, () => {
-                    self.$(".song")[0].style.transform = "scale(" + initScale + ")";
-                    self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
-                });
+                var dialog = app.dialog.create({
+                    backdrop: true,
+                    closeByBackdropClick: false,
+                    title: "<t>Delete this verse?</t>",
+                    buttons: [{
+                        text: "<t>Yes</t>",
+                        onClick: (dialog, ev) => {
+                            dialog.close();
+                            verseId = selectedVerse;
+                            // TODO pre-delete confirmation prompt
+                            let newData = song
+                            // At index, remove one element
+                            let deletedVerse = newData.lyrics.verses.splice(verseId, 1)
+            
+                            song = newData;
+                            app.song = newData;                
+                            self.savableUpdate(true);
+                            self.$setState({
+                                song: newData,
+                                loading: false,
+                            }, () => {
+                                self.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                                self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+                            });
+                        }
+                        },
+                        {
+                            text: "<t>No</t>",
+                            onClick: (dialog, ev) => {
+                                dialog.close();
+                            }
+                        }
+                        ],
+                        verticalButtons: true
+                    });
+                dialog.open();
             },
             validateTag: function(tag){
                 if (languageTags.includes(tag)){

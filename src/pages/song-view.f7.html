@@ -140,7 +140,12 @@
                                         </div>
                                     {{/each}}
                                     {{#if @root.editMode}}
-                                    <a @click=addVerse({{@index}}) class="button button-small item-link edit-phrase">
+                                    <a @click=addLine({{@index}}) class="button button-small item-link edit-phrase">
+                                        <span class="fa-stack fa-1x">
+                                            <i class="fas fa-language fa-file fa-stack-.5x"></i>
+                                            <i class="fas fa-plus fa-small fa-stack-1x" style="color:white;"></i>
+                                        </span>
+                                    </a><a @click=addVerse({{@index}}) class="button button-small item-link edit-phrase">
                                         <span class="fa-stack fa-1x">
                                             <i class="fas fa-bigger fa-file fa-stack-.5x"></i>
                                             <i class="fas fa-plus fa-small fa-stack-1x" style="color:white;"></i>
@@ -434,13 +439,11 @@
                 initScale += 0.05;
                 this.$(".song")[0].style.transform = "scale(" + initScale + ")";
                 this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
-                // debugger;
             },
             zoomOut: function(e) {
                 initScale -= 0.05;
                 this.$(".song")[0].style.transform = "scale(" + initScale + ")";
                 this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
-                // debugger;
             },
             toggleChords: function(e) {
                 if (this.$(".menuChords .fa-check-square")[0].style.display == "") {
@@ -515,12 +518,13 @@
             },
             //
             addLine: function(selectedVerse,selectedLine) {
+                // this supports inserting to middle of a verse, simply input a lineId...
                 let newData = song;
                 verseId = selectedVerse;
                 lineId = selectedLine;
                 // At index, add one element
 
-                var phraseTemplate = Object.assign({}, newData.lyrics.verses[verseId].lines[lineId].phrases[0]);
+                var phraseTemplate = Object.assign({}, newData.lyrics.verses[0].lines[0].phrases[0]);
 
                 for (const tag in phraseTemplate) {
                     if (Object.hasOwnProperty.call(phraseTemplate, tag)) {
@@ -531,27 +535,25 @@
 
                 let lineArray = newData.lyrics.verses[verseId].lines;
                 let workingIndex = ++lineId; // tack it onto after current
+                if(!selectedLine){
+                    lineId = (newData.lyrics.verses[verseId].lines.length)
+                    workingIndex = lineId;
+                }
                 let newLine = {'phrases': [phraseTemplate]};
                 // insert item into arr at the specified index (deleting 0 items first, it's just an insert).
                 lineArray.splice(workingIndex, 0, newLine);
                 newData.lyrics.verses[verseId].lines = lineArray;
-                songCollection.db.setItem(songId, newData);
 
-                // send verse changes to server
-                dataManager.putVerse(songId, verseId, newData.lyrics.verses[verseId])
-                    .then(responseText => alert(JSON.stringify(responseText)));
-                // lastLine = (lineId===(newData.lyrics.verses[verseId].lines.length-1))
                 song = newData;
-                line = song.lyrics.verses[verseId].lines[lineId];
                 self.savableUpdate(true);
                 self.$setState({
                     loading: false,
-                    song: newData,
-                    line: newData.lyrics.verses[verseId].lines[lineId]
+                    song: newData
                 }, () => {
-                    self.displayLyricSliders()
+                    self.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                    self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
                 });
-            },
+            },  
             
             diacriticChecker: function(array, index) {
                 var nextIndex = index + 1
@@ -570,14 +572,6 @@
                 var tag = defaultLanguage;
                 verseId = selectedVerse;
                 lineId = selectedLine;
-                // app.panel.create(parameters)
-                // closeByBackdropClick
-                // el	:HTMLElementstring
-
-                // app.panel.open(panel, animate)
-                // Other option. pass app.js the line data to pre-generate this generated popup when a button it programatically generates is pressed. 
-                // onclick, it calls one of these to update. 
-                // That's also the way to change lang on song edit
                 
                 var langLine = ""
                 if(!phraseBreakLocations[tag]){ // is is not set
@@ -665,9 +659,7 @@
                                 text: "<t>Yes</t>",
                                 onClick: (dialog, ev) => {
                                     dialog.close();
-                                    // app.song = {}
-                                    // this.$router.back();
-                                    // TODO pre-delete confirmation prompt
+                                    // pre-delete confirmation prompt
                                     let newData = song
                                     // At index, remove one element
                                     let deletedLine = newData.lyrics.verses[verseId].lines.splice(lineId, 1)
@@ -697,7 +689,6 @@
             },
             addVerse: function(selectedVerse) {
                 verseId = selectedVerse;
-                debugger;
                 let newData = song;
                 var phraseTemplate = Object.assign({}, newData.lyrics.verses[0].lines[0].phrases[0]);
                 for (const tag in phraseTemplate) {
@@ -845,8 +836,6 @@
                 // send ovreall song changes to server
                 dataManager.putSong(songId, newData)
                     .then(responseText => alert(JSON.stringify(responseText)));
-            
-            
             },
             savableUpdate: function(bool) {
                 if (typeof(bool) != 'boolean'){
@@ -892,7 +881,6 @@
                     this.$router.back();
                 }
             }
-            //
         }
     }
 </script>

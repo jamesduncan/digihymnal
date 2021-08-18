@@ -94,7 +94,7 @@
                         <div class="song">
                             <div class="verse">
                                 {{#each song.lyrics.verses}}
-                                    <h3>{{#if label}}{{translate label}} {{#if @root.editMode}}<a class="button button-small item-link edit-phrase"><i class="fas fa-bigger fa-dumpster-fire"></i></a>{{/if}}{{else}}<br />{{/if}} </h3>
+                                    <h3>{{#if label}}{{translate label}} {{#if @root.editMode}}<a @click=deleteVerse({{@index}}) class="button button-small item-link edit-phrase"><i class="fas fa-bigger fa-dumpster-fire"></i></a>{{/if}}{{else}}<br />{{/if}} </h3>
                                     {{#each lines}}
                                         <div class="line">
                                             {{#if @root.editMode}}
@@ -772,8 +772,6 @@
             },
             deleteVerse: function(selectedVerse){
                 verseId = selectedVerse;
-                lineId = selectedLine;
-                debugger;
                 // TODO pre-delete confirmation prompt
                 let newData = song
                 // At index, remove one element
@@ -785,6 +783,9 @@
                 self.$setState({
                     song: newData,
                     loading: false,
+                }, () => {
+                    self.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                    self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
                 });
             },
             validateTag: function(tag){

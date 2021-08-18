@@ -717,6 +717,9 @@
                 self.$setState({
                     loading: false,
                     song: newData
+                }, () => {
+                    self.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                    self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
                 });
             },
             splitVerse: function(selectedVerse,selectedLine) {
@@ -771,11 +774,10 @@
                 self.savableUpdate(true);
                 self.$setState({
                     loading: false,
-                    song: newData,
-                    lastLine: true,
-                    line: newData.lyrics.verses[verseId + 1].lines[0]
+                    song: newData
                 }, () => {
-                    self.displayLyricSliders()
+                    self.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                    self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
                 });
             },
             deleteVerse: function(selectedVerse){

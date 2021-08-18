@@ -692,7 +692,7 @@
 
                 // 'verse 3'
                 let myArr = currentVerse.label.split(" ");
-                let verseNumber = ( typeof(parseInt(myArr[(myArr.length - 1)])) == 'number' ? ( (parseInt(myArr[(myArr.length - 1)])) + 1) : 1)
+                let verseNumber = ( !isNaN(parseInt(myArr[(myArr.length - 1)])) ? ( (parseInt(myArr[(myArr.length - 1)])) + 1) : 1)
 
                 var newLabel = 'verse '.concat(verseNumber);
 
@@ -725,7 +725,6 @@
             splitVerse: function(selectedVerse,selectedLine) {
                 verseId = selectedVerse;
                 lineId = selectedLine;
-                debugger;
                 let newData = song;
 
                 var currentVerse = newData.lyrics.verses[verseId];
@@ -733,11 +732,11 @@
 
                 // 'verse 3'
                 let myArr = currentVerse.label.split(" ");
-                let verseNumber = (typeof(parseInt(myArr[(myArr.length - 1)])) == 'number' ? (parseInt(myArr[(myArr.length - 1)])) : 1)
-                var newLabel = 'verse'.concat(verseNumber);
+                let verseNumber = (!isNaN(parseInt(myArr[(myArr.length - 1)])) ? (parseInt(myArr[(myArr.length - 1)]))+1 : 1)
+                var newLabel = 'verse '.concat(verseNumber);
 
-                let toRemove = (currentVerse.lines.length - lineId)
-                var lineObj = currentVerse.lines.splice(lineId, toRemove, currentVerse);
+                let toRemove = (currentVerse.lines.length - lineId) 
+                var lineObj = currentVerse.lines.splice(lineId, toRemove);
 
                 var newVerse = {
                     "lines": lineObj,
@@ -750,8 +749,7 @@
 
                 vArray.splice(verseId, 1, currentVerse); // overwrite current to be missing lines...
 
-                let workingIndex = ++verseId; 
-                vArray.splice(workingIndex, 0, newLine);// after current
+                vArray.splice(++verseId, 0, newVerse);// after current
 
                 // fix the ids
                 var i = 0;
@@ -762,15 +760,7 @@
                 newData.lyrics.verses = vArray;
                 song = newData;
                 app.song = newData;
-                line = song.lyrics.verses[verseId].lines[lineId];
-                songCollection.db.setItem(songId, newData);
 
-                // send ovreall song changes to server
-                dataManager.putSong(songId, newData)
-                    .then(responseText => alert(JSON.stringify(responseText)));
-                lastLine = true;
-                song = newData;
-                line = newData.lyrics.verses[verseId].lines[lineId];
                 self.savableUpdate(true);
                 self.$setState({
                     loading: false,

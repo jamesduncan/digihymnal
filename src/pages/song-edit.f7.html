@@ -10,15 +10,15 @@
                     </a>
                 </div>
                 <div class="title">{{#if loading}}{{else}} {{song.title[defaultLanguage]}} {{/if}}</div>
-                <!-- <div class="right">
-<a @click="pickLanguageCode" class="button">
-    <span class="fa-stack">
-        <i class="fas fa-square fa-stack-2x" style="color:grey"></i>
-        <i class="fas fa-language fa-stack-1x" style="color:white"></i>
-        <i class="fas fa-plus fa-stack-1x" style="color:Tomato; text-align:left;  margin-top: 9px; margin-left: 5px;"></i>
-    </span>
-</a>
-</div> -->
+                <div class="right">
+                    <a @click="pickLanguageCode" class="button disabled">
+                        <span class="fa-stack">
+                            <i class="fas fa-square fa-stack-2x" style="color:grey"></i>
+                            <i class="fas fa-globe fa-stack-1x" style="color:white"></i>
+                            <i class="fas fa-plus fa-stack-1x" style="color:Tomato; text-align:left;  margin-top: 9px; margin-left: 5px;"></i>
+                        </span>
+                    </a>
+                </div> 
             </div>
         </div>
         <div class="page-content hide-navbar-on-scroll">
@@ -272,7 +272,7 @@
                     console.log("This is going to cause problems")
                     debugger;
                 }
-                let newData = song;
+                var newData = song;
                 newData.key = key;
                 newData.author = author;
 
@@ -311,8 +311,13 @@
             pickLanguageCode: function() {
                 // TODO add logic here for picking a language
                 var newLanguageTag = 'en';
-                //
-                return addLanguageCode(newLanguageTag);
+                //make popup
+                 // popup: 
+                 // list of all languages
+                 // minus langagues already in song
+                 // user picks one, it calls the @click with it's tag
+
+                return self.addLanguageCode(newLanguageTag);
             },
             addLanguageCode: function(newLanguageTag) {
                 // var newLanguageTag = 'en';

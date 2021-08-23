@@ -9,6 +9,18 @@
                     </div>
                 </div>
                 <div class="page-content">
+                    <div class="block-title">{{#if loading}}Advanced{{else}}{{translate "Advanced"}}{{/if}}</div>
+                    <div class="list simple-list">
+                        <ul>
+                            <li>
+                                <t class="text-color-gray">Edit Mode</t>
+                                <label class="toggle toggle-init">
+                                    <input @click="toggleEditMode" name="editMode" type="checkbox" {{#if editMode}}checked{{/if}}>
+                                    <span class="toggle-icon"></span>
+                                </label>
+                            </li>
+                        </ul>
+                    </div>
                     <div class="block-title">{{#if loading}}Choose a language{{else}}{{translate "Choose a language"}}{{/if}}</div>
                     <div class="list">
                         <ul>
@@ -21,19 +33,15 @@
                                         </div>
                                     </a>
                                 </li>
-                            {{/each}}
-                        </ul>
-                    </div>
-                    <div class="block-title">{{#if loading}}Advanced{{else}}{{translate "Advanced"}}{{/if}}</div>
-                    <div class="list simple-list">
-                        <ul>
-                            <li>
-                                <t class="text-color-gray">Edit Mode</t>
-                                <label class="toggle toggle-init">
-                                    <input @click="toggleEditMode" name="editMode" type="checkbox" {{#if editMode}}checked{{/if}}>
-                                    <span class="toggle-icon"></span>
-                                </label>
-                            </li>
+                                {{/each}}
+                                <li>
+                                    <a @click="addLanguage" class="item-content disabled">
+                                        <div class="item-inner">
+                                            <div class="item-title text-color-gray">{{#if local}}{{local}}{{else}}Add language{{/if}}</div>
+                                            <div class="item-after text-color-primary"><i class="fas fa-plus"></i></div>
+                                        </div>
+                                    </a>
+                                </li>
                         </ul>
                     </div>
                 </div>
@@ -95,6 +103,26 @@ editMode: mode
                 var self = this;
                 var languageCode = this.$$(event.currentTarget).data("languagecode");
                 var languages = setDefaultLanguage(languageCode);
+
+                self.$setState({
+                    languages: languages
+                })
+
+                await preference.setLanguage(languageCode);
+                self.$router.back('/', {
+                    force: true,
+                    ignoreCache: true
+                });
+            },
+            addLanguage: async function(event) {
+                var self = this;
+                debugger;
+                // get in popup
+                var languageCode = 'es';// user added langauge
+                
+                // add to global var
+
+                //var languages = setDefaultLanguage(languageCode);
 
                 self.$setState({
                     languages: languages

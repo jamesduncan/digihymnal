@@ -10,9 +10,6 @@ export default class SongCollection {
         this.nextAvailableId = 0;
         this.exampleSong = {
           "title": {
-              "at": "Twinkle twinkle little star",
-              "kt": "Twinkle twinkle little star",
-              "ct": "Twinkle twinkle little star",
               "en": "Twinkle twinkle little star"
           },
           "author": "traditional",
@@ -26,26 +23,17 @@ export default class SongCollection {
                                   {
                                       "chord": "G",
                                       "number": "1",
-                                      "en": "Twinkle, twinkle li",
-                                      "at": "ཀྱེ། དཀོན་མཆོག",
-                                      "kt": "ཀྱེ། དཀོན་མཆོག ",
-                                      "ct": "ཀྱེ། དཀོན་མཆོག"
+                                      "en": "Twinkle, twinkle li"
                                   },
                                   {
                                       "chord": "C",
                                       "number": "4",
-                                      "en": "ttle st",
-                                      "at": "ཀོན་མཆོ",
-                                      "kt": "ཀོན་མཆོ ",
-                                      "ct": "ཀོན་མཆོ"
+                                      "en": "ttle st"
                                   },
                                   {
                                       "chord": "G",
                                       "number": "1",
-                                      "en": "ar,",
-                                      "at": "མཆོ",
-                                      "kt": "ཀོམཆོ ",
-                                      "ct": "ན་མཆོ"
+                                      "en": "ar,"
                                   }
                               ]
                           },{
@@ -53,31 +41,19 @@ export default class SongCollection {
                                   {
                                       "chord": "C",
                                       "number": "4",
-                                      "en": "How I w",
-                                      "at": "ཀྱེ། དཀོན་མཆོག",
-                                      "kt": "ཀྱེ། དཀོན་མཆོག ",
-                                      "ct": "ཀྱེ། དཀོན་མཆོག"
+                                      "en": "How I w"
                                   },{
                                       "chord": "G",
                                       "number": "1",
-                                      "en": "onder w",
-                                      "at": "ཀྱེ། དཀོན་མཆོག",
-                                      "kt": "ཀྱེ། དཀོན་མཆོག ",
-                                      "ct": "ཀྱེ། དཀོན་མཆོག"
+                                      "en": "onder w"
                                   },{
                                       "chord": "D",
                                       "number": "5",
-                                      "en": "hat you a",
-                                      "at": "ཀྱེ། དཀོན་མཆོག",
-                                      "kt": "ཀྱེ། དཀོན་མཆོག ",
-                                      "ct": "ཀྱེ། དཀོན་མཆོག"
+                                      "en": "hat you a"
                                   },{
                                       "chord": "G",
                                       "number": "1",
-                                      "en": "re",
-                                      "at": "ཀྱེ། དཀོན་མཆོག",
-                                      "kt": "ཀྱེ། དཀོན་མཆོག ",
-                                      "ct": "ཀྱེ། དཀོན་མཆོག"
+                                      "en": "re"
                                   },
                               ]
                           }
@@ -91,31 +67,19 @@ export default class SongCollection {
                                 {
                                     "chord": "G",
                                     "number": "1",
-                                    "en": "Up ab",
-                                    "at": "ཀྱེ། དཀོན་མཆོག",
-                                    "kt": "ཀྱེ། དཀོན་མཆོག ",
-                                    "ct": "ཀྱེ། དཀོན་མཆོག"
+                                    "en": "Up ab"
                                 },{
                                     "chord": "C",
                                     "number": "4",
-                                    "en": "ove the w",
-                                    "at": "ཀྱེ། དཀོན་མཆོག",
-                                    "kt": "ཀྱེ། དཀོན་མཆོག ",
-                                    "ct": "ཀྱེ། དཀོན་མཆོག"
+                                    "en": "ove the w"
                                 },{
                                     "chord": "G",
                                     "number": "1",
-                                    "en": "orld so h",
-                                    "at": "ཀྱེ། དཀོན་མཆོག",
-                                    "kt": "ཀྱེ། དཀོན་མཆོག ",
-                                    "ct": "ཀྱེ། དཀོན་མཆོག"
+                                    "en": "orld so h"
                                 },{
                                     "chord": "D",
                                     "number": "5",
-                                    "en": "igh,",
-                                    "at": "ཀྱེ། དཀོན་མཆོག",
-                                    "kt": "ཀྱེ། དཀོན་མཆོག ",
-                                    "ct": "ཀྱེ། དཀོན་མཆོག"
+                                    "en": "igh,"
                                 },
                               ]
                           },{
@@ -123,31 +87,19 @@ export default class SongCollection {
                                 {
                                     "chord": "G",
                                     "number": "1",
-                                    "en": "Like a Di",
-                                    "at": "ཀྱེ། དཀོན་མཆོག",
-                                    "kt": "ཀྱེ། དཀོན་མཆོག ",
-                                    "ct": "ཀྱེ། དཀོན་མཆོག"
+                                    "en": "Like a Di"
                                 },{
                                     "chord": "C",
                                     "number": "4",
-                                    "en": "amond ",
-                                    "at": "ཀྱེ། དཀོན་མཆོག",
-                                    "kt": "ཀྱེ། དཀོན་མཆོག ",
-                                    "ct": "ཀྱེ། དཀོན་མཆོག"
+                                    "en": "amond "
                                 },{
                                     "chord": "G",
                                     "number": "1",
-                                    "en": "in the s",
-                                    "at": "ཀྱེ། དཀོན་མཆོག",
-                                    "kt": "ཀྱེ། དཀོན་མཆོག ",
-                                    "ct": "ཀྱེ། དཀོན་མཆོག"
+                                    "en": "in the s"
                                 },{
                                     "chord": "D",
                                     "number": "5",
-                                    "en": "ky.",
-                                    "at": "ཀྱེ། དཀོན་མཆོག",
-                                    "kt": "ཀྱེ། དཀོན་མཆོག ",
-                                    "ct": "ཀྱེ། དཀོན་མཆོག"
+                                    "en": "ky."
                                 }
                               ]
                           }
@@ -159,9 +111,6 @@ export default class SongCollection {
           },
           "metadata": [
               {
-                  "at": "Copyright ",
-                  "kt": " Copyright © 1976 Kay Chance, Glaubenszentrum, Dr.-H.-Jasper-Str.20, D-37581 Bad Gandersheim Germany Used by permission ",
-                  "ct": "Copyright",
                   "en": ".Copyright....  "
               }
           ],

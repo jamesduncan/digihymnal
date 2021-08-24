@@ -11,6 +11,13 @@
                 </div>
                 <div class="title">{{#if loading}}{{else}} {{song.title[defaultLanguage]}} {{/if}}</div>
                 <div class="right">
+                    <a @click="pickCodeToAdd" class="button">
+                        <span class="fa-stack">
+                            <i class="fas fa-square fa-stack-2x" style="color:orange"></i>
+                            <i class="fas fa-globe fa-stack-1x" style="color:blue"></i>
+                            <i class="fas fa-plus fa-stack-1x" style="color:red; text-align:left;  margin-top: 9px; margin-left: 5px;"></i>
+                        </span>
+                    </a>
                     <a @click="pickLanguageCode" class="button">
                         <span class="fa-stack">
                             <i class="fas fa-square fa-stack-2x" style="color:grey"></i>
@@ -359,7 +366,133 @@
                     metadata: newData.metadata[0], // obj
                     languages: languages
                 });
-            }
+            },
+            // Add lyrics to existing language
+            pickCodeToAdd: function() {
+                //make popup: list of all languages minus langagues already in song
+                var el = `<div class="popup">
+                        <div class="block">
+                            <strong><h3>*Pick language to bulk edit lyrics</h3></strong>`
+                locale.customLocales.forEach(element => {
+                    if(languages.includes(element['tag'])){
+                        el += `<a  href="#" id="${element.tag}" class="col popup-close button button-fill ${element.tag}">${element.name} - ${element.local}</a></p>`
+                    }
+                });
+                el +=  `</div></div>`
+                var a = app.popup.create({
+                    content:el,
+                    closeByBackdropClick: true,
+                    on: {
+                        close: function (popup) {
+                            var selected = popup.$el[0].children[0].getElementsByClassName('active-state')[0].id
+                            self.addLyricsPopup(selected)
+                        },
+                    }
+                }); 
+                a.open();
+            },
+            addLyricsPopup: function(languageTag) {
+                //make popup: list of all languages minus langagues already in song
+                // open popup
+                var totalLines = 0;
+                app.song.lyrics.verses.forEach(verse => {
+                    totalLines += verse.lines.length;
+                });
+
+                var el = `<div class="popup">
+                        <div class="block">
+                            <strong><h3>*Upload File with ${totalLines} total lines.</h3></strong>
+                            <input type="file" id="file-selector" accept=".txt, .doc, .docx">
+                        </div></div>`
+                        
+                var dialog = app.dialog.create({
+                    backdrop: true,
+                    closeByBackdropClick: false,
+                    title: `<t>Upload File with ${totalLines} total lines.</t>`,
+                    text: "<input type='file' id='file' accept='.txt, .doc, .docx'>",
+                    buttons: [{
+                            text: "<t>Cancel</t>",
+                            onClick: (dialog, ev) => {
+                                dialog.close();
+                            }
+                        },
+                        {
+                            text: "<t>Upload-preview till saved</t>",
+                            onClick: (dialog, ev) => {
+                                self.handleFiles(self.$$("#file")[0].files[0] , languageTag);
+                                dialog.close();
+                            }
+                        }
+                    ],
+                    verticalButtons: true
+                });
+                dialog.open();
+            },
+            addLanguageText: function(newLanguageTag) {
+                
+                document.getElementById('file').onchange = function(){
+
+                var file = this.files[0];
+
+                var reader = new FileReader();
+                reader.onload = function(progressEvent){
+                    // Entire file
+                    console.log(this.result);
+
+                    // By lines
+                    var lines = this.result.split('\n');
+                    for(var line = 0; line < lines.length; line++){
+                        console.log(lines[line]);
+                    }
+                };
+                reader.readAsText(file);
+                };
+
+                //
+                var userUpload = [];
+
+                song.lyrics.verses.forEach(verse => {
+                    verse.lines.forEach(line => {
+                        // add blanks
+                        line.phrases.forEach(phrase => {
+                            phrase[newLanguageTag] = ''
+                        });
+                        // add upload
+                        newLine = userUpload.splice(0,1);
+                        line.phrases[0][newLanguageTag] = newLine;
+                    });
+                });
+            },
+            handleFiles: function(file, tag) {
+                const reader = new FileReader();
+
+                reader.onload = (event) => {
+                    const file = event.target.result;
+                    const allLines = file.split(/\r\n|\n/);
+                    // Reading line by line
+                    // allLines.forEach((line) => {
+                    //     console.log(line);
+                    // });
+                    song.lyrics.verses.forEach(verse => {
+                        verse.lines.forEach(line => {
+                            // add blanks
+                            line.phrases.forEach(phrase => {
+                                phrase[tag] = ''
+                            });
+                            // add upload
+                            let newLine = allLines.splice(0,1);
+                            console.log(newLine);
+                            line.phrases[0][tag] = newLine;
+                        });
+                    });
+                };
+
+                reader.onerror = (event) => {
+                    alert(event.target.error.name);
+                };
+                
+                reader.readAsText(file);
+            },
         },
     }
 </script>

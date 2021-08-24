@@ -11,7 +11,7 @@
                 </div>
                 <div class="title">{{#if loading}}{{else}} {{song.title[defaultLanguage]}} {{/if}}</div>
                 <div class="right">
-                    <a @click="pickLanguageCode" class="button disabled">
+                    <a @click="pickLanguageCode" class="button">
                         <span class="fa-stack">
                             <i class="fas fa-square fa-stack-2x" style="color:grey"></i>
                             <i class="fas fa-globe fa-stack-1x" style="color:white"></i>
@@ -309,45 +309,56 @@
                     });
             },
             pickLanguageCode: function() {
-                // TODO add logic here for picking a language
-                var newLanguageTag = 'en';
-                //make popup
-                 // popup: 
-                 // list of all languages
-                 // minus langagues already in song
-                 // user picks one, it calls the @click with it's tag
-
-                return self.addLanguageCode(newLanguageTag);
+                //make popup: list of all languages minus langagues already in song
+                var el = `<div class="popup">
+                        <div class="block">
+                            <strong><h3>*Pick language to add</h3></strong>`
+                locale.customLocales.forEach(element => {
+                    if(!languages.includes(element['tag'])){
+                        el += `<a  href="#" id="${element.tag}" class="col popup-close button button-fill ${element.tag}">${element.name} - ${element.local}</a></p>`
+                    }
+                });
+                el +=  `</div></div>`
+                var a = app.popup.create({
+                    content:el,
+                    closeByBackdropClick: true,
+                    on: {
+                        close: function (popup) {
+                            var selected = popup.$el[0].children[0].getElementsByClassName('active-state')[0].id
+                            self.addLanguageCode(selected)
+                        },
+                    }
+                }); 
+                a.open();
             },
             addLanguageCode: function(newLanguageTag) {
-                // var newLanguageTag = 'en';
                 let newData = app.song;
-                var languageTag = newLanguageTag;
-
 
                 // Language tag
                 newData.metadata.forEach(metaDataLine => {
-                    metaDataLine[languageTag] = "*";
+                    metaDataLine[newLanguageTag] = "*";
                 });
-                newData.title[languageTag] = "*";
+                newData.title[newLanguageTag] = "*";
                 // add tag to every phrase
                 newData.lyrics.verses.forEach(verse => {
                     verse.lines.forEach(line => {
                         line.phrases.forEach(phrase => {
-                            phrase[languageTag] = "*";
+                            phrase[newLanguageTag] = "*";
                         });
                     });
                 });
                 app.song = newData;
-                songCollection.db.setItem(songId, newData)
-                debugger;
+                languages.push(newLanguageTag);
+
                 self.$setState({
                     loading: false,
                     song: newData,
+                    author: newData.author, // string
+                    key: newData.key, // string
+                    title: newData.title, // obj
+                    metadata: newData.metadata[0], // obj
+                    languages: languages
                 });
-                // TODO send changes to server
-                //
-                return;
             }
         },
     }

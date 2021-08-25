@@ -417,9 +417,16 @@
                             }
                         },
                         {
-                            text: "<t>Upload-preview till saved</t>",
+                            text: "<t>Upload - overwrite</t>",
                             onClick: (dialog, ev) => {
                                 self.handleFiles(self.$$("#file")[0].files[0] , languageTag, totalLines);
+                                dialog.close();
+                            }
+                        },
+                        {
+                            text: "<t>Upload - add on</t>",
+                            onClick: (dialog, ev) => {
+                                self.handleFilesAddon(self.$$("#file")[0].files[0] , languageTag, totalLines);
                                 dialog.close();
                             }
                         }
@@ -451,7 +458,6 @@
                     });
                     if(allLines.length){ // overflow goes into last verse
                         var lastVerseId = song.lyrics.verses.length-1;
-                        debugger
                         var lastLineId = song.lyrics.verses[lastVerseId].lines.length-1;
                         
                         var templatePhrase = {};
@@ -469,6 +475,30 @@
                             song.lyrics.verses[lastVerseId].lines[++lastLineId] = {'phrases':[templatePhrase]};
                         });
                     }
+                };
+
+                reader.onerror = (event) => {
+                    alert(event.target.error.name);
+                };
+                
+                reader.readAsText(file);
+            },
+            handleFilesAddon: function(file, tag, totalLines) {
+                const reader = new FileReader();
+
+                reader.onload = (event) => {
+                    const file = event.target.result;
+                    const allLines = file.split(/\r\n|\n/);
+
+                    var lastVerseId = song.lyrics.verses.length-1;
+                    var lastLineId = song.lyrics.verses[lastVerseId].lines.length-1;
+
+                    allLines.forEach(newLine => {
+                        let a = {'phrases':[]};
+                        a.phrases.push({})
+                        a.phrases[0][tag] = newLine
+                        song.lyrics.verses[lastVerseId].lines[++lastLineId] = a;
+                    });
                 };
 
                 reader.onerror = (event) => {

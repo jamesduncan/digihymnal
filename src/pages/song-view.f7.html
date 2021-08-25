@@ -94,7 +94,11 @@
                         <div class="song">
                             <div class="verse">
                                 {{#each song.lyrics.verses}}
-                                    <h3>{{#if label}}{{translate label}} {{#if @root.editMode}}<a @click=deleteVerse({{@index}}) class="button button-small item-link edit-phrase"><i class="fas fa-bigger fa-dumpster-fire"></i></a>{{/if}}{{else}}<br />{{/if}} </h3>
+                                    <h3>{{#if label}}{{translate label}} 
+                                        {{#if @root.editMode}}
+                                            <a @click=deleteVerse({{@index}}) class="button button-small item-link edit-phrase"><i class="fas fa-bigger fa-dumpster-fire"></i></a>
+                                            <a @click=copyChordsToVerse({{@index}}) class="button button-small item-link edit-phrase"><i class="fas fa-bigger fa-copy"></i></a>
+                                        {{/if}}{{else}}<br />{{/if}} </h3>
                                     {{#each lines}}
                                         <div class="line">
                                             {{#if @root.editMode}}
@@ -739,7 +743,140 @@
                     self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
                 });
             },
+            copyChordsToVerse: function(selectedVerse) {
+                verseId = selectedVerse;
+                let newData = song;
+
+                // open popup, select verse to copy from
+                var buttonsArray = [{ text: "<t>Cancel</t>",
+                            onClick: (dialog, ev) => {
+                                dialog.close();
+                            }}];
+
+                song.lyrics.verses.forEach(verse => {
+                    let elem = { text: `<t>${verse.label}</t>`,
+                            onClick: (dialog, ev) => {
+                                dialog.close();
+                                readLines(verse.id)
+                            }};
+                    buttonsArray.push(elem);
+                });
+
+                var dialog = app.dialog.create({
+                    backdrop: true,
+                    closeByBackdropClick: false,
+                    title: "<t>Select source verse</t>",
+                    buttons: buttonsArray,
+                    verticalButtons: true
+                });
+                dialog.open();
+                function readLines(id){
+                    var sourceV = song.lyrics.verses[id];
+                    var destinationV = song.lyrics.verses[verseId]
+                    // read chords from selected
+                    var i = sourceV.length
+                    debugger
+                    while ( i < sourceV.lines.length && i < destinationV.lines.length ) {
+                        copyPhrase(sourceV.lines[i],id, destinationV.lines[i],verseId,i);
+                    }
+                }
+                function copyPhrase(source,svid,destination,dvid,i){
+                    source.phrases[0];
+                    [{'chord':'A','en':'hey jude'},{'chord':'b','en':' play on piano man'}]
+                    [{'en':'hey jude'},{'chord':'A','en':' play on piano man'}]
+                    destination.phrases[0];
+                    [{'en':'Imagine a world without semicolons'}]
+                    [{'en':'Imagine a world'}, { 'en': 'without semicolons'}]
+
+                    // I need:
+                    chordList = ['','A','B','C','D'];
+                    numberList = ['','1','2','3','4'];
+                    sourcePhraseList = { 'en': [.2,.3,.1,.4,0], 'at': [.3,.2,.2,.3,0] };
+                    sourceLen = { 'en': 10, 'at': 21 };
+
+                    var sourceFullLine = {}
+                    var phraseLengthList = {}
+                    source.phrases.forEach(phrase => {
+                        for (const key in phrase) {
+                            if (Object.hasOwnProperty.call(phrase, key)) {
+                                const element = phrase[key];
+                                if(chord || number){
+                                    chordList.push(element);
+                                } else { // is language
+                                    sourceFullLine[key] += element; // get full line
+                                    // sourceFullLine = {'en': "hey jude", 'at': 'zxcvqewr'}
+                                    phraseLengthList[key].push(self.diacriticChecker(element).length) // (abc).length = 3
+                                    //{'en': [1,2,3], 'at': [1,2,3] }
+                                }
+                            }
+                        }
+                    });
+                    // get source info for each tag
+                    languages.forEach(lang => {
+                        // Get total length of source
+                        // 10
+                        sourceLen[lang] = 0;
+                        phraseLengthList[lang].forEach(phraseLen => {
+                            sourceLen[lang] += phraseLen;
+                        });
+                        //  'en': [.2,.3,.1,.4,0]
+                        phraseLengthList[lang].forEach(phraseLen => {
+                            let ppercentage = phraseLen/sourceLen[lang]
+                            sourcePhraseList[lang].push(ppercentage);
+                        });
+                    });
+
+                    // for each tag:
+
+                    // get approximate spacing from source
+                    // [ab,cde,e,fghi]
+                    // 20%, 30%, 10%, 40%
+                    // total length / length of phrase (2/10 = .2) = aproxPLen
+
+                    // totally combine destination
+                    // [abc]
+                    // [abcdeefghijklmnopqrs]
+
+                    // destination.length * aproxPLen = how many char to put into phrase
+                    // append extra to end
+                    // [a,b,c,'']
+                    // [abcd,eefghi,jk,lmnopqrs]
+
+
+                    for (const key in source) {
+                        if (Object.hasOwnProperty.call(source, key) && key != 'chord' && key != 'number') {
+                            const element = source[key];
+                            // concat phrases, may be overwriting old
+                            var combinedLineS = phraseCombiner(source, key);
+                            var combinedLineD = phraseCombiner(destination, key);
+                            self.diacriticChecker(combinedLine);
+                            
+                        }
+                    }
+                }
+                function phraseCombiner(line,tag){
+                    var lineText = '';
+                    line.phrases.forEach(phrase => {
+                        if(phrase.tag){
+                            lineText += phrase.tag;
+                        }
+                    });
+                    return lineText;
+                }
+
+                song = newData;
+                app.song = newData;
+                self.savableUpdate(true);
+                self.$setState({
+                    loading: false,
+                    song: newData
+                }, () => {
+                    self.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                    self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+                });
+            },
             splitVerse: function(selectedVerse,selectedLine) {
+                // TODO offer option to copy chords from another existing verse
                 verseId = selectedVerse;
                 lineId = selectedLine;
                 let newData = song;

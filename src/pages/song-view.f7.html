@@ -834,7 +834,7 @@
                 songCollection.db.setItem(songId, song);
                 self.savableUpdate(false)
                 // send ovreall song changes to server
-                dataManager.putSong(songId, newData)
+                dataManager.putSong(songId, song)
                     .then(responseText => alert(JSON.stringify(responseText)));
             },
             savableUpdate: function(bool) {

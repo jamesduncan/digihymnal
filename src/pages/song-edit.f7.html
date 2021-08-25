@@ -419,7 +419,7 @@
                         {
                             text: "<t>Upload-preview till saved</t>",
                             onClick: (dialog, ev) => {
-                                self.handleFiles(self.$$("#file")[0].files[0] , languageTag);
+                                self.handleFiles(self.$$("#file")[0].files[0] , languageTag, totalLines);
                                 dialog.close();
                             }
                         }
@@ -428,51 +428,15 @@
                 });
                 dialog.open();
             },
-            addLanguageText: function(newLanguageTag) {
-                
-                document.getElementById('file').onchange = function(){
-
-                var file = this.files[0];
-
-                var reader = new FileReader();
-                reader.onload = function(progressEvent){
-                    // Entire file
-                    console.log(this.result);
-
-                    // By lines
-                    var lines = this.result.split('\n');
-                    for(var line = 0; line < lines.length; line++){
-                        console.log(lines[line]);
-                    }
-                };
-                reader.readAsText(file);
-                };
-
-                //
-                var userUpload = [];
-
-                song.lyrics.verses.forEach(verse => {
-                    verse.lines.forEach(line => {
-                        // add blanks
-                        line.phrases.forEach(phrase => {
-                            phrase[newLanguageTag] = ''
-                        });
-                        // add upload
-                        newLine = userUpload.splice(0,1);
-                        line.phrases[0][newLanguageTag] = newLine;
-                    });
-                });
-            },
-            handleFiles: function(file, tag) {
+            handleFiles: function(file, tag, totalLines) {
                 const reader = new FileReader();
 
                 reader.onload = (event) => {
                     const file = event.target.result;
                     const allLines = file.split(/\r\n|\n/);
-                    // Reading line by line
-                    // allLines.forEach((line) => {
-                    //     console.log(line);
-                    // });
+                    
+                    var linesForExistingSlots = allLines.splice(0,totalLines)
+
                     song.lyrics.verses.forEach(verse => {
                         verse.lines.forEach(line => {
                             // add blanks
@@ -480,11 +444,31 @@
                                 phrase[tag] = ''
                             });
                             // add upload
-                            let newLine = allLines.splice(0,1);
+                            let newLine = linesForExistingSlots.splice(0,1);
                             console.log(newLine);
                             line.phrases[0][tag] = newLine;
                         });
                     });
+                    if(allLines.length){ // overflow goes into last verse
+                        var lastVerseId = song.lyrics.verses.length-1;
+                        debugger
+                        var lastLineId = song.lyrics.verses[lastVerseId].lines.length-1;
+                        
+                        var templatePhrase = {};
+                        for (const key in song.lyrics.verses[lastVerseId].lines[lastLineId].phrases[0]) {
+                            if (Object.hasOwnProperty.call(song.lyrics.verses[lastVerseId].lines[lastLineId].phrases[0], key)) {
+                                if(key != 'chord' && key != 'number'){
+                                    templatePhrase[key] = '';
+                                }
+                            }
+                        }
+
+                        allLines.forEach(newLine => {
+                            templatePhrase[tag] = newLine;
+                            //song.lyrics.verses[lastVerseId].lines[++lastLineId] = {'phrases':[{tag: newLine}]};
+                            song.lyrics.verses[lastVerseId].lines[++lastLineId] = {'phrases':[templatePhrase]};
+                        });
+                    }
                 };
 
                 reader.onerror = (event) => {

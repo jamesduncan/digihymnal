@@ -118,24 +118,26 @@
                                                     </span>
                                                 </a> 
                                             {{/if}}
-                                            {{#each phrases}}
-                                                <div class="phrase {{#if @root.showNumber}}{{else}}noNumbers{{/if}} {{#if @root.showChord}}{{else}}noChords{{/if}}">
-                                                    {{#if chord}}
-                                                        {{#if @root.showChord}}
-                                                            <div class="chord">{{transpose chord @root.steps}}</div>
+                                            {{#if this}}
+                                                {{#each phrases}}
+                                                    <div class="phrase {{#if @root.showNumber}}{{else}}noNumbers{{/if}} {{#if @root.showChord}}{{else}}noChords{{/if}}">
+                                                        {{#if chord}}
+                                                            {{#if @root.showChord}}
+                                                                <div class="chord">{{transpose chord @root.steps}}</div>
+                                                            {{/if}}
                                                         {{/if}}
-                                                    {{/if}}
-                                                    {{#if number}}
-                                                        {{#if @root.showNumber}}
-                                                            <div class="number">{{number}}</div>
+                                                        {{#if number}}
+                                                            {{#if @root.showNumber}}
+                                                                <div class="number">{{number}}</div>
+                                                            {{/if}}
                                                         {{/if}}
-                                                    {{/if}}
-                                                    <div class="lyric">{{printObjectPropertyByKey this @root.lyric1 }}</div>  
-                                                    {{#if @root.showLyric2}}
-                                                        <div class="lyric">{{printObjectPropertyByKey this @root.lyric2 }}</div>
-                                                    {{/if}}
-                                                </div>
-                                            {{/each}}
+                                                        <div class="lyric">{{printObjectPropertyByKey this @root.lyric1 }}</div>  
+                                                        {{#if @root.showLyric2}}
+                                                            <div class="lyric">{{printObjectPropertyByKey this @root.lyric2 }}</div>
+                                                        {{/if}}
+                                                    </div>
+                                                {{/each}}
+                                            {{/if}}
                                             <div style="clear:both;"></div>
                                         </div>
                                     {{/each}}

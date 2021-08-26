@@ -589,7 +589,9 @@
                 line.phrases.forEach(phrase => {
                     if (phrase[tag]) {
                         langLine += phrase[tag];
-                        let elementAsArray = self.diacriticChecker(phrase[tag].split(""), 0) ;
+                        let phraseArr = phrase[tag].split("")
+                        debugger
+                        let elementAsArray = self.diacriticChecker(phraseArr, 0);
                         phraseBreakLocations[tag].push(elementAsArray.length);
                     }
                 });

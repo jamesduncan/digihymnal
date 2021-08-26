@@ -332,6 +332,24 @@
                     on: {
                         close: function (popup) {
                             var selected = popup.$el[0].children[0].getElementsByClassName('active-state')[0].id
+                            //// This is a very janky way of digging into the popup's elements to find the 'ripple-wave class
+                            if(!selected){
+                                var popupButtons = this.$el[0].children[0].getElementsByClassName('col')
+                                if(popupButtons.length == 1){
+                                    // only one language tag here
+                                    selected = popupButtons[0].id
+                                } else{
+                                    // Start digging...
+                                    var a = Array.from(popupButtons)
+                                    let i = 0
+                                    while (i < a.length){
+                                        if (a[i].children){
+                                            selected = a[i++].id
+                                        }
+                                    }
+                                }
+                            }   
+
                             self.addLanguageCode(selected)
                         },
                     }
@@ -385,6 +403,23 @@
                     on: {
                         close: function (popup) {
                             var selected = popup.$el[0].children[0].getElementsByClassName('active-state')[0].id
+                            //// This is a very janky way of digging into the popup's elements to find the 'ripple-wave class
+                            if(!selected){
+                                var popupButtons = this.$el[0].children[0].getElementsByClassName('col')
+                                if(popupButtons.length == 1){
+                                    // only one language tag here
+                                    selected = popupButtons[0].id
+                                } else{
+                                    // Start digging...
+                                    var a = Array.from(popupButtons)
+                                    let i = 0
+                                    while (i < a.length){
+                                        if (a[i].children){
+                                            selected = a[i++].id
+                                        }
+                                    }
+                                }
+                            } 
                             self.addLyricsPopup(selected)
                         },
                     }

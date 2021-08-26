@@ -454,8 +454,11 @@
                         self.displayLyricSliders();
                     });
                     // send line changes to server
-                    dataManager.putLine(songId, verseId, lineId, newData.lyrics.verses[verseId].lines[lineId])
-                        .then(responseText => alert(JSON.stringify(responseText)));
+                    // dataManager.putLine(songId, verseId, lineId, newData.lyrics.verses[verseId].lines[lineId])
+                    //     .then(responseText => alert(JSON.stringify(responseText)));
+                    // send whole song to server
+                    dataManager.putSong(songId, newData)
+                     .then(responseText => alert(JSON.stringify(responseText)));
                 
                 }
             },

@@ -327,6 +327,7 @@
     var lineId
     var song
     var line
+    var languages
     var app
     var phraseBreakLocations = {}
     var self
@@ -400,12 +401,12 @@
                     // update page with selected song
                     function updatePage(song,defaultLanguage){
                         var translationLangs = Object.keys(song.title);
-                        let languages = [];
+                        languages = [];
                         locale.customLocales.forEach((item) => {
                             if (translationLangs.indexOf(item.tag) > -1) {
                                 if (item.tag == lyric1) {
                                     item.default = true;
-                                }
+                                }                                
                                 languages.push(item)
                                 languageTags.push(item.tag)
                             }
@@ -562,6 +563,7 @@
             },  
             
             diacriticChecker: function(array, index) {
+                if (!index) {index = 0};
                 var nextIndex = index + 1
                 if (nextIndex >= array.length) {
                     return array;
@@ -771,14 +773,27 @@
                 });
                 dialog.open();
                 function readLines(id){
-                    var sourceV = song.lyrics.verses[id];
-                    var destinationV = song.lyrics.verses[verseId]
-                    // read chords from selected
-                    var i = sourceV.length
-                    debugger
-                    while ( i < sourceV.lines.length && i < destinationV.lines.length ) {
-                        copyPhrase(sourceV.lines[i],id, destinationV.lines[i],verseId,i);
-                    }
+                    var dialog = app.dialog.create({
+                        backdrop: true,
+                        closeByBackdropClick: false,
+                        title: "<t>Sorry this feature is not done</t>",
+                        buttons: [{ text: "<t>I forgive you</t>",
+                            onClick: (dialog, ev) => {
+                                dialog.close();
+                            }},{ text: "<t>I will never forgive you</t>",
+                            onClick: (dialog, ev) => {
+                                dialog.close();
+                            }}],
+                        verticalButtons: true
+                    });
+                    dialog.open();
+                    // var sourceV = song.lyrics.verses[id];
+                    // var destinationV = song.lyrics.verses[verseId]
+                    // // read chords from selected
+                    // var i = 0;
+                    // while ( i < sourceV.lines.length && i < destinationV.lines.length ) {
+                    //     copyPhrase(sourceV.lines[i],id, destinationV.lines[i],verseId,i);
+                    // }
                 }
                 function copyPhrase(source,svid,destination,dvid,i){
                     source.phrases[0];
@@ -789,30 +804,40 @@
                     [{'en':'Imagine a world'}, { 'en': 'without semicolons'}]
 
                     // I need:
-                    chordList = ['','A','B','C','D'];
-                    numberList = ['','1','2','3','4'];
-                    sourcePhraseList = { 'en': [.2,.3,.1,.4,0], 'at': [.3,.2,.2,.3,0] };
-                    sourceLen = { 'en': 10, 'at': 21 };
-
+                    // var chordList = ['','A','B','C','D'];
+                    var chordList = [];
+                    // var numberList = ['','1','2','3','4'];
+                    var numberList = [];
+                    var sourcePhraseList = { 'en': [.2,.3,.1,.4,0], 'at': [.3,.2,.2,.3,0] };
+                    var sourceLen = { 'en': 10, 'at': 21 };
+                    
                     var sourceFullLine = {}
                     var phraseLengthList = {}
+                    languageTags.forEach(lang => {
+                        sourceFullLine[lang] = []
+                        sourceLen[lang] = []
+                        phraseLengthList[lang] = []
+                        sourcePhraseList[lang] = []
+                    });
                     source.phrases.forEach(phrase => {
                         for (const key in phrase) {
-                            if (Object.hasOwnProperty.call(phrase, key)) {
+                            if (Object.hasOwnProperty.call(phrase, key) && key) {
                                 const element = phrase[key];
-                                if(chord || number){
+                                if( key == 'chord'){ 
                                     chordList.push(element);
+                                }else if( key == 'number' ){
+                                    numberList.push(element);
                                 } else { // is language
                                     sourceFullLine[key] += element; // get full line
                                     // sourceFullLine = {'en': "hey jude", 'at': 'zxcvqewr'}
-                                    phraseLengthList[key].push(self.diacriticChecker(element).length) // (abc).length = 3
+                                    phraseLengthList[key].push(self.diacriticChecker(element, 0).length) // (abc).length = 3
                                     //{'en': [1,2,3], 'at': [1,2,3] }
                                 }
                             }
                         }
                     });
                     // get source info for each tag
-                    languages.forEach(lang => {
+                    languageTags.forEach(lang => {
                         // Get total length of source
                         // 10
                         sourceLen[lang] = 0;
@@ -825,6 +850,7 @@
                             sourcePhraseList[lang].push(ppercentage);
                         });
                     });
+                    debugger;
 
                     // for each tag:
 
@@ -849,7 +875,7 @@
                             // concat phrases, may be overwriting old
                             var combinedLineS = phraseCombiner(source, key);
                             var combinedLineD = phraseCombiner(destination, key);
-                            self.diacriticChecker(combinedLine);
+                            self.diacriticChecker(combinedLine, 0);
                             
                         }
                     }

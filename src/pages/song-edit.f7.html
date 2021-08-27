@@ -11,7 +11,14 @@
                 </div>
                 <div class="title">{{#if loading}}{{else}} {{song.title[defaultLanguage]}} {{/if}}</div>
                 <div class="right">
-                    <a @click="pickLanguageCode" class="button disabled">
+                    <a @click="pickCodeToAdd" class="button">
+                        <span class="fa-stack">
+                            <i class="fas fa-square fa-stack-2x" style="color:orange"></i>
+                            <i class="fas fa-globe fa-stack-1x" style="color:blue"></i>
+                            <i class="fas fa-plus fa-stack-1x" style="color:red; text-align:left;  margin-top: 9px; margin-left: 5px;"></i>
+                        </span>
+                    </a>
+                    <a @click="pickLanguageCode" class="button">
                         <span class="fa-stack">
                             <i class="fas fa-square fa-stack-2x" style="color:grey"></i>
                             <i class="fas fa-globe fa-stack-1x" style="color:white"></i>
@@ -309,46 +316,248 @@
                     });
             },
             pickLanguageCode: function() {
-                // TODO add logic here for picking a language
-                var newLanguageTag = 'en';
-                //make popup
-                 // popup: 
-                 // list of all languages
-                 // minus langagues already in song
-                 // user picks one, it calls the @click with it's tag
+                //make popup: list of all languages minus langagues already in song
+                var el = `<div class="popup">
+                        <div class="block">
+                            <strong><h3>*Pick language to add</h3></strong>`
+                locale.customLocales.forEach(element => {
+                    if(!languages.includes(element['tag'])){
+                        el += `<a  href="#" id="${element.tag}" class="col popup-close button button-fill ${element.tag}">${element.name} - ${element.local}</a></p>`
+                    }
+                });
+                el +=  `</div></div>`
+                var a = app.popup.create({
+                    content:el,
+                    closeByBackdropClick: true,
+                    on: {
+                        close: function (popup) {
+                            var selected;
+                            if( popup ){
+                                selected = popup.$el[0].children[0].getElementsByClassName('active-state')[0].id
+                            } else { 
+                                // This is a very janky way of digging into the popup's elements to find the 'ripple-wave class
+                                var popupButtons = this.$el[0].children[0].getElementsByClassName('col')
+                                if(popupButtons.length == 1){
+                                    // only one language tag here
+                                    selected = popupButtons[0].id
+                                } else{
+                                    // Start digging...
+                                    var a = Array.from(popupButtons)
+                                    let i = 0
+                                    while (i < a.length){
+                                        if (a[i].children){
+                                            selected = a[i++].id
+                                        }
+                                    }
+                                }
+                            }   
 
-                return self.addLanguageCode(newLanguageTag);
+                            self.addLanguageCode(selected)
+                        },
+                    }
+                }); 
+                a.open();
             },
             addLanguageCode: function(newLanguageTag) {
-                // var newLanguageTag = 'en';
                 let newData = app.song;
-                var languageTag = newLanguageTag;
-
 
                 // Language tag
                 newData.metadata.forEach(metaDataLine => {
-                    metaDataLine[languageTag] = "*";
+                    metaDataLine[newLanguageTag] = "*";
                 });
-                newData.title[languageTag] = "*";
+                newData.title[newLanguageTag] = "*";
                 // add tag to every phrase
                 newData.lyrics.verses.forEach(verse => {
                     verse.lines.forEach(line => {
                         line.phrases.forEach(phrase => {
-                            phrase[languageTag] = "*";
+                            phrase[newLanguageTag] = "*";
                         });
                     });
                 });
                 app.song = newData;
-                songCollection.db.setItem(songId, newData)
-                debugger;
+                languages.push(newLanguageTag);
+                self.savableUpdate(true);
+
                 self.$setState({
                     loading: false,
                     song: newData,
+                    author: newData.author, // string
+                    key: newData.key, // string
+                    title: newData.title, // obj
+                    metadata: newData.metadata[0], // obj
+                    languages: languages
                 });
-                // TODO send changes to server
-                //
-                return;
-            }
+            },
+            // Add lyrics to existing language
+            pickCodeToAdd: function() {
+                //make popup: list of all languages minus langagues already in song
+                var el = `<div class="popup">
+                        <div class="block">
+                            <strong><h3>*Pick language to bulk edit lyrics</h3></strong>`
+                locale.customLocales.forEach(element => {
+                    if(languages.includes(element['tag'])){
+                        el += `<a  href="#" id="${element.tag}" class="col popup-close button button-fill ${element.tag}">${element.name} - ${element.local}</a></p>`
+                    }
+                });
+                el +=  `</div></div>`
+                var a = app.popup.create({
+                    content:el,
+                    closeByBackdropClick: true,
+                    on: {
+                        close: function (popup) {
+                            var selected;
+                            if( popup ){
+                                selected = popup.$el[0].children[0].getElementsByClassName('active-state')[0].id
+                            } else {
+                                // This is a very janky way of digging into the popup's elements to find the 'ripple-wave class
+                                var popupButtons = this.$el[0].children[0].getElementsByClassName('col')
+                                if(popupButtons.length == 1){
+                                    // only one language tag here
+                                    selected = popupButtons[0].id
+                                } else{
+                                    // Start digging...
+                                    var a = Array.from(popupButtons)
+                                    let i = 0
+                                    while (i < a.length){
+                                        if (a[i].children){
+                                            selected = a[i++].id
+                                        }
+                                    }
+                                }
+                            } 
+                            self.addLyricsPopup(selected)
+                        },
+                    }
+                }); 
+                a.open();
+            },
+            addLyricsPopup: function(languageTag) {
+                //make popup: list of all languages minus langagues already in song
+                // open popup
+                var totalLines = 0;
+                app.song.lyrics.verses.forEach(verse => {
+                    totalLines += verse.lines.length;
+                });
+
+                var el = `<div class="popup">
+                        <div class="block">
+                            <strong><h3>*Upload File with ${totalLines} total lines.</h3></strong>
+                            <input type="file" id="file-selector" accept=".txt, .doc, .docx">
+                        </div></div>`
+                        
+                var dialog = app.dialog.create({
+                    backdrop: true,
+                    closeByBackdropClick: false,
+                    title: `<t>Upload File with ${totalLines} total lines.</t>`,
+                    text: "<input type='file' id='file' accept='.txt, .doc, .docx'>",
+                    buttons: [{
+                            text: "<t>Cancel</t>",
+                            onClick: (dialog, ev) => {
+                                dialog.close();
+                            }
+                        },
+                        {
+                            text: "<t>Upload - overwrite</t>",
+                            onClick: (dialog, ev) => {
+                                self.handleFiles(self.$$("#file")[0].files[0] , languageTag, totalLines);
+                                self.savableUpdate(true);
+                                dialog.close();
+                            }
+                        },
+                        {
+                            text: "<t>Upload - add on</t>",
+                            onClick: (dialog, ev) => {
+                                self.handleFilesAddon(self.$$("#file")[0].files[0] , languageTag, totalLines);
+                                self.savableUpdate(true);
+                                dialog.close();
+                            }
+                        }
+                    ],
+                    verticalButtons: true
+                });
+                dialog.open();
+            },
+            handleFiles: function(file, tag, totalLines) {
+                const reader = new FileReader();
+
+                reader.onload = (event) => {
+                    const file = event.target.result;
+                    const allLines = file.split(/\r\n|\n/);
+                    
+                    var linesForExistingSlots = allLines.splice(0,totalLines)
+
+                    song.lyrics.verses.forEach(verse => {
+                        verse.lines.forEach(line => {
+                            // add blanks
+                            line.phrases.forEach(phrase => {
+                                phrase[tag] = ''
+                            });
+                            // add upload
+                            let newLine = linesForExistingSlots.splice(0,1);
+                            console.log(newLine);
+                            line.phrases[0][tag] = newLine;
+                        });
+                    });
+                    if(allLines.length){ // overflow goes into last verse
+                        var lastVerseId = song.lyrics.verses.length-1;
+                        var lastLineId = song.lyrics.verses[lastVerseId].lines.length-1;
+                        
+                        var templatePhrase = {};
+                        for (const key in song.lyrics.verses[lastVerseId].lines[lastLineId].phrases[0]) {
+                            if (Object.hasOwnProperty.call(song.lyrics.verses[lastVerseId].lines[lastLineId].phrases[0], key)) {
+                                if(key != 'chord' && key != 'number'){
+                                    templatePhrase[key] = '';
+                                }
+                            }
+                        }
+
+                        allLines.forEach(newLine => {
+                            templatePhrase[tag] = newLine;
+                            //song.lyrics.verses[lastVerseId].lines[++lastLineId] = {'phrases':[{tag: newLine}]};
+                            song.lyrics.verses[lastVerseId].lines[++lastLineId] = {'phrases':[templatePhrase]};
+                        });
+                    }
+                };
+
+                reader.onerror = (event) => {
+                    alert(event.target.error.name);
+                };
+                
+                reader.readAsText(file);
+            },
+            handleFilesAddon: function(file, tag, totalLines) {
+                const reader = new FileReader();
+
+                reader.onload = (event) => {
+                    const file = event.target.result;
+                    const allLines = file.split(/\r\n|\n/);
+
+                    var lastVerseId = song.lyrics.verses.length-1;
+                    var lastLineId = song.lyrics.verses[lastVerseId].lines.length-1;
+
+                    allLines.forEach(newLine => {
+                        let a = {'phrases':[]};
+                        a.phrases.push({})
+                        a.phrases[0][tag] = newLine
+                        song.lyrics.verses[lastVerseId].lines[++lastLineId] = a;
+                    });
+                };
+
+                reader.onerror = (event) => {
+                    alert(event.target.error.name);
+                };
+                
+                reader.readAsText(file);
+            },
+            savableUpdate: function(bool) {
+                if (typeof(bool) != 'boolean'){
+                    bool = false;
+                }
+                app.savable = bool;
+                self.$setState({
+                    savable: bool
+                });
+            },
         },
     }
 </script>

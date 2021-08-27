@@ -2,6 +2,7 @@ import DB from "./DB";
 
 const DB_NAME = "DIGIHYMNAL_PREFERENCE";
 const LANGUAGE_KEY_NAME = "DIGIHYMNAL_LANGUAGE";
+const EDITMODE_KEY_NAME = "DIGIHYMNAL_EDITMODE";
 
 export default class Preference {
     constructor() {
@@ -20,5 +21,19 @@ export default class Preference {
             lang = "kt";
         }
         return lang;
+    }
+
+    async setEditMode(value) {
+        window.editMode = value;
+        return await this.db.setItem(EDITMODE_KEY_NAME, value);
+    }
+
+    async getEditMode() {
+        var mode = await this.db.getItem(EDITMODE_KEY_NAME);
+        if (!mode) {
+            this.setEditMode(false);
+            mode = false;
+        }
+        return mode;
     }
 }

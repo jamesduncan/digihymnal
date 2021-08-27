@@ -5,10 +5,23 @@
                 <div class="navbar">
                     <div class="navbar-bg"></div>
                     <div class="navbar-inner">
-                        <div class="title">{{#if loading}}Choose a language{{else}}{{translate "Choose a language"}}{{/if}}</div>
+                        <div class="title">{{#if loading}}Settings{{else}}{{translate "Settings"}}{{/if}}</div>
                     </div>
                 </div>
                 <div class="page-content">
+                    <div class="block-title">{{#if loading}}Advanced{{else}}{{translate "Advanced"}}{{/if}}</div>
+                    <div class="list simple-list">
+                        <ul>
+                            <li>
+                                <t class="text-color-gray">Edit Mode</t>
+                                <label class="toggle toggle-init">
+                                    <input @click="toggleEditMode" name="editMode" type="checkbox" {{#if editMode}}checked{{/if}}>
+                                    <span class="toggle-icon"></span>
+                                </label>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="block-title">{{#if loading}}Choose a language{{else}}{{translate "Choose a language"}}{{/if}}</div>
                     <div class="list">
                         <ul>
                             {{#each languages}}
@@ -16,11 +29,19 @@
                                     <a @click="changeLanguage" data-languageCode="{{tag}}" class="item-content">
                                         <div class="item-inner">
                                             <div class="item-title text-color-gray">{{#if local}}{{local}}{{else}}{{name}}{{/if}}</div>
-                                            <div class="item-after text-color-primary">{{#if default}}<i class="fas fa-check-circle"></i>{{else}}<i class="far fa-circle">{{/if}}</div>
+                                            <div class="item-after text-color-primary">{{#if default}}<i class="fas fa-check-circle"></i>{{else}}<i class="far fa-circle"></i>{{/if}}</div>
                                         </div>
                                     </a>
                                 </li>
-                            {{/each}}
+                                {{/each}}
+                                <li>
+                                    <a @click="addLanguage" class="item-content disabled">
+                                        <div class="item-inner">
+                                            <div class="item-title text-color-gray">{{#if local}}{{local}}{{else}}Add language{{/if}}</div>
+                                            <div class="item-after text-color-primary"><i class="fas fa-plus"></i></div>
+                                        </div>
+                                    </a>
+                                </li>
                         </ul>
                     </div>
                 </div>
@@ -29,61 +50,95 @@
     </div>
 </template>
 <script>
+    // Import locales
+    const locale = require('../js/locales.js');
 
-// Import locales
-const locale = require('../js/locales.js');
+    import Preference from "../data/preference";
+    const preference = new Preference();
 
-import Preference from "../data/preference";
-const preference = new Preference();
-
-function setDefaultLanguage(languageCode) {
-  var languages = [];
-  locale.customLocales.forEach((item) => {
-    if (item.tag == languageCode) {
-      item.default = true;
-    } else {
-      item.default = false;
+    function setDefaultLanguage(languageCode) {
+        var languages = [];
+        locale.customLocales.forEach((item) => {
+            if (item.tag == languageCode) {
+                item.default = true;
+            } else {
+                item.default = false;
+            }
+            languages.push(item)
+        });
+        return languages;
     }
-    languages.push(item)
-  });
-  return languages;
-}
 
-export default {
-  // Component Data
-  data: function () {
-    
-    // Must return an object
-    return {
-      languages: locale.customLocales
-    }
-  },
-  on: {
-    panelOpened: async function(event) {
-      var self = this;
+    export default {
+        // Component Data
+        data: function() {
 
-      preference.getLanguage().then((languageCode) => {
-        var languages = setDefaultLanguage(languageCode);
-        
-        self.$setState({
-          languages: languages
-        })
-      });
-    }
-  },
-  methods: {
-    changeLanguage: async function(event) {
-      var self = this;
-      var languageCode = this.$$(event.currentTarget).data("languagecode");
-      var languages = setDefaultLanguage(languageCode);
-      
-      self.$setState({
-        languages: languages
-      })
+            // Must return an object
+            return {
+                languages: locale.customLocales,
+                editMode: false
+            }
+        },
+        on: {
+            panelOpened: async function(event) {
+                var self = this;
 
-      await preference.setLanguage(languageCode);
-      self.$router.back('/', {force: true, ignoreCache: true});
+                preference.getLanguage().then((languageCode) => {
+                    var languages = setDefaultLanguage(languageCode);
+
+                    self.$setState({
+                        languages: languages
+                    })
+                });
+
+                preference.getEditMode().then((mode) => {
+self.$setState({
+editMode: mode
+})
+});
+            }
+        },
+        methods: {
+            changeLanguage: async function(event) {
+                var self = this;
+                var languageCode = this.$$(event.currentTarget).data("languagecode");
+                var languages = setDefaultLanguage(languageCode);
+
+                self.$setState({
+                    languages: languages
+                })
+
+                await preference.setLanguage(languageCode);
+                self.$router.back('/', {
+                    force: true,
+                    ignoreCache: true
+                });
+            },
+            addLanguage: async function(event) {
+                var self = this;
+                debugger;
+                // get in popup
+                var languageCode = 'es';// user added langauge
+                
+                // add to global var
+
+                //var languages = setDefaultLanguage(languageCode);
+
+                self.$setState({
+                    languages: languages
+                })
+
+                await preference.setLanguage(languageCode);
+                self.$router.back('/', {
+                    force: true,
+                    ignoreCache: true
+                });
+            },
+            toggleEditMode: async function(event) {
+                var self = this;
+                var mode = event.target.checked;
+                await preference.setEditMode(mode);
+            }
+        }
     }
-  }
-}
 </script>

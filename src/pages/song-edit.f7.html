@@ -493,7 +493,7 @@
                                 phrase[tag] = ''
                             });
                             // add upload
-                            let newLine = linesForExistingSlots.splice(0,1);
+                            let newLine = linesForExistingSlots.splice(0,1)[0];
                             console.log(newLine);
                             line.phrases[0][tag] = newLine;
                         });
@@ -512,9 +512,11 @@
                         }
 
                         allLines.forEach(newLine => {
-                            templatePhrase[tag] = newLine;
-                            //song.lyrics.verses[lastVerseId].lines[++lastLineId] = {'phrases':[{tag: newLine}]};
-                            song.lyrics.verses[lastVerseId].lines[++lastLineId] = {'phrases':[templatePhrase]};
+                            // The same line gets inserted over and over if I DON'T do this
+                            let a = {'phrases':[]};
+                            a.phrases.push({})
+                            a.phrases[0][tag] = newLine
+                            song.lyrics.verses[lastVerseId].lines[++lastLineId] = a;
                         });
                     }
                 };
@@ -536,6 +538,7 @@
                     var lastLineId = song.lyrics.verses[lastVerseId].lines.length-1;
 
                     allLines.forEach(newLine => {
+                        // The same line gets inserted over and over if I DON'T do this
                         let a = {'phrases':[]};
                         a.phrases.push({})
                         a.phrases[0][tag] = newLine

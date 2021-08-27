@@ -373,10 +373,14 @@
                 self = this;
                 app = self.$app;
                 songId = this.$route.params.songId;
-                this.songId = songId
+                this.songId = songId;
+                if(app.savable){
+                    self.savableUpdate(true);
+                } else {
+                    self.savableUpdate(false);
+                }
 
                 preference.getEditMode().then((mode) => {
-                    self.savableUpdate(false);
                     self.$setState({
                         editMode: mode
                     })
@@ -590,7 +594,6 @@
                     if (phrase[tag]) {
                         langLine += phrase[tag];
                         let phraseArr = phrase[tag].split("")
-                        debugger
                         let elementAsArray = self.diacriticChecker(phraseArr, 0);
                         phraseBreakLocations[tag].push(elementAsArray.length);
                     }
@@ -1044,7 +1047,8 @@
                     // If form is empty, go back immediately
                 } else {
                     // just send them back
-                    app.song = {}
+                    app.song = {};
+                    app.saveable = false;
                     this.$router.back();
                 }
             }

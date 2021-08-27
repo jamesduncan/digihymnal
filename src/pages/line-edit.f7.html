@@ -860,7 +860,7 @@
                                     </div>
                                 </div>
                             </form>
-                            <p><a  href="#" class="col popup-close button button-fill">*Save</a></p>
+                            <p><a  href="#" class="col popup-close button button-fill">*Preview</a></p>
                         </div>
                     </div>`
                 var a = app.popup.create({
@@ -878,6 +878,7 @@
                             var tag = self.$$(".tag")[0].innerHTML
                             var formData = self.$$(".lineText")[0].value
                             self.updateLine(formData, tag)
+                            self.savableUpdate(true)
                         },
                     }
                 }); 

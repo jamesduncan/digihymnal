@@ -376,6 +376,7 @@
                 });
                 app.song = newData;
                 languages.push(newLanguageTag);
+                self.savableUpdate(true);
 
                 self.$setState({
                     loading: false,
@@ -459,6 +460,7 @@
                             text: "<t>Upload - overwrite</t>",
                             onClick: (dialog, ev) => {
                                 self.handleFiles(self.$$("#file")[0].files[0] , languageTag, totalLines);
+                                self.savableUpdate(true);
                                 dialog.close();
                             }
                         },
@@ -466,6 +468,7 @@
                             text: "<t>Upload - add on</t>",
                             onClick: (dialog, ev) => {
                                 self.handleFilesAddon(self.$$("#file")[0].files[0] , languageTag, totalLines);
+                                self.savableUpdate(true);
                                 dialog.close();
                             }
                         }
@@ -545,6 +548,15 @@
                 };
                 
                 reader.readAsText(file);
+            },
+            savableUpdate: function(bool) {
+                if (typeof(bool) != 'boolean'){
+                    bool = false;
+                }
+                app.savable = bool;
+                self.$setState({
+                    savable: bool
+                });
             },
         },
     }

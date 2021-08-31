@@ -819,6 +819,10 @@
             },
             // Params: Array, 0
             diacriticChecker: function(array, index) {
+                if (!index) {index = 0};
+                if (typeof(array)=='string') {
+                    array = array.split("");
+                }
                 var nextIndex = index + 1
                 if (nextIndex >= array.length) {
                     return array;

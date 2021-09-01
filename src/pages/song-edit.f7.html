@@ -332,7 +332,7 @@
                     on: {
                         close: function (popup) {
                             var selected;
-                            if( popup ){
+                            if( popup && popup.$el[0].children[0] && popup.$el[0].children[0].getElementsByClassName('active-state')[0]){
                                 selected = popup.$el[0].children[0].getElementsByClassName('active-state')[0].id
                             } else { 
                                 // This is a very janky way of digging into the popup's elements to find the 'ripple-wave class
@@ -406,7 +406,7 @@
                     on: {
                         close: function (popup) {
                             var selected;
-                            if( popup ){
+                            if( popup && popup.$el[0].children[0] && popup.$el[0].children[0].getElementsByClassName('active-state')[0]){
                                 selected = popup.$el[0].children[0].getElementsByClassName('active-state')[0].id
                             } else {
                                 // This is a very janky way of digging into the popup's elements to find the 'ripple-wave class

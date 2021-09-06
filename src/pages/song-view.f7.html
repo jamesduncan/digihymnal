@@ -28,7 +28,7 @@
         <div class="page-content hide-navbar-on-scroll">
             {{#if loading}}
             {{else}}
-                <div class="block block-strong" style="margin-bottom: 10px; overflow: hidden;">
+                <div class="block block-strong" style="margin-bottom: 10px; padding-left: 30px; overflow: hidden;">
                     <div class="menu">
                         <div class="menu-inner no-margin-padding">
                             <a @click="zoomOut" class="menu-item icon-only">
@@ -182,7 +182,7 @@
                                         </div>
                                     {{/each}}
                                     {{#if @root.editMode}}
-                                    <div class="block">
+                                    <div class="block verseEdit">
                                         <div class="row">
                                             <a @click=addLine({{@index}}) class="col button button-large button-fill item-link edit-phrase">
                                                 <span class="fa-stack fa-1x" style="font-size: 80%;">
@@ -314,6 +314,10 @@
         min-width: none !important;
         padding: 0px !important;
         float: left;
+    }
+    
+    .verseEdit {
+        transform-origin: left top;
     }
 
     .chord,
@@ -469,6 +473,9 @@
                             defaultLanguage: defaultLanguage
                         }, () => {
                             self.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                            self.$(".verseEdit").forEach((verse) => {
+                                verse.style.transform = "scale(" + 1/initScale + ")";
+                            })
                             self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
                             var stepper = app.stepper.create({
                                 el: '.stepper',
@@ -494,11 +501,17 @@
             zoomIn: function(e) {
                 initScale += 0.05;
                 this.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                this.$(".verseEdit").forEach((verse) => {
+                    verse.style.transform = "scale(" + 1/initScale + ")";
+                });
                 this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
             },
             zoomOut: function(e) {
                 initScale -= 0.05;
                 this.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                this.$(".verseEdit").forEach((verse) => {
+                    verse.style.transform = "scale(" + 1/initScale + ")";
+                });
                 this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
             },
             toggleChords: function(e) {
@@ -607,6 +620,9 @@
                     song: newData
                 }, () => {
                     self.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                    self.$(".verseEdit").forEach((verse) => {
+                        verse.style.transform = "scale(" + 1/initScale + ")";
+                    })
                     self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
                 });
             },  
@@ -734,6 +750,9 @@
                                         loading: false,
                                     }, () => {
                                         self.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                                        self.$(".verseEdit").forEach((verse) => {
+                                            verse.style.transform = "scale(" + 1/initScale + ")";
+                                        })
                                         self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
                                     });
                                 }
@@ -796,6 +815,9 @@
                     song: newData
                 }, () => {
                     self.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                    self.$(".verseEdit").forEach((verse) => {
+                        verse.style.transform = "scale(" + 1/initScale + ")";
+                    })
                     self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
                 });
             },
@@ -943,6 +965,9 @@
                     song: newData
                 }, () => {
                     self.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                    self.$(".verseEdit").forEach((verse) => {
+                        verse.style.transform = "scale(" + 1/initScale + ")";
+                    })
                     self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
                 });
             },
@@ -992,6 +1017,9 @@
                     song: newData
                 }, () => {
                     self.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                    self.$(".verseEdit").forEach((verse) => {
+                        verse.style.transform = "scale(" + 1/initScale + ")";
+                    })
                     self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
                 });
             },
@@ -1018,6 +1046,9 @@
                                 loading: false,
                             }, () => {
                                 self.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                                self.$(".verseEdit").forEach((verse) => {
+                                    verse.style.transform = "scale(" + 1/initScale + ")";
+                                })
                                 self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
                             });
                         }

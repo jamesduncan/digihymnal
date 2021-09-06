@@ -19,7 +19,7 @@
                 <div class="right">
                     {{#if editMode}}
                         <a class="link icon-only edit-meta" href="{{#if loading}}{{else}}/song/edit/{{ @root.songId}}/{{/if}}">
-                            <i class="text-color-lightgray fas fa-edit"></i>
+                            <i class="fas fa-cog"></i>
                         </a>
                     {{/if}}
                 </div>
@@ -94,33 +94,69 @@
                         <div class="song">
                             <div class="verse">
                                 {{#each song.lyrics.verses}}
-                                    <h3>{{#if label}}{{translate label}} 
-                                        {{#if @root.editMode}}
-                                            <a @click=deleteVerse({{@index}}) class="button button-small item-link edit-phrase"><i class="fas fa-bigger fa-dumpster-fire"></i></a>
-                                            <a @click=copyChordsToVerse({{@index}}) class="button button-small item-link edit-phrase"><i class="fas fa-bigger fa-copy"></i></a>
-                                        {{/if}}{{else}}<br />{{/if}} </h3>
+                                    {{#if @root.editMode}}
+                                        <a class="color-gray link popover-open" style="margin-right: 5px;" href="#" data-popover=".popover-verses{{@index}}"><i class="fas fa-cog"></i></a>
+                                    {{/if}}
+                                    <h3 style="display: inline-block;">
+                                        {{#if label}}
+                                            {{translate label}} 
+                                        {{else}}
+                                            <br />
+                                        {{/if}} 
+                                    </h3>
+                                    {{#if @root.editMode}}
+                                        <div class="popover popover-verses{{@index}}">
+                                            <div class="popover-inner">
+                                                <div class="list">
+                                                    <ul>
+                                                        <li><a @click=deleteVerse({{@index}}) class="list-button item-link edit-phrase"><i class="text-color-deeporange fas fa-bigger fa-trash-alt"></i></a></li>
+                                                        <li><a @click=copyChordsToVerse({{@index}}) class="color-orange list-button item-link edit-phrase"><i class="text-color-deeporange fas fa-bigger fa-copy"></i></a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {{/if}} 
                                     {{#each lines}}
                                         <div class="line">
                                             {{#if @root.editMode}}
-                                                <!-- move chords -->
-                                                <a href="/song/line/edit/{{ @root.songId}}/{{ ../../@index }}/{{@index}}/" class="button button-small item-link edit-phrase">
-                                                    <span class="fa-stack fa-1x">
-                                                        <i class="fas fa-bigger fa-music fa-stack-.5x" style="font-size: 0.80em;  vertical-align:top !important;"></i>
-                                                        <i class="fas fa-arrows-alt-h fa-small fa-stack-1x" style="color:white; font-size: 0.85em; vertical-align:bottom !important;"></i>
-                                                    </span>
+                                                <a style="margin-right: 10px;" class="color-gray phrase {{#if @root.showNumber}}{{else}}noNumbers{{/if}} {{#if @root.showChord}}{{else}}noChords{{/if}} link popover-open" href="#" data-popover=".popover-lines-{{ ../../@index }}-{{@index}}">
+                                                    <i class="fas fa-cog"></i>
                                                 </a>
-                                                <!-- edit line text -->
-                                                <a @click=lineEditPopup({{../../@index}},{{@index}}) class="button button-small item-link edit-phrase"><i class="fas fa-bigger fa-edit"></i></a>
-                                                <!-- delete line -->
-                                                <a @click=deleteLine({{../../@index}},{{@index}}) class="button button-small item-link edit-phrase"><i class="fas fa-bigger fa-trash"></i></a>
-                                                <!-- split verse -->
-                                                <a  @click=splitVerse({{../../@index}},{{@index}}) class="button button-small item-link edit-phrase">
-                                                    <span class="fa-stack fa-1x">
-                                                        <i class="fas fa-bigger fa-file fa-stack-.5x"></i>
-                                                        <i class="fas fa-minus fa-small fa-stack-1x" style="color:white;"></i>
-                                                        <i class="fas fa-arrows-alt-v fa-small fa-stack-1x" style="color:white;"></i>
-                                                    </span>
-                                                </a> 
+                                                <div class="popover popover-lines-{{ ../../@index }}-{{@index}}">
+                                                    <div class="popover-inner">
+                                                        <div class="list">
+                                                            <ul>
+                                                                <li>
+                                                                    <!-- move chords -->
+                                                                    <a href="/song/line/edit/{{@root.songId}}/{{ ../../@index }}/{{@index}}/" class="list-button item-link edit-phrase">
+                                                                        <span class="fa-stack fa-1x" style="font-size: 70%;">
+                                                                            <i style="margin-left: -5px" class="text-color-deeporange fas fa-music fa-stack-2x"></i>
+                                                                            <i style="position: absolute; top: -10px; left: 15px;" class="text-color-deeporange fas fa-arrows-alt-h fa-stack-1x"></i>
+                                                                        </span>
+                                                                    </a>
+                                                                </li>
+                                                                <li>
+                                                                    <!-- edit line text -->
+                                                                    <a @click=lineEditPopup({{../../@index}},{{@index}}) class="list-button item-link edit-phrase"><i class="text-color-deeporange fas fa-bigger fa-edit"></i></a>
+                                                                </li>
+                                                                <li>
+                                                                    <!-- split verse -->
+                                                                    <a  @click=splitVerse({{../../@index}},{{@index}}) class="list-button item-link edit-phrase">
+                                                                        <span class="text-color-deeporange fa-stack fa-1x" style="font-size: 70%;">
+                                                                            <i class="fas fa-file fa-stack-2x"></i>
+                                                                            <i style="position: absolute; top: -10px; left: 15px;" class="text-color-deeporange fas fa-minus fa-stack-1x"></i>
+                                                                            <i class="fas fa-arrows-alt-v fa-stack-1x fa-inverse"></i>
+                                                                        </span>
+                                                                    </a> 
+                                                                </li>
+                                                                <li>
+                                                                    <!-- delete line -->
+                                                                    <a @click=deleteLine({{../../@index}},{{@index}}) class="list-button item-link edit-phrase"><i class="text-color-deeporange fas fa-bigger fa-trash-alt"></i></a>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             {{/if}}
                                             {{#if this}}
                                                 {{#each phrases}}
@@ -146,17 +182,24 @@
                                         </div>
                                     {{/each}}
                                     {{#if @root.editMode}}
-                                    <a @click=addLine({{@index}}) class="button button-small item-link edit-phrase">
-                                        <span class="fa-stack fa-1x">
-                                            <i class="fas fa-language fa-file fa-stack-.5x"></i>
-                                            <i class="fas fa-plus fa-small fa-stack-1x" style="color:white;"></i>
-                                        </span>
-                                    </a><a @click=addVerse({{@index}}) class="button button-small item-link edit-phrase">
-                                        <span class="fa-stack fa-1x">
-                                            <i class="fas fa-bigger fa-file fa-stack-.5x"></i>
-                                            <i class="fas fa-plus fa-small fa-stack-1x" style="color:white;"></i>
-                                        </span>
-                                    </a><br>{{/if}}
+                                    <div class="block">
+                                        <div class="row">
+                                            <a @click=addLine({{@index}}) class="col button button-large button-fill item-link edit-phrase">
+                                                <span class="fa-stack fa-1x" style="font-size: 80%;">
+                                                    <i class="fas fa-microphone fa-stack-2x"></i>
+                                                    <i style="position: absolute; top: -10px; left: 15px;" class="fas fa-plus fa-small fa-stack-1x"></i>
+                                                </span>
+                                            </a>
+                                            <a @click=addVerse({{@index}}) class="col button button-large button-fill item-link edit-phrase">
+                                                <span class="fa-stack fa-1x" style="font-size: 80%;">
+                                                    <i class="fas fa-file-alt fa-stack-2x"></i>
+                                                    <i style="position: absolute; top: -10px; left: 15px;" class="fas fa-plus fa-stack-1x"></i>
+                                                </span>
+                                            </a>
+                                            <br>
+                                        </div>
+                                    </div>
+                                    {{/if}}
                                 {{/each}}
                             </div>
                             <div class="chorus">
@@ -217,7 +260,9 @@
                     </div>
                 </div>
                 {{#js_if "@root.editMode && @root.savable"}}
-                <p><a @click="save"  class="col popup-close button button-fill">*Save</a></p>
+                <div class="block">
+                    <a @click="save"  class="col popup-close button-large button button-fill">*Save</a>
+                </div>
                 {{/js_if}}
                 <div class="block text-align-right text-color-gray" style="margin-top: 10px;">
                     {{song.author[defaultLanguage]}}
@@ -291,10 +336,10 @@
         transform: translateX(-50%);
     }
 
-    .edit-phrase {
+    /* .edit-phrase {
         float: left;
         margin: 10px 10px 0 -10px;
-    }
+    } */
 
     .number {
         top: -25px;

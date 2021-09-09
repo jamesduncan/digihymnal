@@ -59,7 +59,7 @@
                             </div>
                             
                             <div class="item-title item-label">
-                                Chord tools:
+                                Number tools:
                             </div>
                             <!--
                                 phrase
@@ -117,7 +117,7 @@
                             <div class="verse">
                                 <div class="line" id="edit-line">
                                     <!-- -->
-                                    {{ printEachPhrase @root.line @root.languages }}
+                                    {{ printEachNumber @root.line }}
                                     <!-- -->
                                     {{ printLyric @root.line}}
                                 </div>
@@ -221,7 +221,7 @@
     var lastVerse
     var lastLine
     var firstLine
-    var chordStartLocations
+    var numberStartLocations
     import DataManager from '../data/dataManager';
     import Song from '../data/song';
     import noUiSlider from 'nouislider';
@@ -383,31 +383,31 @@
                     let metadataLength = (self.$('.metadata')[0].children).length;
                     var newLanguageLineData = {}
                     
-                    var chordPlacerIndex = 0; // if a new first phrase is chordless, this starts on second phrase
+                    var numberPlacerIndex = 0; // if a new first phrase is chordless, this starts on second phrase
 
                     languages.forEach(langTag => { // selected language
                         newLanguageLineData[langTag] = self.parseLanguageText(langTag);
                         // this logic tries to account for going from a chord at the beginning, to forcing a chordless phrase
                         if ( metadataLength == (newLanguageLineData[langTag].length - 1)){ // This means there is a new chordless phrase
                             // Other language might have already been inserted, 
-                            if (Object.hasOwnProperty.call(newData.lyrics.verses[verseId].lines[lineId].phrases[0], 'chord')) { // if 0 has chord, need to insert new chordless phrase
+                            if (Object.hasOwnProperty.call(newData.lyrics.verses[verseId].lines[lineId].phrases[0], 'number')) { // if 0 has number, need to insert new numberless phrase
                                 let newPhrase = {}
                                 languages.forEach(langTag => {newPhrase[langTag] = ''}); // make / insert new chordless phrase
                                 newData.lyrics.verses[verseId].lines[lineId].phrases.splice(0, 0, newPhrase);
                             } 
-                            chordPlacerIndex = 1;
-                        } else if (chordPlacerIndex || newLanguageLineData[langTag].length == ( metadataLength - 1 ) ) { // this language doesn't have no-chord phrase, another one does.
+                            numberPlacerIndex = 1;
+                        } else if (numberPlacerIndex || newLanguageLineData[langTag].length == ( metadataLength - 1 ) ) { // this language doesn't have no-chord phrase, another one does.
                             newLanguageLineData[langTag].splice(0,0,'');
                         };
                         let i = 0;
                         var expectedLength = newData.lyrics.verses[verseId].lines[lineId].phrases.length
                         if(newLanguageLineData[langTag].length != expectedLength){
-                            if(expectedLength == 1){ // we may not have added chord, and still be trying to save.
+                            if(expectedLength == 1){ // we may not have added number, and still be trying to save.
                                 newLanguageLineData[langTag][0] = newLanguageLineData[langTag].join('');
                                 while(newLanguageLineData[langTag].length != expectedLength){
                                     newLanguageLineData[langTag].pop()
                                 }
-                            }else if(newLanguageLineData[langTag].length == 1 + expectedLength){ // only a difference of one means theres a chord at beginning of phrase now.
+                            }else if(newLanguageLineData[langTag].length == 1 + expectedLength){ // only a difference of one means theres a number at beginning of phrase now.
                                 if (newLanguageLineData[langTag].pop()!=''){
                                     console.error("Why is this happening?")
                                     debugger;
@@ -426,17 +426,14 @@
                     var i = 0;
 
                     while (i < metadataLength) {
-                        let id = ('.chord').concat(i)
-                        let chord = self.$(id)[0]//.value // self.$('.chord1').firstElementChild.value
-                        if (chord) { // our template will not create form if it's supposed to be blank
-                            // setting chord
-                            newData.lyrics.verses[verseId].lines[lineId].phrases[chordPlacerIndex]['chord'] = chord.value;
+                        let id = ('.number').concat(i)
+                        let number = self.$(id)[0]//.value // self.$('.number1').firstElementChild.value
+                        if (number) { // our template will not create form if it's supposed to be blank
                             // setting number
-                            id = ('.number').concat(i) // '.number1'
                             let number = self.$(id)[0].value 
-                            newData.lyrics.verses[verseId].lines[lineId].phrases[chordPlacerIndex]['number'] = number
+                            newData.lyrics.verses[verseId].lines[lineId].phrases[numberPlacerIndex]['number'] = number
                         }
-                        chordPlacerIndex++;
+                        numberPlacerIndex++;
                         i++;
                     };
                     // save
@@ -617,7 +614,7 @@
                 }
                 
                 // if (!Object.hasOwnProperty.call(phraseArray[workingIndex], 'chord')) {
-                phraseArray[workingIndex].chord = '*';
+                //phraseArray[workingIndex].chord = '*';
                 phraseArray[workingIndex].number = 1;
                 // }
 
@@ -689,12 +686,12 @@
             displayLyricSliders: function(e) {
                 // 
                 var lyric = {};
-                chordStartLocations = {}; //  {'en':[1,5,12]}
+                numberStartLocations = {}; //  {'en':[1,5,12]}
                 var chordList = [];           // tooltips: [ {to: function() {return "2<br/>A";} } ]
 
                 // init each language
                 languages.forEach(languageCode => {
-                    chordStartLocations[languageCode] = [];
+                    numberStartLocations[languageCode] = [];
                     lyric[languageCode] = [];
                 });
 
@@ -703,9 +700,10 @@
                     for (const key in phrase) {
                         if (Object.hasOwnProperty.call(phrase, key)) {
                             const element = phrase[key];
-                            if (key == 'chord') {
-                                meta.chord = element
-                            } else if (key == 'number') {
+                            // if (key == 'chord') {
+                            //     meta.chord = element
+                            // } else 
+                            if (key == 'number') {
                                 meta.number = element
                             } else { // language
                                 let elementAsArray = self.diacriticChecker(element.split(""), 0) // lets work with the 'true' length array
@@ -716,25 +714,25 @@
                                 }
                                 // 
                                 var chordEndIndex // falsy
-                                if (chordStartLocations[key]){  // if already exists
-                                    chordEndIndex = chordStartLocations[key].length;
+                                if (numberStartLocations[key]){  // if already exists
+                                    chordEndIndex = numberStartLocations[key].length;
                                 }else{
-                                    chordStartLocations[key] = [];
+                                    numberStartLocations[key] = [];
                                     chordEndIndex = 0;
                                 }
                                 if (chordEndIndex == 0) {
-                                    chordStartLocations[key].push(elementAsArray.length)
+                                    numberStartLocations[key].push(elementAsArray.length)
                                 } else {
-                                    chordStartLocations[key].push(chordStartLocations[key][chordEndIndex - 1] + elementAsArray.length)
+                                    numberStartLocations[key].push(numberStartLocations[key][chordEndIndex - 1] + elementAsArray.length)
                                 }
                             }
                         }
                     }
-                    if (meta.chord){ // if meta is set
+                    if (meta.number){ // if meta is set
                         // push to chord/num list
                         chordList.push({
                             'to': function() {
-                                return `${meta.chord}<br/>${meta.number}`
+                                return `${meta.number}`
                             }
                         })
                     }
@@ -767,20 +765,20 @@
                             };
                             pipFormatter[tag][i.toString()] = "";
                             range[tag]['max'] = [i, 1];
-                            self.makeSlider(tag, pipFormatter[tag], range[tag], chordStartLocations[tag], chordList)
+                            self.makeSlider(tag, pipFormatter[tag], range[tag], numberStartLocations[tag], chordList)
                         }
                     }
                 };
             },
-            makeSlider: function(tag, pipFormats, lyricRange, chordStartLocations, chordDataObject) {
-                if(chordStartLocations.length != chordDataObject.length){
-                    chordStartLocations.pop()
+            makeSlider: function(tag, pipFormats, lyricRange, numberStartLocations, chordDataObject) {
+                if(numberStartLocations.length != chordDataObject.length){
+                    numberStartLocations.pop()
                 } else { // is new data
-                    chordStartLocations.splice(0,0,'')
-                    chordStartLocations.pop()
+                    numberStartLocations.splice(0,0,'')
+                    numberStartLocations.pop()
                 }
-                while(chordDataObject.length > chordStartLocations.length){
-                    chordStartLocations.push(lyricRange.max[0])
+                while(chordDataObject.length > numberStartLocations.length){
+                    numberStartLocations.push(lyricRange.max[0])
                 }
                 var options = {}
                 options.range = lyricRange;
@@ -794,7 +792,7 @@
                 }
                 if (chordDataObject.length){
                     options.tooltips = chordDataObject;
-                    options.start= chordStartLocations;
+                    options.start= numberStartLocations;
                     options.tooltips= chordDataObject;
                 } else {
                     // no chords on this song
@@ -804,7 +802,7 @@
                 var slider = self.$(`.slider-${tag}`)[0];  
                 noUiSlider.create(slider, options);
                 // noUiSlider.create(slider, {
-                //     start: chordStartLocations,
+                //     start: numberStartLocations,
                 //     tooltips: chordDataObject,
                 //     range: lyricRange,
                 //     pips: {
@@ -892,7 +890,7 @@
                 if (self.validateTag(tag)){
                     //update line and refresh
                     var lineArr = self.diacriticChecker(data.split(""), 0)
-                    var chordPlacment = chordStartLocations[tag]
+                    var chordPlacment = numberStartLocations[tag]
 
                     let i = 0
                     while (i < line.phrases.length) {

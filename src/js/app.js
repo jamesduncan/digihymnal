@@ -52,15 +52,74 @@ Template7.registerHelper('printLyric', function(line) {
 // print all lyrics
 // (parentObject)
 Template7.registerHelper('printEachPhrase', function(line, languages) {
-    console.log(line, languages)
+    // console.log(line, languages)
+    // if (line === undefined) {
+    //     console.error('undefined line')
+    //     return "";
+    // }
+    // var results = ''
+    // const validateChords = `required pattern='[ABCDEFG]|[ABCDEFG]m|[ABCDEFG]#|[ABCDEFG]b|[ABCDEFG]#m|[ABCDEFG]bm|[ABCDEFG]m7|[ABCDEFG]7|[ABCDEFG]sus|[ABCDEFG]#7|[ABCDEFG]#sus|[ABCDEFG]b7|[ABCDEFG]bsus'`
+    // const validateNumber = `required pattern='1|2|3|4|5|6|7|8|9|10|11|12||'`
+    // //
+    // results = results.concat(`<div class="line metadata">`)
+    // line.phrases.forEach((phrase, index) => {
+    //     results = results.concat(`<div class="phrase metadata phraseMetadata"> `)
+    //     if(phrase["chord"]) {
+    //             if (phrase["chord"]) {
+    //                 results = results.concat(`<div class="chord ${index}"><div class="item-input-wrap"><input class="chord${index}" type="text" ${validateChords} value="${phrase["chord"]}"></div></div>`)
+    //             } else {
+    //                 results = results.concat(`<div class="chord ${index}"><div class="item-input-wrap"><input class="chord${index}" type="text" ${validateChords} placeholder="*"></div></div>`)
+    //             }
+    //             if (phrase["number"]) {
+    //                 results = results.concat(`<div class="number ${index}"><div class="item-input-wrap"><input class="number${index}" type="text" ${validateNumber}value="${phrase["number"]}"></div></div>`)
+    //             } else {
+    //                 results = results.concat(`<div class="number ${index}"><div class="item-input-wrap"><input class="number${index}" type="text" ${validateNumber}placeholder="*"></div></div>`)
+    //             }
+    //         }
+    //         results = results.concat('</div>');
+    //     });
+     
+    // results = results.concat('</div>');
+
+    return 'no';
+})
+// print all numbers
+// (parentObject)
+Template7.registerHelper('printEachNumber', function(line) {
+    console.log(line)
+    if (line === undefined) {
+        console.error('undefined line')
+        return "";
+    }
+    var results = ''
+    //
+    results = results.concat(`<div class="line metadata">`)
+    line.phrases.forEach((phrase, index) => {
+        results = results.concat(`<div class="phrase metadata phraseMetadata"> `)
+        if(phrase["number"]) {
+                if (phrase["number"]) {
+                    results = results.concat(`<div class="number ${index}"><div class="item-input-wrap"><input class="number${index}" type="text" value="${phrase["number"]}"></div></div>`)
+                } else {
+                    results = results.concat(`<div class="number ${index}"><div class="item-input-wrap"><input class="number${index}" type="text" placeholder=""></div></div>`)
+                }
+            }
+            results = results.concat('</div>');
+        });
+     
+    results = results.concat('</div>');
+
+    return results;
+})
+// print all chords
+// (parentObject)
+Template7.registerHelper('printEachChord', function(line) {
+    console.log(line)
     if (line === undefined) {
         console.error('undefined line')
         return "";
     }
     var results = ''
     const validateChords = `required pattern='[ABCDEFG]|[ABCDEFG]m|[ABCDEFG]#|[ABCDEFG]b|[ABCDEFG]#m|[ABCDEFG]bm|[ABCDEFG]m7|[ABCDEFG]7|[ABCDEFG]sus|[ABCDEFG]#7|[ABCDEFG]#sus|[ABCDEFG]b7|[ABCDEFG]bsus'`
-    const validateNumber = `required pattern='1|2|3|4|5|6|7|8|9|10|11|12||'`
-    //
     results = results.concat(`<div class="line metadata">`)
     line.phrases.forEach((phrase, index) => {
         results = results.concat(`<div class="phrase metadata phraseMetadata"> `)
@@ -69,11 +128,6 @@ Template7.registerHelper('printEachPhrase', function(line, languages) {
                     results = results.concat(`<div class="chord ${index}"><div class="item-input-wrap"><input class="chord${index}" type="text" ${validateChords} value="${phrase["chord"]}"></div></div>`)
                 } else {
                     results = results.concat(`<div class="chord ${index}"><div class="item-input-wrap"><input class="chord${index}" type="text" ${validateChords} placeholder="*"></div></div>`)
-                }
-                if (phrase["number"]) {
-                    results = results.concat(`<div class="number ${index}"><div class="item-input-wrap"><input class="number${index}" type="text" ${validateNumber}value="${phrase["number"]}"></div></div>`)
-                } else {
-                    results = results.concat(`<div class="number ${index}"><div class="item-input-wrap"><input class="number${index}" type="text" ${validateNumber}placeholder="*"></div></div>`)
                 }
             }
             results = results.concat('</div>');

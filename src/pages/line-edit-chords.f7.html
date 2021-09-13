@@ -694,45 +694,52 @@
                     lyric[languageCode] = [];
                 });
 
+                var firstPhrase = true;
                 line.phrases.forEach(phrase => {
                     let meta = {}; // chord and number
-                    for (const key in phrase) {
-                        if (Object.hasOwnProperty.call(phrase, key)) {
-                            const element = phrase[key];
-                            if (key == 'chord') {
-                                meta.chord = element
-                            } else if (key == 'number') {
-                               // meta.number = element
-                            } else { // language
-                                let elementAsArray = self.diacriticChecker(element.split(""), 0) // lets work with the 'true' length array
-                                if(lyric[key]){
-                                    lyric[key] = lyric[key].concat(elementAsArray);
-                                } else{
-                                    lyric[key] = elementAsArray;
-                                }
-                                // 
-                                var chordEndIndex // falsy
-                                if (chordStartLocations[key]){  // if already exists
-                                    chordEndIndex = chordStartLocations[key].length;
-                                }else{
-                                    chordStartLocations[key] = [];
-                                    chordEndIndex = 0;
-                                }
-                                if (chordEndIndex == 0) {
-                                    chordStartLocations[key].push(elementAsArray.length)
-                                } else {
-                                    chordStartLocations[key].push(chordStartLocations[key][chordEndIndex - 1] + elementAsArray.length)
-                                }
-                            }
-                        }
-                    }
-                    if (meta.chord){ // if meta is set
+                    if (phrase['chord']) {
+                        meta.chord = phrase['chord']
                         // push to chord/num list
                         chordList.push({
                             'to': function() {
                                 return `${meta.chord}`
                             }
                         })
+                    }
+                    for (const key in phrase) {
+                        if (Object.hasOwnProperty.call(phrase, key) && key != 'chord'  && key != 'number' ) {
+                            const element = phrase[key];
+                            // put lyrics to an array
+                            let stringarr = ((typeof element == 'string') ? element.split("") : element[0].split(""));
+                            let elementAsArray = self.diacriticChecker(stringarr, 0) // lets work with the 'true' length array
+                            if(lyric[key]){
+                                lyric[key] = lyric[key].concat(elementAsArray);
+                            } else{
+                                lyric[key] = elementAsArray;
+                            }
+                            var chordEndIndex;
+                            if (firstPhrase) {
+                                chordStartLocations[key] = [];
+                                chordEndIndex = 0;
+                            }
+                            chordEndIndex = chordStartLocations[key].length;
+                            if (!meta.chord && firstPhrase) {// if first phrase skip it,
+                                // if first, make a blank chord area
+                                chordStartLocations[key].push(elementAsArray.length);
+                                
+                            } else if (!meta.chord) { // else there is no chord, concat with the last one  
+                                // if there is no chord, concat language array to last
+                                chordStartLocations[key][chordEndIndex - 1] += elementAsArray.length;
+                            } else { // totally normal
+                                // if this has a chord, start adding chord start locations
+                                if (chordEndIndex == 0) {
+                                    chordStartLocations[key].push(elementAsArray.length);
+                                } else {
+                                    chordStartLocations[key].push(chordStartLocations[key][chordEndIndex - 1] + elementAsArray.length);
+                                }
+                            }
+                            firstPhrase = false;
+                        }
                     }
                 });
 

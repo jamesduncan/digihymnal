@@ -706,7 +706,8 @@
                             if (key == 'number') {
                                 meta.number = element
                             } else { // language
-                                let elementAsArray = self.diacriticChecker(element.split(""), 0) // lets work with the 'true' length array
+                                let stringarr = ((typeof element == 'string') ? element.split("") : element[0].split(""));
+                                let elementAsArray = self.diacriticChecker(stringarr, 0) // lets work with the 'true' length array
                                 if(lyric[key]){
                                     lyric[key] = lyric[key].concat(elementAsArray);
                                 } else{

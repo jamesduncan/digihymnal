@@ -459,26 +459,50 @@
                 
                 }
             },
-            parseLanguageText: function(tag, languageLine, chordArray){
+            parseLanguageText: function(tag, languageLine, insertArray){
                 // I need the full string "Twinkle, twinkle, little star"
                 // I need placment of phrase breaks ["0.00", "10.00", "15.00"]
                 // return [('Twinkle, tw'),('inkle'),(', little star')]
-                if(!chordArray){ // get from dom
+                var chordMap = []
+                if(!insertArray){ // get from dom
                     try {
-                        chordArray = this.$$(`#slider-${tag}`)[0].noUiSlider.get()
+                        insertArray = this.$$(`#slider-${tag}`)[0].noUiSlider.get()
                     } catch (error) {
                         console.error(error)
                     }
-                    if (!chordArray) {
+                    if (!insertArray) {
                         console.error({"no div for tag":tag})
                     }
                 }
                 if(!languageLine){ // get from global var
                     try {
                         languageLine = ''
+                        var languageLen = 0
+                        var languageArr = []
+                        var lastLength = 0
                         line.phrases.forEach(phrase => {
                             if (Object.hasOwnProperty.call(phrase, tag)) {
-                                languageLine = languageLine.concat(phrase[tag]);   
+                                if (!languageLen){
+                                    var first = true;
+                                }
+                                languageLine = languageLine.concat(phrase[tag]); 
+                                let arr = self.diacriticChecker(phrase[tag], 0);
+                                languageArr = languageArr.concat(arr)
+                                languageLen += arr.length
+                            } 
+                            let phraseMap = {}
+                            if (Object.hasOwnProperty.call(phrase, 'chord')) { // has chord
+                                phraseMap['len'] = lastLength // we get distance from start
+                                lastLength = languageLen
+                                phraseMap['chord'] = phrase['chord']
+                                chordMap.push(phraseMap)
+                            } else if (!Object.hasOwnProperty.call(phrase, 'number') && !Object.hasOwnProperty.call(phrase, 'chord') && first ) { 
+                                // first phrase is chordless,
+                                debugger 
+                                phraseMap['len'] = 0 // is start
+                                lastLength =  languageLen
+                                phraseMap['chord'] = ''
+                                chordMap.push(phraseMap)
                             }
                         });
                     } catch (error) {
@@ -490,10 +514,10 @@
                 }
                 var phraseArray = [] ;// ["Twin","kle, twinkle,", " little star"]
                 
-                if (typeof chordArray === 'string'){// there's only the one chord
-                    if (parseInt(chordArray) != 0){ // we need two phrases
+                if (typeof insertArray === 'string'){// there's only the one chord
+                    if (parseInt(insertArray) != 0){ // we need two phrases
                         var parsedLineArr = self.diacriticChecker(languageLine.split(""), 0);
-                        phraseArray.push( (parsedLineArr.splice(0, parseInt(chordArray) )).join("") ); 
+                        phraseArray.push( (parsedLineArr.splice(0, parseInt(insertArray) )).join("") ); 
                         phraseArray.push( parsedLineArr.join("") ); // remaining
                     } else {
                         phraseArray.push(languageLine);
@@ -505,11 +529,40 @@
                     var parsedLineArr =  self.diacriticChecker(languageLine, 0);
                     var lastPhraseLength = 0;
                     var firstChord = true;
-                    var totalPhrases = chordArray.length
+                    var totalPhrases = insertArray.length
 
                     var i = 0;
-                    while (chordArray[i]) {
-                        let chord = (chordArray[i]);
+                    // insertIndex = 0;
+                    // languageMap
+                    console.log(chordMap) // this is the expected map
+                    console.log(languageArr) // this is the expected map
+                    debugger;
+                    // languageMap.length != insertArray.length 
+                    // [cL,cL]
+                    // [L0,cL3, cL5] (starts at)
+                    // insert: nums at 0,3,6
+                    // [Ln0,cLn3,cL5,Ln6]
+                    // ["Twin","kle, twinkle,", " little star"]
+                    // ["Twin","kle, twinkle,", " little star"]
+
+                    // from JSON
+                    // chordMap
+                    // from nouislider
+                    // insertArray
+                    while(languageMap[i] ){ 
+                        if ( languageMap[i] == 'num' || languageMap[i] == 'both' ){
+                            // do nothing 
+                        } else if ( languageMap[i] == 'chord' ){
+                            insertArray.splice(i,0, 'chord') // insert a blank
+                        } else if  ( languageMap[i] == 'none'){
+                            insertArray.splice(i,0, 'concat') // insert a blank
+                        }
+                    }
+                    
+
+                    while (insertArray[i]) {// while (languageMap[i]) {
+                        let chord = (insertArray[i]); // let chord = (insertArray[insertIndex]);
+                        // let Map = (insertArray[insertIndex]);
                         var currentIndexValue = parseInt(chord);
                         var currentPhraseLength
                         // to chop off index
@@ -532,7 +585,7 @@
                             currentPhraseLength = parsedLineArr.length;
                             i++;
                         } else { // middle
-                            currentPhraseLength = parseInt(chordArray[i+1]) - currentIndexValue;
+                            currentPhraseLength = parseInt(insertArray[i+1]) - currentIndexValue;
                             i++;
                         }
                         
@@ -695,49 +748,55 @@
                     lyric[languageCode] = [];
                 });
 
+                var firstPhrase = true;
                 line.phrases.forEach(phrase => {
                     let meta = {}; // chord and number
-                    for (const key in phrase) {
-                        if (Object.hasOwnProperty.call(phrase, key)) {
-                            const element = phrase[key];
-                            // if (key == 'chord') {
-                            //     meta.chord = element
-                            // } else 
-                            if (key == 'number') {
-                                meta.number = element
-                            } else { // language
-                                let stringarr = ((typeof element == 'string') ? element.split("") : element[0].split(""));
-                                let elementAsArray = self.diacriticChecker(stringarr, 0) // lets work with the 'true' length array
-                                if(lyric[key]){
-                                    lyric[key] = lyric[key].concat(elementAsArray);
-                                } else{
-                                    lyric[key] = elementAsArray;
-                                }
-                                // 
-                                var chordEndIndex // falsy
-                                if (numberStartLocations[key]){  // if already exists
-                                    chordEndIndex = numberStartLocations[key].length;
-                                }else{
-                                    numberStartLocations[key] = [];
-                                    chordEndIndex = 0;
-                                }
-                                if (chordEndIndex == 0) {
-                                    numberStartLocations[key].push(elementAsArray.length)
-                                } else {
-                                    numberStartLocations[key].push(numberStartLocations[key][chordEndIndex - 1] + elementAsArray.length)
-                                }
-                            }
-                        }
-                    }
-                    if (meta.number){ // if meta is set
-                        // push to chord/num list
+                    if (phrase['number']) {
+                        meta.number = phrase['number']
+                        // push to num list
                         chordList.push({
                             'to': function() {
                                 return `${meta.number}`
                             }
                         })
                     }
+                    for (const key in phrase) {
+                        if (Object.hasOwnProperty.call(phrase, key) && key != 'chord' && key != 'number') {
+                            const element = phrase[key];
+                            let stringarr = ((typeof element == 'string') ? element.split("") : element[0].split(""));
+                            let elementAsArray = self.diacriticChecker(stringarr, 0) // lets work with the 'true' length array
+                            if(lyric[key]){
+                                lyric[key] = lyric[key].concat(elementAsArray);
+                            } else{
+                                lyric[key] = elementAsArray;
+                            }
+                            var numberEndIndex;
+                            if (firstPhrase) {
+                                numberStartLocations[key] = [];
+                                numberEndIndex = 0;
+                            } else {
+                                numberEndIndex = numberStartLocations[key].length;
+                            }
+
+                            if (!meta.number && firstPhrase) {// if first phrase skip it,
+                                // if first, make a blank number area
+                                numberStartLocations[key].push(elementAsArray.length);
+                            } else if (!meta.number) { // else there is no number, concat with the last one  
+                                // if there is no number, concat language array to last
+                                numberStartLocations[key][numberEndIndex - 1] += elementAsArray.length;
+                            } else { // totally normal
+                                // if this has a number, start adding number start locations
+                                if (numberEndIndex == 0) {
+                                    numberStartLocations[key].push(elementAsArray.length);
+                                } else {
+                                    numberStartLocations[key].push(numberStartLocations[key][numberEndIndex - 1] + elementAsArray.length);
+                                }
+                            }
+                        }
+                        firstPhrase = false;
+                    }
                 });
+                console.log(numberStartLocations)
 
                 var pipFormatter = {}; //var pipFormats = {'0':'abc', '1':'pqr', '2':'xyz'};
                 var range = {}; // {min/max/percentage: [increment, 1]}

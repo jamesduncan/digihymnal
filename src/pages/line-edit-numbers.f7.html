@@ -635,6 +635,64 @@
                 }
                 return phraseArray;
             },
+            combineLines: function(oldLine, newLine) {
+                // [{en:''},{number:1, chord:'A', en:'Hey Jude'}]
+                // [{es:''},{number:1, chord:'A', es:'Hola Jude'}]
+                // [{number:1, chord:'A', ja:'Moshi Jude'}]
+                // [{th:'Saw'},{number:1, chord:'A', th:'-adee Jude'}]
+                // result = [{en:'',es:'',ja:'',th:'Saw'},{number:1, chord:'A', en:'Hey Jude', es:'Hola Jude',ja:'Moshi Jude', th:'-adee Jude'}]
+
+                if (oldLine.length !== newLine.length){
+                    console.error('these should be the same?');
+                    debugger
+                }
+                var i = 0;
+                var newLineArr = [];
+                while(newLine[i]){
+                    let newPhrase;
+                    if (i=0){
+                        let oldIsMetaless =  ( !Object.hasOwnProperty.call(oldLine[i], 'number') && !Object.hasOwnProperty.call(oldLine[i], 'chord') );
+                        let newIsMetaless = ( !Object.hasOwnProperty.call(newLine[i], 'number') && !Object.hasOwnProperty.call(newLine[i], 'chord') );
+                        if (oldIsMetaless && newIsMetaless){
+                            // they match already
+                            newPhrase = {
+                                ...oldLine[i],
+                                ...newLine[i]
+                            };
+                        } else if (oldIsMetaless){
+                            newPhrase = newLine[i];
+                            for (const key in oldLine[i]) {
+                                if (Object.hasOwnProperty.call(oldLine[i], key) && key != 'chord' && key != 'number') {
+                                    const element = oldLine[i][key];
+                                    // only insert a blank, data will be coped in next iteration
+                                    newPhrase[key] = ''
+                                }
+                            }
+                            // splice(start, deleteCount, item1)
+                            // push the index up so it's used in next iteration
+                            oldLine.splice(0,0,newPhrase)
+                        } else if (newIsMetaless){
+                            // same as this ^^
+                            newPhrase = oldLine[i];
+                            for (const key in newLine[i]) {
+                                if (Object.hasOwnProperty.call(newLine[i], key) && key != 'chord' && key != 'number') {
+                                    const element = newLine[i][key];
+                                    newPhrase[key] = ''
+                                }
+                            }
+                            newLine.splice(0,0,newPhrase)
+                        }
+                    } else {
+                        newPhrase = {
+                            ...oldLine[i],
+                            ...newLine[i]
+                        };
+                    }
+                    newLineArr.push(newPhrase);
+                    i++;
+                }
+                return newLineArr
+            },
             nextLine: function(e) {
                 // only get index forward if it exists in song
                 if (lastLine && !lastVerse) { // if at end of NOTlastVerse, check next verse

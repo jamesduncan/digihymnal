@@ -27,6 +27,11 @@ import {
 } from "./transpose";
 Template7.registerHelper('transpose', transpose);
 
+import {
+    numbers
+} from "./numbers";
+Template7.registerHelper('numbers', numbers);
+
 // Import translation tool
 import {
     translate

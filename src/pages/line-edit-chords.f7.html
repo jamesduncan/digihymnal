@@ -721,8 +721,9 @@
                             if (firstPhrase) {
                                 chordStartLocations[key] = [];
                                 chordEndIndex = 0;
+                            } else {
+                                chordEndIndex = chordStartLocations[key].length;
                             }
-                            chordEndIndex = chordStartLocations[key].length;
                             if (!meta.chord && firstPhrase) {// if first phrase skip it,
                                 // if first, make a blank chord area
                                 chordStartLocations[key].push(elementAsArray.length);
@@ -921,7 +922,7 @@
                         line: line
                     }, () => {
                         self.displayLyricSliders()
-                        // User will need to save....
+                        // User will need to save ....
                     });                   
                 }
             },

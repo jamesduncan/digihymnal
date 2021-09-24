@@ -381,23 +381,20 @@
                     var newLineCombined = [];
                     languages.forEach(langTag => { // selected language
                         newLineCombined = self.combineLines(newLineCombined, self.parseLanguageText(langTag));
-                    });
-                    debugger;
-
-                    
+                    });                    
                     
                     // fill in the numbers, we left empty slots earlier
                     var metaIndex = 0;
                     var phraseIndex = 0;
                     
                     while (phraseIndex < newLineCombined.length) {
-                        if(newLineCombined.number){
+                        if(typeof(newLineCombined[phraseIndex].number) !== 'undefined' ){
                             let id = ('.number').concat(metaIndex)
                             let number = self.$(id)[0]//.value // self.$('.number1').firstElementChild.value
                             if (number) { // our template will not create form if it's supposed to be blank
                             // setting number
                             let number = self.$(id)[0].value 
-                                newLineCombined.number = number
+                                newLineCombined[phraseIndex].number = number
                             }
                             metaIndex ++;
                         }
@@ -483,7 +480,6 @@
                                 chordMap.push(phraseMap)
                             } else if (!Object.hasOwnProperty.call(phrase, 'number') && !Object.hasOwnProperty.call(phrase, 'chord') && first ) { 
                                 // first phrase is chordless,
-                                debugger 
                                 phraseMap['len'] = 0 // is start
                                 lastLength =  languageLen
                                 phraseMap['chord'] = ''
@@ -523,7 +519,6 @@
                     // chordMap
                     console.log(chordMap) // this is the expected map
                     console.log(languageArr) // this is the expected map
-                    debugger;
                     // chordMap.length != insertArray.length 
                     // [cL,cL]
                     // [L0,cL3, cL5] (starts at)
@@ -552,7 +547,17 @@
                             // we have an array of language characters
                             // SHOULD we just make the phrase here and now?
                             var newIndex = parseInt(insertArray[insertArrayi]);
-                            var mapIndex = chordMap[chordMapi].len;
+                            if (insertArray[insertArrayi] === undefined){
+                                newIndex = chordMap[chordMap.length-1].len + 1 // one greater than largest chord map
+                            }
+                            
+                            var mapIndex 
+                            if (chordMap[chordMapi] != undefined){
+                                mapIndex = chordMap[chordMapi].len;
+                            } else {
+                                mapIndex = newIndex + 1 // one greater
+                            }
+
                             var currentTargetIndex = ( (newIndex >= mapIndex) ? newIndex : mapIndex );
 
                             let elem = {};
@@ -585,6 +590,15 @@
                                     let onLastLetter = ( lastLanguageLetter <= currentTargetIndex)
                                     if(onLastLetter){ // 4 <= 4
                                         // both of these have reached end of line
+                                        if ( chordMap[chordMapi] ) {
+                                            elem['chord'] = chordMap[chordMapi].chord
+                                            chordMapi++
+                                        }
+                                        if( insertArray[insertArrayi] ){
+                                            latestIndex = chordMap[0].len;
+                                            elem['number'] = ''
+                                            insertArrayi++
+                                        } 
                                     } else {
                                         // there is no 'room' for language 
                                         // remove from last phrase, move up
@@ -606,27 +620,32 @@
                                     // both: c and num on same character 
                                     elem['chord'] = chordMap[chordMapi].chord
                                     elem['number'] = ''
-                                    latestIndex = insertArrayi
+                                    latestIndex = newIndex
                                     insertArrayi++
                                     chordMapi++ 
                                 } else if ( mapIndex > (newIndex) ){ // 3 > 2
                                     // num first 
                                     elem['number'] = ''
-                                    latestIndex = insertArrayi
+                                    latestIndex = newIndex
                                     insertArrayi++
                                 } else if  ( mapIndex < (newIndex) ){ // 3 < 5
                                     // chord first
                                     elem['chord'] = chordMap[chordMapi].chord
-                                    latestIndex = chordMapi
+                                    latestIndex = mapIndex
                                     chordMapi++
                                 } else {
-                                    debugger
+                                    insertArrayi++
+                                    chordMapi++
+                                    console.error("Both chordmap and insertarray are invalid")
+                                    //debugger
                                     // at end
                                 }
                             } 
                             // always push a phrase
                             newPhraseLayout.push(elem)
                         }     
+                        //console.log(newPhraseLayout);
+                        phraseArray = newPhraseLayout;
                     } else {
                         while (newIndex) {// while (chordMap[i]) {
                             let chord = (newIndex); // let chord = (insertArray[insertIndex]);
@@ -664,6 +683,7 @@
                         }
                     }
                 }
+                console.log({'new line': phraseArray});
                 return phraseArray;
             },
             combineLines: function(oldLine, newLine) {
@@ -674,14 +694,18 @@
                 // result = [{en:'',es:'',ja:'',th:'Saw'},{number:1, chord:'A', en:'Hey Jude', es:'Hola Jude',ja:'Moshi Jude', th:'-adee Jude'}]
 
                 if (oldLine.length !== newLine.length){
-                    console.error('these should be the same?');
-                    debugger
+                    if (oldLine.length === 0){
+                        return newLine
+                    } else {
+                        console.error('these should be the same?');
+                        //debugger
+                    }
                 }
                 var i = 0;
                 var newLineArr = [];
                 while(newLine[i]){
                     let newPhrase;
-                    if (i=0){
+                    if (i==0){
                         let oldIsMetaless =  ( !Object.hasOwnProperty.call(oldLine[i], 'number') && !Object.hasOwnProperty.call(oldLine[i], 'chord') );
                         let newIsMetaless = ( !Object.hasOwnProperty.call(newLine[i], 'number') && !Object.hasOwnProperty.call(newLine[i], 'chord') );
                         if (oldIsMetaless && newIsMetaless){
@@ -920,10 +944,10 @@
                                 }
                             }
                         }
-                        firstPhrase = false;
                     }
+                    firstPhrase = false;
                 });
-                console.log(numberStartLocations)
+                //console.log(numberStartLocations)
 
                 var pipFormatter = {}; //var pipFormats = {'0':'abc', '1':'pqr', '2':'xyz'};
                 var range = {}; // {min/max/percentage: [increment, 1]}

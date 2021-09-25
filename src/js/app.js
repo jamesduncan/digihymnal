@@ -100,16 +100,16 @@ Template7.registerHelper('printEachNumber', function(line) {
     //
     results = results.concat(`<div class="line metadata">`)
     line.phrases.forEach((phrase, index) => {
-        results = results.concat(`<div class="phrase metadata phraseMetadata"> `)
         if(phrase["number"]) {
-                if (phrase["number"]) {
-                    results = results.concat(`<div class="number ${index}"><div class="item-input-wrap"><input class="number${index}" type="text" value="${phrase["number"]}"></div></div>`)
-                } else {
-                    results = results.concat(`<div class="number ${index}"><div class="item-input-wrap"><input class="number${index}" type="text" placeholder=""></div></div>`)
-                }
+            results = results.concat(`<div class="phrase metadata phraseMetadata"> `)
+            if (phrase["number"]) {
+                results = results.concat(`<div class="number ${index}"><div class="item-input-wrap"><input class="number${index}" type="text" value="${phrase["number"]}"></div></div>`)
+            } else {
+               // results = results.concat(`<div class="number ${index}"><div class="item-input-wrap"><input class="number${index}" type="text" placeholder=""></div></div>`)
             }
             results = results.concat('</div>');
-        });
+        }
+    });
      
     results = results.concat('</div>');
 

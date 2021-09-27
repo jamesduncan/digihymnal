@@ -392,9 +392,9 @@
                             if ( phraseIndex  != 0 ){
                                 console.error({"this should only be 0": phraseIndex})
                             } else {
-                                let id = ('.number').concat(metaIndex)
-                                let number = self.$(id)[0]//.value // self.$('.number1').firstElementChild.value
-                                if (!number) { // our template already knows it's supposed to be blank
+                                let id = ('.number').concat(metaIndex);
+                                let number = self.$(id)[0];
+                                if (!number) { // our template already has a blank slot, we need to increment past it
                                     // incriement past blank
                                     metaIndex++;
                                 }
@@ -515,13 +515,19 @@
                 var phraseArray = [] ;// ["Twin","kle, twinkle,", " little star"]
                 
                 if (typeof insertArray === 'string'){// there's only the one chord
+                    let e = {}
                     if (parseInt(insertArray) != 0){ // we need two phrases
                         var parsedLineArr = self.diacriticChecker(languageLine.split(""), 0);
-                        phraseArray.push( (parsedLineArr.splice(0, parseInt(insertArray) )).join("") ); 
-                        phraseArray.push( parsedLineArr.join("") ); // remaining
+                        e[tag] = (parsedLineArr.splice(0, parseInt(insertArray) )).join("") 
+                        phraseArray.push(e)
+
+                        e[tag] = parsedLineArr.join("") // remaining
+                        e[number] = '' // remaining
                     } else {
-                        phraseArray.push(languageLine);
+                        e[tag] = languageLine;
+                        e[number] = '' // remaining
                     }
+                    phraseArray.push(e)
                 } else {
                     if( typeof languageLine == 'string'){
                         languageLine = languageLine.split("");
@@ -532,202 +538,149 @@
                     var totalPhrases = insertArray.length
 
                     var i = 0;
-                    // insertIndex = 0;
-                    // chordMap
                     console.log(chordMap) // this is the expected map
                     console.log(languageArr) // this is the expected map
-                    // chordMap.length != insertArray.length 
-                    // [cL,cL]
-                    // [L0,cL3, cL5] (starts at)
-                    // insert: nums at 0,3,6
-                    // [Ln0,cLn3,cL5,Ln6]
-                    // ["Twin","kle, twinkle,", " little star"]
-                    // ["Twin","kle, twinkle,", " little star"]
 
                     // from JSON
                     // chordMap
                     // from nouislider
                     // insertArray
-                    if(tag == 'en'){debugger}
-                    
+                    //if(tag == 'en'){debugger}
+                    var trueMap = []
+                    var insertArrayi = 0
+                    var newIA = []
+                    insertArray.forEach(element => {
+                        newIA.push(parseInt(element))
+                    });
+                    var lastLanguageLetter = parsedLineArr.length
+                    var chordMapi = 0
+                    var first = true;
                     if (chordMap){
-                        var chordMapi = 0
-                        var insertArrayi = 0
-                        var latestIndex = 0
-                        var lastPhrase = false
-                        var lastLanguageLetter = parsedLineArr.length
+                        while(chordMap[chordMapi] || newIA[insertArrayi] ){ 
+                            let e = {}
 
-                        var newPhraseLayout = []
-                        var first = true;
-
-                        while(chordMap[chordMapi] || insertArray[insertArrayi] ){ 
-
-                            var newIndexStart
-                            if (insertArray[insertArrayi] != undefined){
-                                var newIndexStart = parseInt(insertArray[insertArrayi]);
-                            }else if (insertArray[insertArrayi] === undefined){
-                                newIndexStart = lastLanguageLetter // 
-                            }
-                            var newIndexEnd
-                            if (insertArray[insertArrayi+1] != undefined){
-                                var newIndexEnd = parseInt(insertArray[insertArrayi+1]);
-                            }else if (insertArray[insertArrayi+1] === undefined){
-                                newIndexEnd = lastLanguageLetter // 
-                            }
-                            
-                            var mapIndexStart 
-                            if (chordMap[chordMapi] != undefined){
-                                mapIndexStart = chordMap[chordMapi].len;
-                            } else {
-                                mapIndexStart = lastLanguageLetter
-                            } 
-                            var mapIndexEnd
-                            if (chordMap[chordMapi+1] != undefined){
-                                mapIndexEnd = chordMap[chordMapi+1].len;
-                            } else {
-                                mapIndexEnd = lastLanguageLetter
-                            }
-
-                            let arr = [newIndexStart, newIndexEnd, mapIndexStart, mapIndexEnd]
-                            arr.sort((a, b) => a - b)
-                            let i =0
-                            while (arr[i]) {
-                                if (arr[i] == 0){
-                                    arr.splice(i,1)
-                                }
-                                i++
-                            }
-
-                            //var currentTargetIndex = ( (newIndexStart <= mapIndexStart) ? newIndexStart : mapIndexStart ); // get smallest one
-                            var currentTargetIndex = ( arr[0] ); // get smallest one
-
-                            let elem = {};
-                            if (first && (chordMap[0]['chord'] === '' || newIndexStart != 0 )) {
+                            if( first ){
                                 // phrase 0 can lack a chord/num
+                                let firstPhraseLen = 0;
+                                e.type = 'chordnumber'
                                 if ( (chordMap[0]['chord'] === '')) {
                                     // a different language has a meta-less phrase: insert a blank
-                                    elem[tag] = ('');
-                                    //latestIndex = 0;
-                                    chordMapi++
+                                    firstPhraseLen = chordMap[0].len
+                                    e.startPosition = 0
+                                    e.type = 'none'
+                                    chordMapi++;
                                 }
 
                                 //New first numberless phrase
-                                if(newIndexStart != 0 ){
-                                    elem[tag] = parsedLineArr.splice(0,newIndexStart).join('');
-                                    latestIndex = chordMap[0].len;
+                                if(newIA[insertArrayi] != 0 ){
+                                    firstPhraseLen = (newIA[insertArrayi]>newIA[insertArrayi] ? newIA[insertArrayi] : newIA[insertArrayi] )
+                                    e.startPosition = 0
+                                    e.type = 'none'
                                     // do not iterate!
                                 } 
+                                e.len = firstPhraseLen;
                                 first = false;
+
+                            } else{ 
+
+                                // if(!(chordMap[chordMapi])){
+                                //     
+                                // }
                                 
-                            } else {
-
-                                let catchRepeatedIndex = ( latestIndex == currentTargetIndex )
-                                if (catchRepeatedIndex){
-                                    // don't push language
-                                    // [1,2,3,4,4!,4,4,4,4,4]
-                                    //        |<-----------
-                                    // [1,!1,1,1,1,2,3,4]
-                                    //   ------->|
-                                    let onLastLetter = ( lastLanguageLetter <= currentTargetIndex)
-                                    if(onLastLetter){ // 4 <= 4
-                                        // both of these have reached end of line
-                                        if ( chordMap[chordMapi] ) {
-                                            elem['chord'] = chordMap[chordMapi].chord
-                                            chordMapi++
-                                        }
-                                        if( insertArray[insertArrayi] ){
-                                            latestIndex = chordMap[0].len;
-                                            elem['number'] = ''
-                                            insertArrayi++
-                                        } 
-                                    } else {
-                                        // there is no 'room' for language 
-                                        // remove from last phrase, move up
-
-                                        //this starts being wrong after second splice
-                                        elem[tag] = new String(newPhraseLayout[newPhraseLayout.length-1][tag]) // {chord: number: en:}  
-                                        newPhraseLayout[newPhraseLayout.length-1][tag] = ''
-                                    } 
-                                    // note: leading phrases will have empty attrubute, trailing will lack attrib. after first
-                                } else if ( !chordMap[chordMapi+1] && !insertArray[insertArrayi+1] ){ // on last
-                                    elem[tag] = parsedLineArr.splice(0,parsedLineArr.length).join('')
-                                    debugger
-                                } else {
-                                    // insert language normally
-                                    // start at 0, 
-                                    // remove currentTargetIndex - latestIndex, 
-                                    elem[tag] = parsedLineArr.splice(0,currentTargetIndex-latestIndex).join('')
-                                }
-
-                                // every phrase (aside from 0) must have either/both chord or num
-                                if ( mapIndexStart == (newIndexStart) && chordMap[chordMapi]){ // 1 == 1
-                                    // both: c and num on same character 
-                                    elem['chord'] = chordMap[chordMapi].chord
-                                    elem['number'] = ''
-                                    latestIndex = currentTargetIndex
+                                if( (typeof(chordMap[chordMapi]))==='undefined' || chordMap[chordMapi].len > newIA[insertArrayi] ){
+                                    //e.type = 'number'
+                                    e.startPosition = newIA[insertArrayi]
+                                    e.number = ''
                                     insertArrayi++
-                                    chordMapi++ 
-                                } else if ( mapIndexStart >= (newIndexStart) ){ // 3 > 2
-                                    // num first 
-                                    elem['number'] = ''
-                                    latestIndex = currentTargetIndex
+                                } else if ( (typeof(newIA[insertArrayi]))==='undefined' || chordMap[chordMapi].len < newIA[insertArrayi] ){
+                                    //e.type = 'chord'
+                                    e.chord = chordMap[chordMapi].chord
+                                    e.startPosition = chordMap[chordMapi].len
+                                    chordMapi++
+                                } else if ( chordMap[chordMapi].len == newIA[insertArrayi] ){
+                                    //e.type = 'both'
+                                    e.startPosition = chordMap[chordMapi].len
+                                    e.number = ''
+                                    e.chord = chordMap[chordMapi].chord
                                     insertArrayi++
-                                } else if  ( mapIndexStart < (newIndexStart) ){ // 3 < 5
-                                    // chord first
-                                    elem['chord'] = chordMap[chordMapi].chord
-                                    latestIndex = currentTargetIndex
                                     chordMapi++
                                 } else {
-                                    insertArrayi++
+                                    console.error("This should not happen unless some data is broken")
                                     chordMapi++
-                                    console.error("Both chordmap and insertarray are invalid")
-                                    debugger
-                                    // at end
+                                    insertArrayi++
                                 }
-                            } 
-                            // always push a phrase
-                            newPhraseLayout.push(elem)
+                            }
+                            trueMap.push(e)
                         }
-                        phraseArray = newPhraseLayout;
-                    } else {
-                        while (newIndexStart) {// while (chordMap[i]) {
-                            let chord = (newIndexStart); // let chord = (insertArray[insertIndex]);
-                            // let Map = (insertArray[insertIndex]);
-                            var currentIndexValue = parseInt(chord);
-                            var currentPhraseLength
-                            // to chop off index
-                            
-                            
-                            if(firstChord && currentIndexValue != 0){ // first and skipping phrase
-                                firstChord = false;
-                                // put a chordless phrase end of chordless is start of next
-                                let toInsert = (parsedLineArr.splice(0,currentIndexValue)).join(""); // splice(start, deleteCount)
-                                totalPhrases++;
-                                phraseArray.push( toInsert );
+                    } else { // numbers only
+                        while(newIA[insertArrayi] ){ 
+                            let e = {}
+
+                            if( first ){
+                                // phrase 0 can lack a chord/num
+                                let firstPhraseLen = 0;
+                                e.type = 'chordnumber'
+                                if ( (chordMap[0]['chord'] === '')) {
+                                    // a different language has a meta-less phrase: insert a blank
+                                    firstPhraseLen = chordMap[0].len
+                                    e.startPosition = 0
+                                    e.type = 'none'
+                                    chordMapi++;
+                                }
+
+                                //New first numberless phrase
+                                if(newIA[insertArrayi] != 0 ){
+                                    firstPhraseLen = (newIA[insertArrayi]>newIA[insertArrayi] ? newIA[insertArrayi] : newIA[insertArrayi] )
+                                    e.startPosition = 0
+                                    e.type = 'none'
+                                    // do not iterate!
+                                } 
+                                e.len = firstPhraseLen;
+                                first = false;
+
                             } else {
-                                firstChord = false;
-                            }
-                                
-                                //else if(firstChord && currentIndexValue === 0){ // There is always a chordless phrase
-                            //     phraseArray.push( '' )
-                            // }
-                            if (totalPhrases == phraseArray.length+1){ // we're on last chord, claim rest of phrase
-                                currentPhraseLength = parsedLineArr.length;
-                                i++;
-                            } else { // middle
-                                currentPhraseLength = parseInt(insertArray[i+1]) - currentIndexValue;
-                                i++;
-                            }
-                            
-                            
-                            lastPhraseLength = currentPhraseLength;
-                            let toInsert = (parsedLineArr.splice(0,currentPhraseLength)).join(""); // splice(start, deleteCount)
-                            phraseArray.push( toInsert );
+                                e.startPosition = newIA[insertArrayi]
+                                e.type = 'number'
+                                e.number = ''
+                                insertArrayi++
+                            } 
+                            trueMap.push(e)
                         }
                     }
+                    var i = 0;
+                    while (trueMap[i]){
+                        if (trueMap[i+1]){
+                            trueMap[i].endPosition = trueMap[i+1].startPosition;
+                            trueMap[i].len = trueMap[i].endPosition -trueMap[i].startPosition;
+                        } else {
+                            trueMap[i].endPosition = lastLanguageLetter;
+                            trueMap[i].len = trueMap[i].endPosition -trueMap[i].startPosition;
+                        }
+                        i++
+                    }
+                    i = 0;
+                    trueMap.forEach(element => {
+                        let e = {};
+
+                        if (element.len){
+                            e[tag] = parsedLineArr.splice(0,element.len).join('')
+                        }else if (i === 0){
+                            e[tag] = ''
+                        }
+                        if (element.number === ''){
+                            e.number = element.number;
+                        }
+                        if (element.chord){
+                            e.chord = element.chord;
+                        }
+                        i++;
+                        // always push a phrase
+                        phraseArray.push(e)
+                    });
                 }
                 if(tag == 'en'){debugger}
                 console.log({'new line': phraseArray, 'old line':line});
+                }
                 return phraseArray;
             },
             combineLines: function(oldLine, newLine) {

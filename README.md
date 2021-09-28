@@ -84,6 +84,31 @@ framework7 assets --ui
 * [Framework7 Icons Reference](https://framework7.io/icons/)
 * [Community Forum](https://forum.framework7.io)
 
+
+Concept: after each phrase there is a 'break' in the float. This allows for 'blank' space for a language/chord/number to exist without getting overlapped . We  can have abscense of an element without reporting it with a `''` style blank
+
+[{en:'a'},
+{at:'b'},
+{number:'&'},
+{chord:'Em'}]
+`    Em
+   &
+a
+  b     `
+
+**If in middle, if no language tag for display language, it should collapse backwards**
+Do not collapse forwards
+[{en:'a'},
+{at:'b'},
+{number:'&'},
+{chord:'Em'},
+{en:'c'}]
+`   Em
+    &
+a   c
+  b     `
+
+
 ## Support Framework7
 
 Love Framework7? Support project by donating or pledging on patreon:

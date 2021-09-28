@@ -222,6 +222,7 @@
     var lastLine
     var firstLine
     var numberStartLocations
+    var numberArray
     import DataManager from '../data/dataManager';
     import Song from '../data/song';
     import noUiSlider from 'nouislider';
@@ -377,7 +378,20 @@
                     self.$app.dialog.alert('Please correct your entries.');
                     console.error('<t>Please correct your entries.</t>');
                 } else {
-                    let newData = song;                   
+                    let newData = song; 
+                    var metaIndex = 0 
+                    numberArray = []
+                    while ( metaIndex < newData.lyrics.verses[verseId].lines[lineId].phrases.length ){
+                        let id = ('.number').concat(metaIndex)
+                        let number = self.$(id)[0]//.value // self.$('.number1').firstElementChild.value
+                        if (number) { // our template will not create form if it's supposed to be blank
+                            // setting number
+                            let number = self.$(id)[0].value 
+                            numberArray.push(number)
+                        } 
+                        metaIndex++;
+                    }
+                    
                     var newLineCombined = [];
                     languages.forEach(langTag => { // selected language
                         newLineCombined = self.combineLines(newLineCombined, self.parseLanguageText(langTag));
@@ -390,7 +404,7 @@
                     while ( phraseIndex < newLineCombined.length ) {
                         if ( typeof(newLineCombined[phraseIndex].number) === 'undefined' ){
                             if ( phraseIndex  != 0 ){
-                                console.error({"this should only be 0": phraseIndex})
+                                console.error({"this should only be 0": phraseIndex, 'this phrase':newLineCombined[phraseIndex] })
                             } else {
                                 let id = ('.number').concat(metaIndex);
                                 let number = self.$(id)[0];
@@ -549,8 +563,8 @@
                     var trueMap = []
                     var insertArrayi = 0
                     var newIA = []
-                    insertArray.forEach(element => {
-                        newIA.push(parseInt(element))
+                    insertArray.forEach((element, index) => {
+                        newIA.push({'len':parseInt(element), 'number':numberArray[index]})
                     });
                     var lastLanguageLetter = parsedLineArr.length
                     var chordMapi = 0
@@ -572,8 +586,9 @@
                                 }
 
                                 //New first numberless phrase
-                                if(newIA[insertArrayi] != 0 ){
-                                    firstPhraseLen = (newIA[insertArrayi]>newIA[insertArrayi] ? newIA[insertArrayi] : newIA[insertArrayi] )
+                                if(newIA[insertArrayi].len != 0 ){
+                                    //firstPhraseLen = (newIA[insertArrayi].len>newIA[insertArrayi].len ? newIA[insertArrayi].len : newIA[insertArrayi].len )
+                                    firstPhraseLen = (newIA[insertArrayi].len>firstPhraseLen ? firstPhraseLen : newIA[insertArrayi].len ) // take the smallest once
                                     e.startPosition = 0
                                     e.type = 'none'
                                     // do not iterate!
@@ -584,23 +599,22 @@
                             } else{ 
 
                                 // if(!(chordMap[chordMapi])){
-                                //     
-                                // }
+                                //    
                                 
-                                if( (typeof(chordMap[chordMapi]))==='undefined' || chordMap[chordMapi].len > newIA[insertArrayi] ){
+                                if( (typeof(chordMap[chordMapi]))==='undefined' || chordMap[chordMapi].len > newIA[insertArrayi].len ){
                                     //e.type = 'number'
-                                    e.startPosition = newIA[insertArrayi]
-                                    e.number = ''
+                                    e.startPosition = newIA[insertArrayi].len
+                                    e.number = newIA[insertArrayi].number
                                     insertArrayi++
-                                } else if ( (typeof(newIA[insertArrayi]))==='undefined' || chordMap[chordMapi].len < newIA[insertArrayi] ){
+                                } else if ( (typeof(newIA[insertArrayi].len))==='undefined' || chordMap[chordMapi].len < newIA[insertArrayi].len ){
                                     //e.type = 'chord'
                                     e.chord = chordMap[chordMapi].chord
                                     e.startPosition = chordMap[chordMapi].len
                                     chordMapi++
-                                } else if ( chordMap[chordMapi].len == newIA[insertArrayi] ){
+                                } else if ( chordMap[chordMapi].len == newIA[insertArrayi].len ){
                                     //e.type = 'both'
                                     e.startPosition = chordMap[chordMapi].len
-                                    e.number = ''
+                                    e.number = newIA[insertArrayi].number
                                     e.chord = chordMap[chordMapi].chord
                                     insertArrayi++
                                     chordMapi++
@@ -629,8 +643,8 @@
                                 }
 
                                 //New first numberless phrase
-                                if(newIA[insertArrayi] != 0 ){
-                                    firstPhraseLen = (newIA[insertArrayi]>newIA[insertArrayi] ? newIA[insertArrayi] : newIA[insertArrayi] )
+                                if(newIA[insertArrayi].len != 0 ){
+                                    firstPhraseLen = (newIA[insertArrayi].len)
                                     e.startPosition = 0
                                     e.type = 'none'
                                     // do not iterate!
@@ -639,9 +653,9 @@
                                 first = false;
 
                             } else {
-                                e.startPosition = newIA[insertArrayi]
+                                e.startPosition = newIA[insertArrayi].len
                                 e.type = 'number'
-                                e.number = ''
+                                e.number = newIA[insertArrayi].number
                                 insertArrayi++
                             } 
                             trueMap.push(e)
@@ -667,7 +681,7 @@
                         }else if (i === 0){
                             e[tag] = ''
                         }
-                        if (element.number === ''){
+                        if (element.number || element.number === ''){
                             e.number = element.number;
                         }
                         if (element.chord){
@@ -678,8 +692,9 @@
                         phraseArray.push(e)
                     });
                 }
-                if(tag == 'en'){debugger}
-                console.log({'new line': phraseArray, 'old line':line});
+                if(tag == 'en'){
+                    console.log({'new line': phraseArray, 'old line':line});
+                    //debugger
                 }
                 return phraseArray;
             },
@@ -687,30 +702,43 @@
                 // [{en:''},{number:1, chord:'A', en:'Hey Jude'}]
                 // [{es:''},{number:1, chord:'A', es:'Hola Jude'}]
                 // [{number:1, chord:'A', ja:'Moshi Jude'}]
-                // [{th:'Saw'},{number:1, chord:'A', th:'-adee Jude'}]
-                // result = [{en:'',es:'',ja:'',th:'Saw'},{number:1, chord:'A', en:'Hey Jude', es:'Hola Jude',ja:'Moshi Jude', th:'-adee Jude'}]
 
-                if (oldLine.length !== newLine.length){
-                    if (oldLine.length === 0){
-                        return newLine
-                    } else {
-                        console.error('these should be the same?');
-                        //debugger
-                    }
+                // [{th:'Saw',number:1},{ chord:'A', th:'-adee Jude'}]
+                // [{fr:'Oui',chord:'A'},{number:1, fr:'-mon Jude'}]
+                
+                // [{th:'Saw',number:1},{ chord:'A', th:'-adee Jude'}]
+                // [{fr:'Oui',chord:'A'},{number:1, fr:'-mon Jude'}]
+
+
+                // result = [{en:'',es:'',ja:'',th:'Saw',number:1,},{ chord:'A', en:'Hey Jude', es:'Hola Jude',ja:'Moshi Jude', th:'-adee Jude'}]
+
+                if (oldLine.length ===0){
+                    return newLine;
                 }
-                var i = 0;
+
+                var iNew = 0;
+                var iOld = 0;
                 var newLineArr = [];
-                while(newLine[i]){
+                while( newLine[iNew] || oldLine[iOld] ){
                     let newPhrase;
-                    if (i==0){
-                        let oldIsMetaless =  ( !Object.hasOwnProperty.call(oldLine[i], 'number') && !Object.hasOwnProperty.call(oldLine[i], 'chord') );
-                        let newIsMetaless = ( !Object.hasOwnProperty.call(newLine[i], 'number') && !Object.hasOwnProperty.call(newLine[i], 'chord') );
+                    let i = iNew < iOld ? iNew : iOld // i is smallest
+                    // let oldIsMetaless =  ( !Object.hasOwnProperty.call(oldLine[i], 'number') && !Object.hasOwnProperty.call(oldLine[i], 'chord') );
+                    // let newIsMetaless = ( !Object.hasOwnProperty.call(newLine[i], 'number') && !Object.hasOwnProperty.call(newLine[i], 'chord') );
+                    var oldChordless = ( !Object.hasOwnProperty.call(oldLine[iOld], 'number') );
+                    var oldNumberless = ( !Object.hasOwnProperty.call(oldLine[iOld], 'chord') );
+                    var newChordless = ( !Object.hasOwnProperty.call(newLine[iNew], 'number') );
+                    var newNumberless =( !Object.hasOwnProperty.call(newLine[iNew], 'chord') );
+                    if (i == 0){ //  first phrase checker
+                        let oldIsMetaless =  oldChordless && oldNumberless
+                        let newIsMetaless = newChordless&&newNumberless
                         if (oldIsMetaless && newIsMetaless){
                             // they match already
                             newPhrase = {
                                 ...oldLine[i],
                                 ...newLine[i]
                             };
+                            iOld++;
+                            iNew++;
                         } else if (oldIsMetaless){
                             newPhrase = newLine[i];
                             for (const key in oldLine[i]) {
@@ -723,6 +751,7 @@
                             // splice(start, deleteCount, item1)
                             // push the index up so it's used in next iteration
                             oldLine.splice(0,0,newPhrase)
+                            iOld++;
                         } else if (newIsMetaless){
                             // same as this ^^
                             newPhrase = oldLine[i];
@@ -732,16 +761,83 @@
                                     newPhrase[key] = ''
                                 }
                             }
+                            iNew++;
                             newLine.splice(0,0,newPhrase)
                         }
                     } else {
-                        newPhrase = {
-                            ...oldLine[i],
-                            ...newLine[i]
-                        };
+                        // If in middle, if no language tag for display language, it should collapse backwards
+                        newLine[iNew] //{number:1}
+                        oldLine[iOld] //{en:'hi', number:1,chord:A }
+                        // false == false && true == true
+                        if (oldChordless == newChordless && oldNumberless == newNumberless){
+                            newPhrase = {
+                                ...oldLine[iOld],
+                                ...newLine[iNew]
+                            };
+                            iOld++;
+                            iNew++;
+                        } else {
+                            
+                            if (oldChordless && !oldNumberless && !newChordless && !newNumberless){
+                                //
+                                newPhrase = oldLine[iOld];
+                                delete newLine[iNew].chord; // move number back
+                                iOld++;
+                            } else if (newChordless && !newNumberless && !oldChordless && !oldNumberless){
+                                //
+                                newPhrase = newLine[iNew];
+                                delete oldLine[iOld].chord; // move number back
+                                iNew++;
+                            } else if (!oldChordless && oldNumberless && !newChordless && !newNumberless){
+                                //
+                                newPhrase = oldLine[iOld];
+                                delete newLine[iNew].number; // move chord back
+                                iOld++;
+                            } else if (!newChordless && newNumberless && !oldChordless && !oldNumberless){
+                                //
+                                newPhrase = newLine[iNew];
+                                delete oldLine[iOld].number; // move chord back
+                                iNew++;
+                            } else {
+                                if ( iNew < iOld ){
+                                    newPhrase = newLine[iNew];
+                                    iNew++;
+                                } else if ( iNew > iOld ){
+                                    newPhrase = oldLine[iOld];
+                                    iOld++;
+                                }else {
+                                    debugger
+                                    alert("Hello! I am an alert box!!");
+                                    throw new Error;
+                                    console.error("paradox, who wins?")
+                                    if ( newLine[iNew].number === oldLine[iOld+1].number ){
+                                        delete oldLine[iOld+1].number
+                                        //delete newLine[iNew].chord
+                                        newPhrase = newLine[iNew];
+                                        iNew++;
+                                        //iOld++;
+                                    } else if ( oldLine[iOld].number == newLine[iNew+1].number ){
+                                        //delete oldLine[iOld].chord
+                                        delete newLine[iNew].number
+                                        newPhrase = oldLine[iOld];
+                                        iOld++;
+                                    } else if ( newLine[iNew].chord == oldLine[iOld].chord ){
+                                        debugger
+                                        delete oldLine[iOld].number
+                                        delete newLine[iNew].number
+                                        newPhrase = {
+                                            ...oldLine[iOld],
+                                            ...newLine[iNew]
+                                        };
+                                        iOld++;
+                                        iNew++;
+                                    }
+                                }
+                            }
+                        }
                     }
                     newLineArr.push(newPhrase);
-                    i++;
+                    
                 }
                 return newLineArr
             },

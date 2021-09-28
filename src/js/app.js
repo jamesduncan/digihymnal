@@ -99,11 +99,11 @@ Template7.registerHelper('printEachNumber', function(line) {
     var results = ''
     //
     results = results.concat(`<div class="line metadata">`)
-    line.phrases.forEach((phrase, index) => {
-        if(phrase["number"]) {
+    line.numbers.forEach((element, index) => {
+        if(element) {
             results = results.concat(`<div class="phrase metadata phraseMetadata"> `)
-            if (phrase["number"]) {
-                results = results.concat(`<div class="number ${index}"><div class="item-input-wrap"><input class="number${index}" type="text" value="${phrase["number"]}"></div></div>`)
+            if (element) {
+                results = results.concat(`<div class="number ${index}"><div class="item-input-wrap"><input class="number${index}" type="text" value="${element}"></div></div>`)
             } else {
                // results = results.concat(`<div class="number ${index}"><div class="item-input-wrap"><input class="number${index}" type="text" placeholder=""></div></div>`)
             }

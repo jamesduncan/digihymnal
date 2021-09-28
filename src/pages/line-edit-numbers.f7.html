@@ -395,44 +395,10 @@
                     var newLineCombined = [];
                     languages.forEach(langTag => { // selected language
                         newLineCombined = self.combineLines(newLineCombined, self.parseLanguageText(langTag));
-                    });                    
-                    
-                    // fill in the numbers, we left empty slots earlier
-                    var metaIndex = 0;
-                    var phraseIndex = 0;
-                    
-                    while ( phraseIndex < newLineCombined.length ) {
-                        if ( typeof(newLineCombined[phraseIndex].number) === 'undefined' ){
-                            if ( phraseIndex  != 0 ){
-                                console.error({"this should only be 0": phraseIndex, 'this phrase':newLineCombined[phraseIndex] })
-                            } else {
-                                let id = ('.number').concat(metaIndex);
-                                let number = self.$(id)[0];
-                                if (!number) { // our template already has a blank slot, we need to increment past it
-                                    // incriement past blank
-                                    metaIndex++;
-                                }
-                            }
-                        } else {
-                            let id = ('.number').concat(metaIndex)
-                            let number = self.$(id)[0]//.value // self.$('.number1').firstElementChild.value
-                            if (number) { // our template will not create form if it's supposed to be blank
-                                // setting number
-                                let number = self.$(id)[0].value 
-                                newLineCombined[phraseIndex].number = number
-                            } else if (!number && phraseIndex == 0) { // our template is wrong, it isn't supposed to be blank
-                                console.error({"Why is this being removed?":line, 'new':newLineCombined})
-                                // going to next number
-                                id = ('.number').concat(++metaIndex)
-                                number = self.$(id)[0].value 
-                                newLineCombined[phraseIndex].number = number
-                            }
-                            metaIndex ++;
-                        }
-                        phraseIndex++;
-                    }; 
+                    });  
 
                     newData.lyrics.verses[verseId].lines[lineId].phrases = newLineCombined;
+                    newData.lyrics.verses[verseId].lines[lineId].numbers = numberArray;
                     // // this only updates the numbers, **if the nouisliders were not modified** this would be a fast way of updating just the notes
                     // var metaIndex = 0;
                     // var phraseIndex = 0;
@@ -536,10 +502,8 @@
                         phraseArray.push(e)
 
                         e[tag] = parsedLineArr.join("") // remaining
-                        e[number] = '' // remaining
                     } else {
                         e[tag] = languageLine;
-                        e[number] = '' // remaining
                     }
                     phraseArray.push(e)
                 } else {
@@ -597,9 +561,6 @@
                                 first = false;
 
                             } else{ 
-
-                                // if(!(chordMap[chordMapi])){
-                                //    
                                 
                                 if( (typeof(chordMap[chordMapi]))==='undefined' || chordMap[chordMapi].len > newIA[insertArrayi].len ){
                                     //e.type = 'number'
@@ -673,23 +634,38 @@
                         i++
                     }
                     i = 0;
-                    trueMap.forEach(element => {
+                    trueMap.forEach((element,index) => {
                         let e = {};
-
-                        if (element.len){
-                            e[tag] = parsedLineArr.splice(0,element.len).join('')
-                        }else if (i === 0){
-                            e[tag] = ''
-                        }
-                        if (element.number || element.number === ''){
-                            e.number = element.number;
-                        }
                         if (element.chord){
                             e.chord = element.chord;
-                        }
-                        i++;
-                        // always push a phrase
+
+
+                            if (element.len){
+                                e[tag] = parsedLineArr.splice(0,element.len).join('')
+                            }else if (index === 0){// first phrase
+                                e[tag] = ''
+                            }
+
+                            if (element.number || element.number === ''){
+                                e[tag] = '%'.concat(e[tag]) // "%Ama";
+                            }
+
+                        // only push chord phrases
                         phraseArray.push(e)
+
+                        } else { // we join the next, or join the last
+                            if (element.number || element.number === ''){
+                                if ( index != trueMap.length ){
+                                    parsedLineArr.unshift('%'); // this will come out on next iteration "%Amazing"
+                                    trueMap[index+1].len += ( ++element.len )
+                                } else { //put it into last
+                                    e[tag] = '%'.concat(e[tag])
+                                    phraseArray[length][tag] += e[tag]
+                                }
+                            } else {
+                                console.error({"This is a chordless numberless phrase":element})
+                            }
+                        }
                     });
                 }
                 if(tag == 'en'){
@@ -699,19 +675,6 @@
                 return phraseArray;
             },
             combineLines: function(oldLine, newLine) {
-                // [{en:''},{number:1, chord:'A', en:'Hey Jude'}]
-                // [{es:''},{number:1, chord:'A', es:'Hola Jude'}]
-                // [{number:1, chord:'A', ja:'Moshi Jude'}]
-
-                // [{th:'Saw',number:1},{ chord:'A', th:'-adee Jude'}]
-                // [{fr:'Oui',chord:'A'},{number:1, fr:'-mon Jude'}]
-                
-                // [{th:'Saw',number:1},{ chord:'A', th:'-adee Jude'}]
-                // [{fr:'Oui',chord:'A'},{number:1, fr:'-mon Jude'}]
-
-
-                // result = [{en:'',es:'',ja:'',th:'Saw',number:1,},{ chord:'A', en:'Hey Jude', es:'Hola Jude',ja:'Moshi Jude', th:'-adee Jude'}]
-
                 if (oldLine.length ===0){
                     return newLine;
                 }
@@ -994,19 +957,23 @@
 
                 var firstPhrase = true;
                 line.phrases.forEach(phrase => {
-                    let meta = {}; // chord and number
-                    if (phrase['number']) {
-                        meta.number = phrase['number']
-                        // push to num list
-                        chordList.push({
-                            'to': function() {
-                                return `${meta.number}`
-                            }
-                        })
-                    }
+                    //let meta = {}; // chord and number
+                    // if (phrase['number']) {
+                    //     meta.number = phrase['number']
+                    //     // push to num list
+                    //     chordList.push({
+                    //         'to': function() {
+                    //             return `${meta.number}`
+                    //         }
+                    //     })
+                    // }
                     for (const key in phrase) {
                         if (Object.hasOwnProperty.call(phrase, key) && key != 'chord' && key != 'number') {
                             const element = phrase[key];
+
+                            var number = element.indexOf('%')
+                            debugger
+
                             let stringarr = ((typeof element == 'string') ? element.split("") : element[0].split(""));
                             let elementAsArray = self.diacriticChecker(stringarr, 0) // lets work with the 'true' length array
                             if(lyric[key]){
@@ -1022,10 +989,10 @@
                                 numberEndIndex = numberStartLocations[key].length;
                             }
 
-                            if (!meta.number && firstPhrase) {// if first phrase skip it,
+                            if (number == -1 && firstPhrase) {// if first phrase skip it,
                                 // if first, make a blank number area
                                 numberStartLocations[key].push(elementAsArray.length);
-                            } else if (!meta.number) { // else there is no number, concat with the last one  
+                            } else if (number == -1) { // else there is no number, concat with the last one  
                                 // if there is no number, concat language array to last
                                 numberStartLocations[key][numberEndIndex - 1] += elementAsArray.length;
                             } else { // totally normal
@@ -1132,6 +1099,9 @@
                 //if ([' ྱ', ' ེ', ' ོ', ].includes(array[nextIndex])){
                 if ([4017, 3962, 3964, 3954].includes((array[nextIndex]).charCodeAt(0))) {
                     array[index] = array[index].concat(array.splice(nextIndex, 1)[0]);
+                } else if (['%'].includes((array[nextIndex]).charCodeAt(0))) {
+                    // remove our number markers
+                    array.splice(index, 1)[0]; 
                 } else { // only increase if no diacritic
                     ++index;
                 }

@@ -168,24 +168,7 @@
                                                 </div>
                                             {{/if}}
                                             {{#if this}}
-                                                {{#each phrases}}
-                                                    <div class="phrase {{#if @root.showNumber}}{{else}}noNumbers{{/if}} {{#if @root.showChord}}{{else}}noChords{{/if}}">
-                                                        {{#if chord}}
-                                                            {{#if @root.showChord}}
-                                                                <div class="chord">{{transpose chord @root.steps}}</div>
-                                                            {{/if}}
-                                                        {{/if}}
-                                                        {{#if number}}
-                                                            {{#if @root.showNumber}}
-                                                                <div class="number">{{numbers number}}</div>
-                                                            {{/if}}
-                                                        {{/if}}
-                                                        <div class="lyric">{{printObjectPropertyByKey this @root.lyric1 }}</div>  
-                                                        {{#if @root.showLyric2}}
-                                                            <div class="lyric">{{printObjectPropertyByKey this @root.lyric2 }}</div>
-                                                        {{/if}}
-                                                    </div>
-                                                {{/each}}
+                                                {{printLine this @root.lyric1 @root.showChord @root.showNumber @root.steps @root.lyric2 }} 
                                             {{/if}}
                                             <div style="clear:both;"></div>
                                         </div>
@@ -211,7 +194,7 @@
                                     {{/if}}
                                 {{/each}}
                             </div>
-                            <div class="chorus">
+                            <!-- <div class="chorus">
                                 {{#each song.lyrics.Chorus}}
                                     <h3>{{#if label}}{{translate label}}{{else}}<br />{{/if}}</h3>
                                     {{#each lines}}
@@ -237,8 +220,8 @@
                                         </div>
                                     {{/each}}
                                 {{/each}}
-                            </div>
-                            <div class="bridge">
+                            </div> -->
+                            <!-- <div class="bridge">
                                 {{#each song.lyrics.Bridge}}
                                     <h3>{{#if label}}{{translate label}}{{else}}<br />{{/if}}</h3>
                                     {{#each lines}}
@@ -264,7 +247,7 @@
                                         </div>
                                     {{/each}}
                                 {{/each}}
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -453,13 +436,38 @@
                         songCollection.get(songId).then(result => {
                             
                             song = result;
-                            app.song = result;
+                            // TEMPORARY CODE, remove number trait from phrases and put on line
+                            song.lyrics.verses.forEach(verse => {
+                                verse.lines.forEach(line => {
+                                    var numbers = []
+                                    line.phrases.forEach(phrase => {
+                                        if (Object.hasOwnProperty.call(phrase, 'number')) {
+                                            numbers.push(phrase['number'])
+                                            delete phrase['number'];
+                                            for (const key in phrase) {
+                                                if (Object.hasOwnProperty.call(phrase, key) && key != 'chord') {
+                                                    phrase[key] = '%'.concat(phrase[key]);
+                                                }
+                                            }
+                                        }
+                                    });
+                                    line['numbers'] = numbers
+                                });
+                            });
+                            //debugger
+                            //
+                            app.song = song;
                             updatePage(song);
                         });
                     } else { // else keep global var
                         song = app.song;
                         updatePage(song);
                     }
+
+
+
+
+
                     // update page with selected song
                     function updatePage(song,defaultLanguage){
                         var translationLangs = Object.keys(song.title);

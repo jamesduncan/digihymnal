@@ -177,6 +177,156 @@ Template7.registerHelper('printObjectPropertyByKey', function(dataObject, langua
     } 
     return ""
 })
+// print line
+// {{#each phrases}}
+// <!-- {%am%az%ing %grace} {%how %s}{%weet %the}{ %sound} -->
+//     <div class="phrase {{#if @root.showNumber}}{{else}}noNumbers{{/if}} {{#if @root.showChord}}{{else}}noChords{{/if}}">
+//         {{#if chord}}
+//             {{#if @root.showChord}}
+//                 <div class="chord">{{transpose chord @root.steps}}</div>
+//             {{/if}}
+//         {{/if}}
+//         <!-- @root.showNumber -->
+//         <div class="lyric">{{printObjectPropertyByKey this @root.lyric1 true ../numbers}}</div>  
+//         {{#if @root.showLyric2}}
+//             <div class="lyric">{{printObjectPropertyByKey this @root.lyric2 }}</div>
+//         {{/if}}
+//     </div>
+// {{/each}}
+
+Template7.registerHelper('printLine', function(dataObjectLine, language1, showChords, showNumbers, steps, language2) {
+    // this @root.lyric1 @root.showChord @root.showNumber @root.steps @root.lyric2 
+    var finalLineHtml = ''
+    function getAllIndexes(arr, val) {
+        var indexes = [], i;
+        for(i = 0; i < arr.length; i++)
+            if (arr[i] === val)
+                indexes.push(i);
+        return indexes;
+    }
+    function forceSpace(lyricString){
+        let lastIndex = (lyricString.length-1);
+        let c = lyricString[lastIndex]; // last character
+        if ((c <= 32 && c >= 0) || c == 127){
+            lyricString +=`&nbsp;`
+        }
+        c = lyricString[0]; // last character
+        if ((c <= 32 && c >= 0) || c == 127){
+            lyricString = `&nbsp;${lyricString}`
+        }
+        return lyricString
+    }
+    
+    var phraseHtmlTemplate = `<div class="phrase`
+    if ( !showNumbers ){
+        phraseHtmlTemplate+=' noNumbers'
+    }
+    if ( !showChords ){
+        phraseHtmlTemplate+=' noChords'
+    }
+    phraseHtmlTemplate+=`">`
+    
+    if( dataObjectLine.numbers ){
+        var numberArray = dataObjectLine.numbers // array
+        var hasNum = true     
+    } else {
+        debugger
+    }
+    var lyric2numIndex = 0 
+    var numberIndex = 0
+
+    dataObjectLine.phrases.forEach( phrase => {
+        var phraseHtml = phraseHtmlTemplate;
+        
+        if ( phrase.chord && showChords){
+            // TODO transpose this
+            phraseHtml += `<div class="chord">${phrase.chord}</div>`
+        }
+
+        if ( hasNum ) {
+            var lyric1 = phrase[language1];
+            var lyric2 = phrase[language2];
+            var lyric1NumArr = getAllIndexes(lyric1, '%')
+            
+            
+            if (lyric1NumArr.length && showNumbers){
+                //debugger;
+                var lastnum1 = 0
+                
+                lyric1NumArr.forEach( (number,index) => {
+                    phraseHtml += `<div class="number num${numberIndex}">${numberArray.slice(0,1)}</div>`
+                    
+                    var lyric = `<div class="lyric ${language1}">`
+                    number = (index != lyric1NumArr.length-1 ) ? number : phrase[language1].length
+                    let miniPhrase = phrase[language1].slice(0,number-lastnum1)
+                    miniPhrase = miniPhrase.replaceAll('%', '')
+                    lyric += forceSpace(miniPhrase)
+                    lyric += `</div>`
+                    phraseHtml += lyric
+                    //
+                    if (typeof language2 != 'undefined'){
+                        var lastnum2 = 0
+                        var lyric2NumArr = getAllIndexes(lyric2, '%')
+                        // miniPhrase = lyric2NumArr[index] ? phrase[language2].slice(0,lyric2NumArr[index]-lastnum2) : phrase[language2]
+                        // miniPhraseLen = lyric2NumArr[index]? lyric2NumArr[index]-lastnum2 : phrase[language2].length
+                        let miniPhraseLen = (index != lyric1NumArr.length-1 && lyric2NumArr[index]) ? lyric2NumArr[index]-lastnum2 : phrase[language2].length
+                        lyric = `<div class="lyric ${language2}">`
+                        miniPhrase = phrase[language2].slice(0,miniPhraseLen)
+                        miniPhrase = miniPhrase.replaceAll('%', '')
+                        lyric += forceSpace(miniPhrase)
+                        lyric += `</div>`
+                        phraseHtml += lyric
+                    }
+                    //
+                    phraseHtml += `</div>`
+                    finalLineHtml += phraseHtml;  
+                    phraseHtml = phraseHtmlTemplate; 
+                    numberIndex = 1+numberIndex     
+                });
+                
+            } else {
+                // there should be nums, there arent any here
+                debugger;
+                
+                var lyric = `<div class="lyric">`
+                let miniPhrase = phrase[language1].replaceAll('%', '')
+                lyric += forceSpace(miniPhrase)
+                lyric += `</div>`
+                phraseHtml += lyric
+
+                if (typeof language2 != 'undefined'){
+                    lyric = `<div class="lyric ${language2}">`
+                    miniPhrase = phrase[language2]
+                    miniPhrase = miniPhrase.replaceAll('%', '')
+                    lyric += forceSpace(miniPhrase)
+                    lyric += `</div>`
+                    phraseHtml += lyric
+                }
+
+                phraseHtml +=  `</div>`
+                finalLineHtml += phraseHtml;
+            }
+        } else {
+            // there are no nums, build normally
+            debugger;
+            var lyric = `<div class="lyric">`
+            lyric += forceSpace(phrase[language1])
+            lyric += `</div>`
+            phraseHtml += lyric
+
+            if (typeof language2 != 'undefined'){
+                lyric = `<div class="lyric ${language2}">`
+                lyric += forceSpace(phrase[language2])
+                lyric += `</div>`
+                phraseHtml += lyric
+            }
+
+            phraseHtml +=  `</div>`
+            finalLineHtml += phraseHtml;
+        }
+    });
+    return finalLineHtml
+})
 
 var app = new Framework7({
     root: '#app', // App root element

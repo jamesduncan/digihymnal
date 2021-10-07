@@ -446,7 +446,7 @@
                                             delete phrase['number'];
                                             for (const key in phrase) {
                                                 if (Object.hasOwnProperty.call(phrase, key) && key != 'chord') {
-                                                    phrase[key] = '%'.concat(phrase[key]);
+                                                    phrase[key] = String.fromCharCode(173).concat(phrase[key]);
                                                 }
                                             }
                                         }

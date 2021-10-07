@@ -647,7 +647,7 @@
                             }
 
                             if (element.number || element.number === ''){
-                                e[tag] = '%'.concat(e[tag]) // "%Ama";
+                                e[tag] = String.fromCharCode(173).concat(e[tag]) // "%Ama";
                             }
 
                         // only push chord phrases
@@ -656,10 +656,10 @@
                         } else { // we join the next, or join the last
                             if (element.number || element.number === ''){
                                 if ( index != trueMap.length ){
-                                    parsedLineArr.unshift('%'); // this will come out on next iteration "%Amazing"
+                                    parsedLineArr.unshift(String.fromCharCode(173)); // this will come out on next iteration "%Amazing"
                                     trueMap[index+1].len += ( ++element.len )
                                 } else { //put it into last
-                                    e[tag] = '%'.concat(e[tag])
+                                    e[tag] = String.fromCharCode(173).concat(e[tag])
                                     phraseArray[length][tag] += e[tag]
                                 }
                             } else {
@@ -971,7 +971,7 @@
                         if (Object.hasOwnProperty.call(phrase, key) && key != 'chord' && key != 'number') {
                             const element = phrase[key];
 
-                            var number = element.indexOf('%')
+                            var number = element.indexOf(String.fromCharCode(173))
                             debugger
 
                             let stringarr = ((typeof element == 'string') ? element.split("") : element[0].split(""));
@@ -1099,7 +1099,7 @@
                 //if ([' ྱ', ' ེ', ' ོ', ].includes(array[nextIndex])){
                 if ([4017, 3962, 3964, 3954].includes((array[nextIndex]).charCodeAt(0))) {
                     array[index] = array[index].concat(array.splice(nextIndex, 1)[0]);
-                } else if (['%'].includes((array[nextIndex]).charCodeAt(0))) {
+                } else if ([String.fromCharCode(173)].includes((array[nextIndex]).charCodeAt(0))) {
                     // remove our number markers
                     array.splice(index, 1)[0]; 
                 } else { // only increase if no diacritic

@@ -808,7 +808,7 @@
                 var slider = self.$(`.slider-${tag}`)[0];  
                 noUiSlider.create(slider, options);
                 // noUiSlider.create(slider, {
-                //     start: chordStartLocations,
+                //     start: chordStartLocations, 
                 //     tooltips: chordDataObject,
                 //     range: lyricRange,
                 //     pips: {
@@ -832,7 +832,7 @@
                     return array;
                 }
                 //if ([' ྱ', ' ེ', ' ོ', ].includes(array[nextIndex])){
-                if ([4017, 3962, 3964, 3954].includes((array[nextIndex]).charCodeAt(0))) {
+                if ([4017, 3962, 3964, 3954, 173].includes((array[nextIndex]).charCodeAt(0))) {
                     array[index] = array[index].concat(array.splice(nextIndex, 1)[0]);
                 } else { // only increase if no diacritic
                     ++index;

@@ -99,17 +99,17 @@ Template7.registerHelper('printEachNumber', function(line) {
     var results = ''
     //
     results = results.concat(`<div class="line metadata">`)
-    line.numbers.forEach((element, index) => {
-        if(element) {
-            results = results.concat(`<div class="phrase metadata phraseMetadata"> `)
-            if (element) {
-                results = results.concat(`<div class="number ${index}"><div class="item-input-wrap"><input class="number${index}" type="text" value="${element}"></div></div>`)
-            } else {
-               // results = results.concat(`<div class="number ${index}"><div class="item-input-wrap"><input class="number${index}" type="text" placeholder=""></div></div>`)
+    line.phrases.forEach((phrase, index) => {
+        results = results.concat(`<div class="phrase metadata phraseMetadata"> `)
+        if(phrase["number"]) {
+                if (phrase["number"]) {
+                    results = results.concat(`<div class="number ${index}"><div class="item-input-wrap"><input class="number${index}" type="text" value="${phrase["number"]}"></div></div>`)
+                } else {
+                    results = results.concat(`<div class="number ${index}"><div class="item-input-wrap"><input class="number${index}" type="text" placeholder=""></div></div>`)
+                }
             }
             results = results.concat('</div>');
-        }
-    });
+        });
      
     results = results.concat('</div>');
 
@@ -246,11 +246,10 @@ Template7.registerHelper('printLine', function(dataObjectLine, language1, showCh
         if ( hasNum ) {
             var lyric1 = phrase[language1];
             var lyric2 = phrase[language2];
-            var lyric1NumArr = getAllIndexes(lyric1, '%')
+            var lyric1NumArr = getAllIndexes(lyric1, String.fromCharCode(173)) //  invisible character
             
             
             if (lyric1NumArr.length && showNumbers){
-                //debugger;
                 var lastnum1 = 0
                 
                 lyric1NumArr.forEach( (number,index) => {
@@ -259,20 +258,20 @@ Template7.registerHelper('printLine', function(dataObjectLine, language1, showCh
                     var lyric = `<div class="lyric ${language1}">`
                     number = (index != lyric1NumArr.length-1 ) ? number : phrase[language1].length
                     let miniPhrase = phrase[language1].slice(0,number-lastnum1)
-                    miniPhrase = miniPhrase.replaceAll('%', '')
+                    miniPhrase = miniPhrase.replaceAll(String.fromCharCode(173), '')//  invisible character
                     lyric += forceSpace(miniPhrase)
                     lyric += `</div>`
                     phraseHtml += lyric
                     //
                     if (typeof language2 != 'undefined'){
                         var lastnum2 = 0
-                        var lyric2NumArr = getAllIndexes(lyric2, '%')
+                        var lyric2NumArr = getAllIndexes(lyric2, String.fromCharCode(173))
                         // miniPhrase = lyric2NumArr[index] ? phrase[language2].slice(0,lyric2NumArr[index]-lastnum2) : phrase[language2]
                         // miniPhraseLen = lyric2NumArr[index]? lyric2NumArr[index]-lastnum2 : phrase[language2].length
                         let miniPhraseLen = (index != lyric1NumArr.length-1 && lyric2NumArr[index]) ? lyric2NumArr[index]-lastnum2 : phrase[language2].length
                         lyric = `<div class="lyric ${language2}">`
                         miniPhrase = phrase[language2].slice(0,miniPhraseLen)
-                        miniPhrase = miniPhrase.replaceAll('%', '')
+                        miniPhrase = miniPhrase.replaceAll(String.fromCharCode(173), '')
                         lyric += forceSpace(miniPhrase)
                         lyric += `</div>`
                         phraseHtml += lyric
@@ -286,10 +285,8 @@ Template7.registerHelper('printLine', function(dataObjectLine, language1, showCh
                 
             } else {
                 // there should be nums, there arent any here
-                debugger;
-                
                 var lyric = `<div class="lyric">`
-                let miniPhrase = phrase[language1].replaceAll('%', '')
+                let miniPhrase = phrase[language1].replaceAll(String.fromCharCode(173), '')
                 lyric += forceSpace(miniPhrase)
                 lyric += `</div>`
                 phraseHtml += lyric
@@ -297,7 +294,7 @@ Template7.registerHelper('printLine', function(dataObjectLine, language1, showCh
                 if (typeof language2 != 'undefined'){
                     lyric = `<div class="lyric ${language2}">`
                     miniPhrase = phrase[language2]
-                    miniPhrase = miniPhrase.replaceAll('%', '')
+                    miniPhrase = miniPhrase.replaceAll(String.fromCharCode(173), '')
                     lyric += forceSpace(miniPhrase)
                     lyric += `</div>`
                     phraseHtml += lyric
@@ -308,7 +305,6 @@ Template7.registerHelper('printLine', function(dataObjectLine, language1, showCh
             }
         } else {
             // there are no nums, build normally
-            debugger;
             var lyric = `<div class="lyric">`
             lyric += forceSpace(phrase[language1])
             lyric += `</div>`

@@ -2,7 +2,7 @@ export default {
     "id": "sample01",
     "title":
     {
-      "en": "Ah Lord God",
+      "en": "AArdvard Tune",
       "at": "༠༡། ཀྱེ། དཀོན་མཆགོོ",
       "ct": "ཞེས་པའི་དབྱིན་ཇིའི་བསྟོད་དབྱངས།",
       "ctr": "GYE, GÖNCHÒ"
@@ -20,6 +20,7 @@ export default {
             {
                 "label": "Intro Verse",
                 "lines": [{
+                    'numbers':['1','3'],
                     "phrases": [
                         {
                             "chord": "C",

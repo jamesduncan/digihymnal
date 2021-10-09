@@ -225,19 +225,22 @@
     var numberArray
     import DataManager from '../data/dataManager';
     import Song from '../data/song';
+    import LineModulate from '../data/lineModulate';
     import noUiSlider from 'nouislider';
     import 'nouislider/dist/nouislider.css';
+
     // //  the namespace:
     // import * as noUiSlider from 'nouislider';
     // import 'nouislider/dist/nouislider.css';
-
+    
     // // Alternatively, you can include both files:
     // <link href="nouislider.css" rel="stylesheet">
     // <script src="nouislider.js"><//////script>
-
+        
     import Preference from "../data/preference";
     const dataManager = new DataManager();
     const songCollection = new Song();
+    const lineModulate = new LineModulate();
     const preference = new Preference();
 
     // Import locales
@@ -956,57 +959,117 @@
                 });
 
                 var firstPhrase = true;
-                line.phrases.forEach(phrase => {
-                    //let meta = {}; // chord and number
-                    // if (phrase['number']) {
-                    //     meta.number = phrase['number']
-                    //     // push to num list
-                    //     chordList.push({
-                    //         'to': function() {
-                    //             return `${meta.number}`
-                    //         }
-                    //     })
-                    // }
-                    for (const key in phrase) {
-                        if (Object.hasOwnProperty.call(phrase, key) && key != 'chord' && key != 'number') {
-                            const element = phrase[key];
+                var lineModulated = lineModulate.consolidate(line)
+                debugger
+                //
 
-                            var number = element.indexOf(String.fromCharCode(173))
-                            debugger
+                lineModulated.forEach(lang => {
+                    if (Object.hasOwnProperty.call(lineModulated, lang)) {
+                        const languageLineCombinedLyric = lang.lyric;
+                        const languageLineCombinedChordLocations = lang.chords;
 
-                            let stringarr = ((typeof element == 'string') ? element.split("") : element[0].split(""));
-                            let elementAsArray = self.diacriticChecker(stringarr, 0) // lets work with the 'true' length array
-                            if(lyric[key]){
-                                lyric[key] = lyric[key].concat(elementAsArray);
-                            } else{
-                                lyric[key] = elementAsArray;
-                            }
-                            var numberEndIndex;
-                            if (firstPhrase) {
-                                numberStartLocations[key] = [];
-                                numberEndIndex = 0;
-                            } else {
-                                numberEndIndex = numberStartLocations[key].length;
-                            }
+                        // TODO we need to split each of these in relation to position of 173
+                        // For Each then we need to find the true length of non diacritic elements
 
-                            if (number == -1 && firstPhrase) {// if first phrase skip it,
-                                // if first, make a blank number area
+                        //let stringarr = ((typeof element == 'string') ? element.split("") : element[0].split(""));
+                        let stringarr = ( languageLineCombinedLyric.split( String.fromCharCode(173) ) );
+                        // 'aaa','bbb','ccccc'
+                        if (stringarr.length != line.numbers.length) {
+                            console.error("What is happening, these should match")
+                        }
+
+                        var number = element.indexOf(String.fromCharCode(173))
+                        console.log(lineModulate.convertFlat(number))
+                        console.log(lineModulate(number))
+                        debugger
+
+                        let elementAsArray = self.diacriticChecker(stringarr, 0) // lets work with the 'true' length array
+                        if(lyric[key]){
+                            lyric[key] = lyric[key].concat(elementAsArray);
+                        } else{
+                            lyric[key] = elementAsArray;
+                        }
+                        var numberEndIndex;
+                        if (firstPhrase) {
+                            numberStartLocations[key] = [];
+                            numberEndIndex = 0;
+                        } else {
+                            numberEndIndex = numberStartLocations[key].length;
+                        }
+
+                        if (number == -1 && firstPhrase) {// if first phrase skip it,
+                            // if first, make a blank number area
+                            numberStartLocations[key].push(elementAsArray.length);
+                        } else if (number == -1) { // else there is no number, concat with the last one  
+                            // if there is no number, concat language array to last
+                            numberStartLocations[key][numberEndIndex - 1] += elementAsArray.length;
+                        } else { // totally normal
+                            // if this has a number, start adding number start locations
+                            if (numberEndIndex == 0) {
                                 numberStartLocations[key].push(elementAsArray.length);
-                            } else if (number == -1) { // else there is no number, concat with the last one  
-                                // if there is no number, concat language array to last
-                                numberStartLocations[key][numberEndIndex - 1] += elementAsArray.length;
-                            } else { // totally normal
-                                // if this has a number, start adding number start locations
-                                if (numberEndIndex == 0) {
-                                    numberStartLocations[key].push(elementAsArray.length);
-                                } else {
-                                    numberStartLocations[key].push(numberStartLocations[key][numberEndIndex - 1] + elementAsArray.length);
-                                }
+                            } else {
+                                numberStartLocations[key].push(numberStartLocations[key][numberEndIndex - 1] + elementAsArray.length);
                             }
                         }
                     }
-                    firstPhrase = false;
                 });
+                // line.phrases.forEach(phrase => {
+                //     //let meta = {}; // chord and number
+                //     // if (phrase['number']) {
+                //     //     meta.number = phrase['number']
+                //     //     // push to num list
+                //     //     chordList.push({
+                //     //         'to': function() {
+                //     //             return `${meta.number}`
+                //     //         }
+                //     //     })
+                //     // }
+                //     for (const key in phrase) {
+                //         if (Object.hasOwnProperty.call(phrase, key) && key != 'chord' && key != 'number') {
+                //             const element = phrase[key];
+
+
+                //             // TODO we need to split each of these in relation to position of 173
+                //             // For Each then we need to find the true length of non diacritic elements
+
+                //             var number = element.indexOf(String.fromCharCode(173))
+                //             console.log(lineModulate.convertFlat(number))
+                //             console.log(lineModulate(number))
+                //             debugger
+
+                //             let stringarr = ((typeof element == 'string') ? element.split("") : element[0].split(""));
+                //             let elementAsArray = self.diacriticChecker(stringarr, 0) // lets work with the 'true' length array
+                //             if(lyric[key]){
+                //                 lyric[key] = lyric[key].concat(elementAsArray);
+                //             } else{
+                //                 lyric[key] = elementAsArray;
+                //             }
+                //             var numberEndIndex;
+                //             if (firstPhrase) {
+                //                 numberStartLocations[key] = [];
+                //                 numberEndIndex = 0;
+                //             } else {
+                //                 numberEndIndex = numberStartLocations[key].length;
+                //             }
+
+                //             if (number == -1 && firstPhrase) {// if first phrase skip it,
+                //                 // if first, make a blank number area
+                //                 numberStartLocations[key].push(elementAsArray.length);
+                //             } else if (number == -1) { // else there is no number, concat with the last one  
+                //                 // if there is no number, concat language array to last
+                //                 numberStartLocations[key][numberEndIndex - 1] += elementAsArray.length;
+                //             } else { // totally normal
+                //                 // if this has a number, start adding number start locations
+                //                 if (numberEndIndex == 0) {
+                //                     numberStartLocations[key].push(elementAsArray.length);
+                //                 } else {
+                //                     numberStartLocations[key].push(numberStartLocations[key][numberEndIndex - 1] + elementAsArray.length);
+                //                 }
+                //             }
+                //         }
+                //     }
+                //     firstPhrase = false;
+                // });
                 //console.log(numberStartLocations)
 
                 var pipFormatter = {}; //var pipFormats = {'0':'abc', '1':'pqr', '2':'xyz'};
@@ -1099,10 +1162,13 @@
                 //if ([' ྱ', ' ེ', ' ོ', ].includes(array[nextIndex])){
                 if ([4017, 3962, 3964, 3954].includes((array[nextIndex]).charCodeAt(0))) {
                     array[index] = array[index].concat(array.splice(nextIndex, 1)[0]);
-                } else if ([String.fromCharCode(173)].includes((array[nextIndex]).charCodeAt(0))) {
+                } //else if ([173].includes((array[nextIndex]).charCodeAt(0))) {
                     // remove our number markers
-                    array.splice(index, 1)[0]; 
-                } else { // only increase if no diacritic
+                   // console.error("This should be getting split?")
+                    //debugger
+                    //array.splice(index, 1)[0]; 
+                //} 
+                else { // only increase if no diacritic
                     ++index;
                 }
                 return self.diacriticChecker(array, index);

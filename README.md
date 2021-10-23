@@ -108,6 +108,38 @@ Do not collapse forwards
 a   c
   b     `
 
+Pages:
+view-song
+- display a 1-2 languages
+- display chords
+- - display phrases for each chord
+- display numbers
+- - break up chord-phrase favoring the 1st language
+ - edit line test
+ - - consolidate lyrics of 1st language
+ - - remove number-markers (exact or percentage location ? )
+ - - recive user's input
+ - - replace number-markers
+
+line-edit-chords
+ - display all languages with chord sliders
+ - display all chords
+ - ignore locations of number markers using diacritic checker
+
+line-edit-numbers
+ - display all languages with number-sliders
+ - display all numbers
+ - (disallow editing text?)
+ - process for each language:
+ - - store locations of chords, 
+ - - combine whole line
+ - - get locations of numbers
+ - - place on sliders
+ - - get new locations from slider
+ - - place on line-text (diacritically checked)
+ - - place new text into phrases(diacritically checked to ignore number-markers)
+ - - !! User percentages or exact indexes ??
+
 
 ## Support Framework7
 

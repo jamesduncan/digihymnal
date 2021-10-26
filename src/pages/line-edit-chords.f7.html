@@ -226,6 +226,9 @@
     import Song from '../data/song';
     import noUiSlider from 'nouislider';
     import 'nouislider/dist/nouislider.css';
+
+    import LineModulate from '../data/lineModulate';
+    const lineModulate = new LineModulate();
     // //  the namespace:
     // import * as noUiSlider from 'nouislider';
     // import 'nouislider/dist/nouislider.css';
@@ -492,7 +495,8 @@
                 
                 if (typeof chordArray === 'string'){// there's only the one chord
                     if (parseInt(chordArray) != 0){ // we need two phrases
-                        var parsedLineArr = self.diacriticChecker(languageLine.split(""), 0);
+                        //var parsedLineArr self.diacriticChecker(languageLine.split(""), 0);
+                        var parsedLineArr = lineModulate.diacriticChecker(languageLine.split(""), 0)
                         phraseArray.push( (parsedLineArr.splice(0, parseInt(chordArray) )).join("") ); 
                         phraseArray.push( parsedLineArr.join("") ); // remaining
                     } else {
@@ -502,7 +506,7 @@
                     if( typeof languageLine == 'string'){
                         languageLine = languageLine.split("");
                     }
-                    var parsedLineArr =  self.diacriticChecker(languageLine, 0);
+                    var parsedLineArr =  lineModulate.diacriticChecker(languageLine, 0);
                     var lastPhraseLength = 0;
                     var firstChord = true;
                     var totalPhrases = chordArray.length
@@ -711,7 +715,7 @@
                             const element = phrase[key];
                             // put lyrics to an array
                             let stringarr = ((typeof element == 'string') ? element.split("") : element[0].split(""));
-                            let elementAsArray = self.diacriticChecker(stringarr, 0) // lets work with the 'true' length array
+                            let elementAsArray = lineModulate.diacriticChecker(stringarr, 0) // lets work with the 'true' length array
                             if(lyric[key]){
                                 lyric[key] = lyric[key].concat(elementAsArray);
                             } else{
@@ -838,7 +842,7 @@
                 } else { // only increase if no diacritic
                     ++index;
                 }
-                return self.diacriticChecker(array, index);
+                return lineModulate.diacriticChecker(array, index);
             },
             lineEditPopup: function(tag) {
                 // app.panel.create(parameters)
@@ -896,7 +900,7 @@
             updateLine: function(data,tag){
                 if (self.validateTag(tag)){
                     //update line and refresh
-                    var lineArr = self.diacriticChecker(data.split(""), 0)
+                    var lineArr = lineModulate.diacriticChecker(data.split(""), 0)
                     var chordPlacment = chordStartLocations[tag]
 
                     let i = 0

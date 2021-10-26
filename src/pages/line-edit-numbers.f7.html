@@ -242,6 +242,8 @@
     const songCollection = new Song();
     const lineModulate = new LineModulate();
     const preference = new Preference();
+    import ParseText from "../data/parseText";
+    const parseText = new ParseText();
 
     // Import locales
     const locale = require('../js/locales.js');
@@ -468,7 +470,7 @@
                         line.phrases.forEach(phrase => {
                             if (Object.hasOwnProperty.call(phrase, tag)) {
                                 languageLine = languageLine.concat(phrase[tag]); 
-                                let arr = self.diacriticChecker(phrase[tag], 0);
+                                let arr = lineModulate.diacriticChecker(phrase[tag], 0);
                                 languageArr = languageArr.concat(arr)
                                 languageLen += arr.length
                             } 
@@ -500,7 +502,7 @@
                 if (typeof insertArray === 'string'){// there's only the one chord
                     let e = {}
                     if (parseInt(insertArray) != 0){ // we need two phrases
-                        var parsedLineArr = self.diacriticChecker(languageLine.split(""), 0);
+                        var parsedLineArr = lineModulate.diacriticChecker(languageLine.split(""), 0);
                         e[tag] = (parsedLineArr.splice(0, parseInt(insertArray) )).join("") 
                         phraseArray.push(e)
 
@@ -513,7 +515,7 @@
                     if( typeof languageLine == 'string'){
                         languageLine = languageLine.split("");
                     }
-                    var parsedLineArr =  self.diacriticChecker(languageLine, 0);
+                    var parsedLineArr =  lineModulate.diacriticChecker(languageLine, 0);
                     var lastPhraseLength = 0;
                     var firstChord = true;
                     var totalPhrases = insertArray.length
@@ -960,30 +962,32 @@
 
                 var firstPhrase = true;
                 var lineModulated = lineModulate.consolidate(line)
-                debugger
                 //
-
-                lineModulated.forEach(lang => {
-                    if (Object.hasOwnProperty.call(lineModulated, lang)) {
+                for (const key in lineModulated) {
+                    if (Object.hasOwnProperty.call(lineModulated, key)) {
+                        const lang = lineModulated[key];
+                        const element = lineModulated[key];
                         const languageLineCombinedLyric = lang.lyric;
                         const languageLineCombinedChordLocations = lang.chords;
 
                         // TODO we need to split each of these in relation to position of 173
+                        // use parseText???
+                        parsed = parseText.remove(lang.lyric)
+                        parsed.numberPositions
                         // For Each then we need to find the true length of non diacritic elements
 
                         //let stringarr = ((typeof element == 'string') ? element.split("") : element[0].split(""));
                         let stringarr = ( languageLineCombinedLyric.split( String.fromCharCode(173) ) );
                         // 'aaa','bbb','ccccc'
-                        if (stringarr.length != line.numbers.length) {
+                        if (!(stringarr.length == line.numbers.length || stringarr.length-1 == line.numbers.length)) {
                             console.error("What is happening, these should match")
                         }
 
                         var number = element.indexOf(String.fromCharCode(173))
-                        console.log(lineModulate.convertFlat(number))
-                        console.log(lineModulate(number))
+                        //console.log(lineModulate.test(number))
                         debugger
 
-                        let elementAsArray = self.diacriticChecker(stringarr, 0) // lets work with the 'true' length array
+                        let elementAsArray = lineModulate.diacriticChecker(stringarr, 0) // lets work with the 'true' length array
                         if(lyric[key]){
                             lyric[key] = lyric[key].concat(elementAsArray);
                         } else{
@@ -1012,7 +1016,8 @@
                             }
                         }
                     }
-                });
+                }//}
+                //});
                 // line.phrases.forEach(phrase => {
                 //     //let meta = {}; // chord and number
                 //     // if (phrase['number']) {
@@ -1149,30 +1154,6 @@
                 //     }
                 // });
             },
-            // Params: Array, 0
-            diacriticChecker: function(array, index) {
-                if (!index) {index = 0};
-                if (typeof(array)=='string') {
-                    array = array.split("");
-                }
-                var nextIndex = index + 1
-                if (nextIndex >= array.length) {
-                    return array;
-                }
-                //if ([' ྱ', ' ེ', ' ོ', ].includes(array[nextIndex])){
-                if ([4017, 3962, 3964, 3954].includes((array[nextIndex]).charCodeAt(0))) {
-                    array[index] = array[index].concat(array.splice(nextIndex, 1)[0]);
-                } //else if ([173].includes((array[nextIndex]).charCodeAt(0))) {
-                    // remove our number markers
-                   // console.error("This should be getting split?")
-                    //debugger
-                    //array.splice(index, 1)[0]; 
-                //} 
-                else { // only increase if no diacritic
-                    ++index;
-                }
-                return self.diacriticChecker(array, index);
-            },
             lineEditPopup: function(tag) {
                 // app.panel.create(parameters)
                 // closeByBackdropClick
@@ -1229,7 +1210,7 @@
             updateLine: function(data,tag){
                 if (self.validateTag(tag)){
                     //update line and refresh
-                    var lineArr = self.diacriticChecker(data.split(""), 0)
+                    var lineArr = lineModulate.diacriticChecker(data.split(""), 0)
                     var chordPlacment = numberStartLocations[tag]
 
                     let i = 0

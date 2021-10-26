@@ -1,23 +1,8 @@
-//Currently only support # not . Can extend in future.
-const chords = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
-const flatChords = ["C","D♭","D","E♭","F♭","F","G♭","G","A♭","A","B♭","C♭"];
-
-function transposeChord (chord, steps) {
-  //Check if chord is flat (\u266D - unicode ♭)
-  if (/[A-F]\u266D/.test(chord)) {
-  	chord = convertFlat(chord)
-  }
-  let index = chords.indexOf(chord) + steps;
-  index = index < 0 ? index + 12 :
-          index >= 12 ? index - 12 : index;
-  return chords[index];
-}
 
 //Extracts and replaces a transposed chord from a string ex. Dm7/F# -> D#m7/G
 export default class lineModulate {
     constructor() {
         fetch = fetch;
-        const string = 'hello world';
     }
     lineModulate (line) {
         debugger;
@@ -25,13 +10,15 @@ export default class lineModulate {
             return transposeChord(chord, steps);
         });
     }
-    convertWhole(chord) {
+    test(chord) {
         debugger
         let i = flatChords.indexOf(chord);
         a.chords = [{'chord':'A','index':1}]
         a[key] = 'aaa%aaaa%a'
         return
     }
+    // line: line object including phrases and languages
+    // returns object, with key for each language 'en':{lyrics:"abc",chords['chord','start','len']}
     consolidate(line) {
         debugger
         var newLine = {}
@@ -77,6 +64,7 @@ export default class lineModulate {
             }
         });
 
+        // this for each language key:
         //newLine[key].lyric = 'aaa%aaaa%a'
         //newLine[key].chords = [{'chord':'A','start':0,'len':5}]
 

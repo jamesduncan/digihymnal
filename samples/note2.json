@@ -1,0 +1,28 @@
+
+lines:
+    [
+    {
+        numbers: '3z 3z 6z ',
+        phrases:[
+            { 'chord':'Bm', 'th':'6--', at:'གཙོ་', en:'TRALAA' }
+            {'th':'5z6zrr',at:'བོ།' , en:'hoho' }
+            {'chord':A, 'th':'a3.', at:'ལྷ་', en:'' } 
+            {'th':'6z', at:'ཡི་', en:'aLaaf' }
+            {'th':'5',  at:'ཁྲོད་', en:'fds' }
+            {'th':'4a', at:'དུ་', en:'gr' }
+            {'chord':Bm, 'th':'3z', at:'ཁྱེད་', en:'' }]
+    },
+    {
+        numbers: '3z3z6z6z3z3z1z3za5z5z3z5z2z1z6ca6v6v2z3z2z3xr2x1z7vta6c---s',
+        phrases:[
+            { 'chord':'Bm', 'th':'6--', at:'གཙོ་', en:'TRALAA' }
+            {'th':'5z6zrr',at:'བོ།' , en:'hoho' }
+            {'chord':A, 'th':'a3.', at:'ལྷ་', en:'' }
+            {'th':'6z', at:'ཡི་', en:'aLaaf' }
+            {'th':'5',  at:'ཁྲོད་', en:'fds' }
+            {'th':'4a', at:'དུ་', en:'gr' }
+            {'chord':Bm, 'th':'3z', at:'ཁྱེད་', en:'' }]
+    },
+    
+],
+    

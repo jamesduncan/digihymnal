@@ -1,0 +1,99 @@
+{ 'chord':'Bm', 'number':'6--', at:'གཙོ་', en:'TRALAA' }
+{'number':'5z6zrr',at:'བོ།' , en:'hoho' }
+{'chord':A, 'number':'a3.', at:'ལྷ་', en:'' }
+{'number':'6z', at:'ཡི་', en:'aLaaf' }
+{'number':'5',  at:'ཁྲོད་', en:'fds' }
+{'number':'4a', at:'དུ་', en:'gr' }
+{'chord':Bm, 'number':'3z', at:'ཁྱེད་', en:'' }
+
+
+
+
+{ 'chord':'Bm', 'number':'6--', at:'', en:'' }
+{'number':'5z6zrr',at:'' , en:'' }
+{'chord':A, 'number':'a3.', at:'', en:'' }
+{'number':'6z', at:'', en:'' }
+{'number':'5',  at:'', en:'' }
+{'number':'4a', at:'', en:'' }
+{'chord':Bm, 'number':'3z', at:'', en:'' }
+
+
+{'number':'', at:'', en:'' } <- 'chord':''
+{'number':'', at:'', en:'' }
+{'number':'', at:'', en:'' } <- 'chord':''
+{'number':'', at:'', en:'' }
+{'number':'', at:'', en:'' }
+{'number':'', at:'', en:'' }
+{'number':'', at:'', en:'' } <- 'chord':''
+
+
+
+{}
+{}
+{}
+{}
+{}
+{}
+{}
+
+
+
+[
+{en:'a'},
+{at:'b'},
+{number:'&'},
+{chord:'Em'}
+{chord:'Am'}
+]
+`    EmAm
+   &
+a
+  b     `
+
+If !(chord||number), concat the string until NEXT (chord||number)
+
+            number:
+            number:
+A   A
+m   m chord:    number:
+a   a
+g   z           number:
+i   i           number:
+n   n
+s   g           number:
+ ' '
+g   g chord:    number:
+r   r
+a   a           number:
+c   c
+i   e
+a
+            {number:}
+            {number:
+A   A}
+{m   m chord:    number:
+a   a}
+{g   z           number:}
+{i   i           number:
+n   n}
+{s   g           number:
+ ' '}
+{g   g chord:    number:
+r   r}
+{a   a           number:
+c   c
+i   e
+a}
+
+
+
+
+
+
+
+
+
+
+
+
+

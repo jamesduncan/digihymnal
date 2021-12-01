@@ -222,7 +222,7 @@
     var lastLine
     var firstLine
     var numberStartLocations
-    var numberArray
+    var numberArray = [];
     import DataManager from '../data/dataManager';
     import Song from '../data/song';
     import LineModulate from '../data/lineModulate';
@@ -385,7 +385,6 @@
                 } else {
                     let newData = song; 
                     var metaIndex = 0 
-                    numberArray = []
                     while ( metaIndex < newData.lyrics.verses[verseId].lines[lineId].phrases.length ){
                         let id = ('.number').concat(metaIndex)
                         let number = self.$(id)[0]//.value // self.$('.number1').firstElementChild.value
@@ -952,7 +951,15 @@
                 // 
                 var lyric = {};
                 numberStartLocations = {}; //  {'en':[1,5,12]}
-                var chordList = [];           // tooltips: [ {to: function() {return "2<br/>A";} } ]
+                //var noteList = [];           // tooltips: [ {to: function() {return "2<br/>A";} } ]
+                var noteList = [];  
+                line.numbers.forEach(element => {
+                    noteList.push({
+                        'to': function() {
+                            return `${element}`
+                        }
+                    })
+                });
 
                 // init each language
                 languages.forEach(languageCode => {
@@ -965,121 +972,62 @@
                 //
                 for (const key in lineModulated) {
                     if (Object.hasOwnProperty.call(lineModulated, key)) {
+                        // we're working with a single language here
+                        // combining the whole line together (as if there were no chords)
+                        // then splitting it back out as if the numbers were chords
                         const lang = lineModulated[key];
                         const element = lineModulated[key];
                         const languageLineCombinedLyric = lang.lyric;
                         const languageLineCombinedChordLocations = lang.chords;
 
-                        // TODO we need to split each of these in relation to position of 173
-                        // use parseText???
-                        parsed = parseText.remove(lang.lyric)
-                        parsed.numberPositions
+                        // we need to split each of these in relation to position of 173
+                        // use parseText
+                        var parsed = parseText.remove(lang.lyric)
+                        console.log(parsed)
                         // For Each then we need to find the true length of non diacritic elements
 
                         //let stringarr = ((typeof element == 'string') ? element.split("") : element[0].split(""));
-                        let stringarr = ( languageLineCombinedLyric.split( String.fromCharCode(173) ) );
+                        //let stringarr = ( languageLineCombinedLyric.split( String.fromCharCode(173) ) );
+                        let stringarr = parsed.splitLyrics
                         // 'aaa','bbb','ccccc'
                         if (!(stringarr.length == line.numbers.length || stringarr.length-1 == line.numbers.length)) {
                             console.error("What is happening, these should match")
                         }
 
-                        var number = element.indexOf(String.fromCharCode(173))
-                        //console.log(lineModulate.test(number))
-                        debugger
+                        let elementAsArray = lineModulate.diacriticChecker(parsed.lyric, 0) // lets work with the 'true' length array
+                        lyric[key] = elementAsArray;
 
-                        let elementAsArray = lineModulate.diacriticChecker(stringarr, 0) // lets work with the 'true' length array
-                        if(lyric[key]){
-                            lyric[key] = lyric[key].concat(elementAsArray);
-                        } else{
-                            lyric[key] = elementAsArray;
-                        }
-                        var numberEndIndex;
-                        if (firstPhrase) {
-                            numberStartLocations[key] = [];
-                            numberEndIndex = 0;
-                        } else {
-                            numberEndIndex = numberStartLocations[key].length;
-                        }
+                        numberStartLocations[key] = parsed.numberStartLocations;
+                        //var numberEndIndex;
+                        // if (firstPhrase) {
+                        //     numberStartLocations[key] = [];
+                        //     numberEndIndex = 0;
+                        // } else {
+                        //     numberEndIndex = numberStartLocations[key].length;
+                        // }
 
-                        if (number == -1 && firstPhrase) {// if first phrase skip it,
-                            // if first, make a blank number area
-                            numberStartLocations[key].push(elementAsArray.length);
-                        } else if (number == -1) { // else there is no number, concat with the last one  
-                            // if there is no number, concat language array to last
-                            numberStartLocations[key][numberEndIndex - 1] += elementAsArray.length;
-                        } else { // totally normal
-                            // if this has a number, start adding number start locations
-                            if (numberEndIndex == 0) {
-                                numberStartLocations[key].push(elementAsArray.length);
-                            } else {
-                                numberStartLocations[key].push(numberStartLocations[key][numberEndIndex - 1] + elementAsArray.length);
-                            }
-                        }
+                        // if (number == -1 && firstPhrase) {// if first phrase skip it,
+                        //     // if first, make a blank number area
+                        //     numberStartLocations[key].push(elementAsArray.length);
+                        // } else if (number == -1) { // else there is no number, concat with the last one  
+                        //     // if there is no number, concat language array to last
+                        //     numberStartLocations[key][numberEndIndex - 1] += elementAsArray.length;
+                        // } else { // totally normal
+                        //     // if this has a number, start adding number start locations
+                        //     if (numberEndIndex == 0) {
+                        //         numberStartLocations[key].push(elementAsArray.length);
+                        //     } else {
+                        //         numberStartLocations[key].push(numberStartLocations[key][numberEndIndex - 1] + elementAsArray.length);
+                        //     }
+                        // }
                     }
-                }//}
-                //});
-                // line.phrases.forEach(phrase => {
-                //     //let meta = {}; // chord and number
-                //     // if (phrase['number']) {
-                //     //     meta.number = phrase['number']
-                //     //     // push to num list
-                //     //     chordList.push({
-                //     //         'to': function() {
-                //     //             return `${meta.number}`
-                //     //         }
-                //     //     })
-                //     // }
-                //     for (const key in phrase) {
-                //         if (Object.hasOwnProperty.call(phrase, key) && key != 'chord' && key != 'number') {
-                //             const element = phrase[key];
-
-
-                //             // TODO we need to split each of these in relation to position of 173
-                //             // For Each then we need to find the true length of non diacritic elements
-
-                //             var number = element.indexOf(String.fromCharCode(173))
-                //             console.log(lineModulate.convertFlat(number))
-                //             console.log(lineModulate(number))
-                //             debugger
-
-                //             let stringarr = ((typeof element == 'string') ? element.split("") : element[0].split(""));
-                //             let elementAsArray = self.diacriticChecker(stringarr, 0) // lets work with the 'true' length array
-                //             if(lyric[key]){
-                //                 lyric[key] = lyric[key].concat(elementAsArray);
-                //             } else{
-                //                 lyric[key] = elementAsArray;
-                //             }
-                //             var numberEndIndex;
-                //             if (firstPhrase) {
-                //                 numberStartLocations[key] = [];
-                //                 numberEndIndex = 0;
-                //             } else {
-                //                 numberEndIndex = numberStartLocations[key].length;
-                //             }
-
-                //             if (number == -1 && firstPhrase) {// if first phrase skip it,
-                //                 // if first, make a blank number area
-                //                 numberStartLocations[key].push(elementAsArray.length);
-                //             } else if (number == -1) { // else there is no number, concat with the last one  
-                //                 // if there is no number, concat language array to last
-                //                 numberStartLocations[key][numberEndIndex - 1] += elementAsArray.length;
-                //             } else { // totally normal
-                //                 // if this has a number, start adding number start locations
-                //                 if (numberEndIndex == 0) {
-                //                     numberStartLocations[key].push(elementAsArray.length);
-                //                 } else {
-                //                     numberStartLocations[key].push(numberStartLocations[key][numberEndIndex - 1] + elementAsArray.length);
-                //                 }
-                //             }
-                //         }
-                //     }
-                //     firstPhrase = false;
-                // });
-                //console.log(numberStartLocations)
+                }
 
                 var pipFormatter = {}; //var pipFormats = {'0':'abc', '1':'pqr', '2':'xyz'};
                 var range = {}; // {min/max/percentage: [increment, 1]}
 
+                // setup pipFormatter
+                // we want to group diacritic characters together
                 for (const tag in lyric) {
                     pipFormatter[tag] = {};
                     range[tag] = {};
@@ -1104,18 +1052,19 @@
                             };
                             pipFormatter[tag][i.toString()] = "";
                             range[tag]['max'] = [i, 1];
-                            self.makeSlider(tag, pipFormatter[tag], range[tag], numberStartLocations[tag], chordList)
+                            self.makeSlider(tag, pipFormatter[tag], range[tag], numberStartLocations[tag], noteList)
                         }
                     }
                 };
             },
             makeSlider: function(tag, pipFormats, lyricRange, numberStartLocations, chordDataObject) {
-                if(numberStartLocations.length != chordDataObject.length){
-                    numberStartLocations.pop()
-                } else { // is new data
-                    numberStartLocations.splice(0,0,'')
-                    numberStartLocations.pop()
-                }
+                // if(numberStartLocations.length != chordDataObject.length){
+                //     debugger
+                //     numberStartLocations.pop()
+                // } else { // is new data
+                //     numberStartLocations.splice(0,0,'')
+                //     numberStartLocations.pop()
+                // }
                 while(chordDataObject.length > numberStartLocations.length){
                     numberStartLocations.push(lyricRange.max[0])
                 }

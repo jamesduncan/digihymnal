@@ -81,8 +81,13 @@ export default class lineModulate {
         }
         //if ([' ྱ', ' ེ', ' ོ', ].includes(langArray[nextIndex])){
         // or if phrase is lead with a number marker
-        if ( ([4017, 3962, 3964, 3954, 173].includes((langArray[nextIndex]).charCodeAt(0))) || ( 173 === (langArray[index]).charCodeAt(0) ) ){
+        if ( [4017, 3962, 3964, 3954, 173].includes((langArray[nextIndex]).charCodeAt(0) )){
+            // this grabs the next, don't iterate the index
             langArray[index] = langArray[index].concat(langArray.splice(nextIndex, 1)[0]);
+        } else if ( 173 === (langArray[index]).charCodeAt(0) ) { 
+            // this looks at current index. Must iterate if one is caught
+            langArray[index] = langArray[index].concat(langArray.splice(nextIndex, 1)[0]);
+            ++index;
         } else { // only increase if no diacritic
             ++index;
         }
@@ -100,13 +105,7 @@ export default class lineModulate {
         //if ([' ྱ', ' ེ', ' ོ', ].includes(langArray[nextIndex])){
         if ([4017, 3962, 3964, 3954].includes((langArray[nextIndex]).charCodeAt(0))) {
             langArray[index] = langArray[index].concat(langArray.splice(nextIndex, 1)[0]);
-        } //else if ([173].includes((langArray[nextIndex]).charCodeAt(0))) {
-            // remove our number markers
-           // console.error("This should be getting split?")
-            //debugger
-            //langArray.splice(index, 1)[0]; 
-        //} 
-        else { // only increase if no diacritic
+        } else { 
             ++index;
         }
         return this.diacriticChecker(langArray, index);

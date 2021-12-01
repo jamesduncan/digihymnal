@@ -395,13 +395,18 @@
                         } 
                         metaIndex++;
                     }
+                    //debugger
+                    // TODO set the number array correctly
+                    //if (numberArray === []){
+                        numberArray = newData.lyrics.verses[verseId].lines[lineId].numbers;
+                    //}
                     
-                    var newLineCombined = [];
+                    var newPhrasesCombined = [];
                     languages.forEach(langTag => { // selected language
-                        newLineCombined = lineModulate.combineLines(newLineCombined, self.parseLanguageText(langTag));
+                        newPhrasesCombined = lineModulate.combineLines(newPhrasesCombined, self.parseLanguageText(langTag));
                     });  
 
-                    newData.lyrics.verses[verseId].lines[lineId].phrases = newLineCombined;
+                    newData.lyrics.verses[verseId].lines[lineId].phrases = newPhrasesCombined;
                     newData.lyrics.verses[verseId].lines[lineId].numbers = numberArray;
                     // // this only updates the numbers, **if the nouisliders were not modified** this would be a fast way of updating just the notes
                     // var metaIndex = 0;
@@ -422,7 +427,10 @@
                     // };
                     
                     // save
-                    line = {'phrases':newLineCombined};
+                    line = {
+                        'phrases':newPhrasesCombined,
+                        'numbers':numberArray
+                    };
                     song = newData;
                     app.song = newData;
                     //songCollection.db.setItem(songId, newData);
@@ -474,7 +482,9 @@
                         var first = true;
                         line.phrases.forEach(phrase => {
                             if (Object.hasOwnProperty.call(phrase, tag)) {
-                                let arr = lineModulate.diacriticCheckerChord(phrase[tag], 0);
+                                // let cleanLyric = lineModulate.hiddenStringCleaner(phrase[tag]); // this doesn't work?
+                                let cleaner = phrase[tag].replaceAll(String.fromCharCode(173), '')
+                                let arr = lineModulate.diacriticCheckerChord(cleaner, 0);
                                 languageArr = languageArr.concat(arr)
                                 languageLen += arr.length
                             } 
@@ -501,6 +511,12 @@
                         console.error({"no line data for tag":tag});
                     }
                 }
+                // // TODO if there are to many number markers run this
+                // for (let index = 0; index < languageArr.length; index++) {
+                //     if (languageArr[index].includes(String.fromCharCode(173))){
+                //         console.error("found hidden char, should all be stripped")
+                //     }
+                // }
 
                 if (typeof insertArray === 'string'){// there's only the one number 
                     let numberLoc = parseInt(insertArray)
@@ -517,20 +533,19 @@
                     // from nouislider
                     // insertArray
                     //if(tag == 'en'){debugger}
-                    var chordMapi = 0
-                    var first = true;
-
-                    
                     numberMap.forEach((element) => {
                         if ( element < languageArr.length ){
-                            //languageArr[element] = String.fromCharCode(173).concat(languageArr[element]) ; // 
-                            languageArr[element] = "%".concat(languageArr[element]) ; 
+                            languageArr[element] = String.fromCharCode(173).concat(languageArr[element]) ; // 
+                            //languageArr[element] = "%".concat(languageArr[element]) ; 
                         } else { //put it into last
-                            languageArr.push("%".concat(String.fromCharCode(173)))
+                            //languageArr.push("%".concat(String.fromCharCode(173)))
+                            languageArr.push(String.fromCharCode(173))
                         }
                     });
                 }
                 if (chordMap){
+                    var first = true;
+                    var chordMapi = 0;
                     while(chordMap[chordMapi]){ 
                         let currentChord = chordMap[chordMapi];
                         let phraseLen = ( chordMap[chordMapi+1]? (chordMap[chordMapi+1].len-currentChord.len) : languageArr.length ); // sub next len from curr lent to get expected strong. if no next get whole string
@@ -752,28 +767,6 @@
                         lyric[key] = elementAsArray;
 
                         numberStartLocations[key] = parsed.numberStartLocations;
-                        //var numberEndIndex;
-                        // if (firstPhrase) {
-                        //     numberStartLocations[key] = [];
-                        //     numberEndIndex = 0;
-                        // } else {
-                        //     numberEndIndex = numberStartLocations[key].length;
-                        // }
-
-                        // if (number == -1 && firstPhrase) {// if first phrase skip it,
-                        //     // if first, make a blank number area
-                        //     numberStartLocations[key].push(elementAsArray.length);
-                        // } else if (number == -1) { // else there is no number, concat with the last one  
-                        //     // if there is no number, concat language array to last
-                        //     numberStartLocations[key][numberEndIndex - 1] += elementAsArray.length;
-                        // } else { // totally normal
-                        //     // if this has a number, start adding number start locations
-                        //     if (numberEndIndex == 0) {
-                        //         numberStartLocations[key].push(elementAsArray.length);
-                        //     } else {
-                        //         numberStartLocations[key].push(numberStartLocations[key][numberEndIndex - 1] + elementAsArray.length);
-                        //     }
-                        // }
                     }
                 }
 

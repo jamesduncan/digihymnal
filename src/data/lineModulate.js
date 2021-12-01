@@ -70,6 +70,138 @@ export default class lineModulate {
 
         return newLine
     }
+
+    combineLines (oldLine, newLine) {
+        if (oldLine.length === 0){
+            return newLine;
+        }
+        debugger
+        var iNew = 0;
+        var iOld = 0;
+        var newLineArr = [];
+        while( newLine[iNew] || oldLine[iOld] ){
+            let newPhrase;
+            let i = iNew < iOld ? iNew : iOld // i is smallest
+            // let oldIsMetaless =  ( !Object.hasOwnProperty.call(oldLine[i], 'number') && !Object.hasOwnProperty.call(oldLine[i], 'chord') );
+            // let newIsMetaless = ( !Object.hasOwnProperty.call(newLine[i], 'number') && !Object.hasOwnProperty.call(newLine[i], 'chord') );
+            var oldChordless = ( !Object.hasOwnProperty.call(oldLine[iOld], 'number') );
+            var oldNumberless = ( !Object.hasOwnProperty.call(oldLine[iOld], 'chord') );
+            var newChordless = ( !Object.hasOwnProperty.call(newLine[iNew], 'number') );
+            var newNumberless = ( !Object.hasOwnProperty.call(newLine[iNew], 'chord') );
+            if (i == 0){ //  first phrase checker
+                let oldIsMetaless =  oldChordless && oldNumberless
+                let newIsMetaless = newChordless&&newNumberless
+                if (oldIsMetaless && newIsMetaless){
+                    // they match already
+                    newPhrase = {
+                        ...oldLine[i],
+                        ...newLine[i]
+                    };
+                    iOld++;
+                    iNew++;
+                } else if (oldIsMetaless){
+                    newPhrase = newLine[i];
+                    for (const key in oldLine[i]) {
+                        if (Object.hasOwnProperty.call(oldLine[i], key) && key != 'chord' && key != 'number') {
+                            const element = oldLine[i][key];
+                            // only insert a blank, data will be coped in next iteration
+                            newPhrase[key] = ''
+                        }
+                    }
+                    // splice(start, deleteCount, item1)
+                    // push the index up so it's used in next iteration
+                    oldLine.splice(0,0,newPhrase)
+                    iOld++;
+                } else if (newIsMetaless){
+                    // same as this ^^
+                    newPhrase = oldLine[i];
+                    for (const key in newLine[i]) {
+                        if (Object.hasOwnProperty.call(newLine[i], key) && key != 'chord' && key != 'number') {
+                            const element = newLine[i][key];
+                            newPhrase[key] = ''
+                        }
+                    }
+                    iNew++;
+                    newLine.splice(0,0,newPhrase)
+                }
+            } else {
+                // If in middle, if no language tag for display language, it should collapse backwards
+                newLine[iNew] //{number:1}
+                oldLine[iOld] //{en:'hi', number:1,chord:A }
+                // false == false && true == true
+                if (oldChordless == newChordless && oldNumberless == newNumberless){
+                    newPhrase = {
+                        ...oldLine[iOld],
+                        ...newLine[iNew]
+                    };
+                    iOld++;
+                    iNew++;
+                } else {
+                    
+                    if (oldChordless && !oldNumberless && !newChordless && !newNumberless){
+                        //
+                        newPhrase = oldLine[iOld];
+                        delete newLine[iNew].chord; // move number back
+                        iOld++;
+                    } else if (newChordless && !newNumberless && !oldChordless && !oldNumberless){
+                        //
+                        newPhrase = newLine[iNew];
+                        delete oldLine[iOld].chord; // move number back
+                        iNew++;
+                    } else if (!oldChordless && oldNumberless && !newChordless && !newNumberless){
+                        //
+                        newPhrase = oldLine[iOld];
+                        delete newLine[iNew].number; // move chord back
+                        iOld++;
+                    } else if (!newChordless && newNumberless && !oldChordless && !oldNumberless){
+                        //
+                        newPhrase = newLine[iNew];
+                        delete oldLine[iOld].number; // move chord back
+                        iNew++;
+                    } else {
+                        if ( iNew < iOld ){
+                            newPhrase = newLine[iNew];
+                            iNew++;
+                        } else if ( iNew > iOld ){
+                            newPhrase = oldLine[iOld];
+                            iOld++;
+                        }else {
+                            debugger
+                            alert("Hello! I am an alert box!!");
+                            throw new Error;
+                            console.error("paradox, who wins?")
+                            if ( newLine[iNew].number === oldLine[iOld+1].number ){
+                                delete oldLine[iOld+1].number
+                                //delete newLine[iNew].chord
+                                newPhrase = newLine[iNew];
+                                iNew++;
+                                //iOld++;
+                            } else if ( oldLine[iOld].number == newLine[iNew+1].number ){
+                                //delete oldLine[iOld].chord
+                                delete newLine[iNew].number
+                                newPhrase = oldLine[iOld];
+                                iOld++;
+                            } else if ( newLine[iNew].chord == oldLine[iOld].chord ){
+                                debugger
+                                delete oldLine[iOld].number
+                                delete newLine[iNew].number
+                                newPhrase = {
+                                    ...oldLine[iOld],
+                                    ...newLine[iNew]
+                                };
+                                iOld++;
+                                iNew++;
+                            }
+                        }
+                    }
+                }
+            }
+            newLineArr.push(newPhrase);
+            
+        }
+        return newLineArr
+    }
+
     diacriticCheckerChord (langArray, index) {
         if (!index) {index = 0};
         if (typeof(langArray)=='string') {

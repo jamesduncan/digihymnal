@@ -406,8 +406,8 @@
             return {
                 loading: true,
                 savable: false,
-                showNumber: false,
-                showChord: false
+                showNumber: true,
+                showChord: true
             }
         },
         // Page Events
@@ -438,7 +438,7 @@
                         songCollection.get(songId).then(result => {
                             
                             song = result;
-                            // TEMPORARY CODE, remove number trait from phrases and put on line
+                            // TODO TEMPORARY CODE, remove number trait from phrases and put on line
                             song.lyrics.verses.forEach(verse => {
                                 verse.lines.forEach(line => {
                                     var numbers = []

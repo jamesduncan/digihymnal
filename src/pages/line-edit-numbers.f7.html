@@ -67,7 +67,7 @@
                             <div class="menu-item">
                                 <div class="menu-item-content icon-only">
                                     <div class="menu-item-content">
-                                        <a @click="addPhrase" class="col button">
+                                        <a @click="addNote" class="col button">
                                             <i class="text-color-gray fas fa-plus"></i>
                                         </a>
                                     </div>
@@ -117,7 +117,7 @@
                             <div class="verse">
                                 <div class="line" id="edit-line">
                                     <!-- -->
-                                    {{ printEachNumber @root.line }}
+                                    {{ printEachNumber @root.line.numbers }}
                                     <!-- -->
                                     {{ printLyric @root.line}}
                                 </div>
@@ -435,12 +435,15 @@
                     app.song = newData;
                     //songCollection.db.setItem(songId, newData);
                     self.savableUpdate(false);
-                    self.clearSliders();
+                    //self.clearSliders();
+
+                    // TODO  when there are 3+ languages sliders get nuked somewhere starting here
                     self.$setState({
                         loading: false,
                         song: newData,
                         line: newData.lyrics.verses[verseId].lines[lineId]
                     }, () => {
+                        // <endTODO>The slider elements are destroyed by now
                         self.displayLyricSliders();
                     });
                     // send line changes to server
@@ -469,10 +472,7 @@
                         console.error({"no div for tag":tag})
                     }
                 }
-                var numberMap = [];
-                insertArray.forEach(element => {
-                    numberMap.push( parseInt(element) );
-                });
+                
                 if(!languageArr){ // get from global var
                     try {
                         languageArr = []
@@ -511,7 +511,7 @@
                         console.error({"no line data for tag":tag});
                     }
                 }
-                // // TODO if there are to many number markers run this
+                // // tool: if there are to many number markers run this
                 // for (let index = 0; index < languageArr.length; index++) {
                 //     if (languageArr[index].includes(String.fromCharCode(173))){
                 //         console.error("found hidden char, should all be stripped")
@@ -522,6 +522,12 @@
                     let numberLoc = parseInt(insertArray)
                     languageArr[numberLoc] = String.fromCharCode(173).concat(languageArr[numberLoc]) 
                 } else {
+                    // array of strings to array of useable indexes
+                    var numberMap = [];
+                    insertArray.forEach(element => {
+                        numberMap.push( parseInt(element) );
+                    });
+
                     var firstChord = true;
 
                     var i = 0;
@@ -624,6 +630,36 @@
                     verseLabel: verseLabel,
                     lastVerse: lastVerse,
                     line: song.lyrics.verses[verseId].lines[lineId]
+                }, () => {
+                    self.displayLyricSliders()
+                });
+            },
+            addNote: function(e) {
+                let newData = song
+                // At index, add one element
+
+                var phraseArray = newData.lyrics.verses[verseId].lines[lineId].phrases
+                var workingIndex = phraseArray.length - 1; // get last index
+
+                for (const tag in phraseArray[workingIndex]) {
+                    if (Object.hasOwnProperty.call(phraseArray[workingIndex], tag) && tag != 'chord') {
+                        phraseArray[workingIndex][tag] = (phraseArray[workingIndex][tag]).concat(String.fromCharCode(173))
+                    }
+                }
+                
+
+                newData.lyrics.verses[verseId].lines[lineId].phrases = phraseArray
+                newData.lyrics.verses[verseId].lines[lineId].numbers.push('1');
+                app.song = newData;
+                self.savableUpdate(true);
+                //songCollection.db.setItem(songId, newData)
+                song = newData;
+                line = song.lyrics.verses[verseId].lines[lineId];
+                self.clearSliders()
+                self.$setState({
+                    loading: false,
+                    song: newData,
+                    line: newData.lyrics.verses[verseId].lines[lineId]
                 }, () => {
                     self.displayLyricSliders()
                 });
@@ -833,9 +869,28 @@
                     // no chords on this song
                     options.start= [lyricRange.max[0]];
                 }
-                //  Make the slider
-                var slider = self.$(`.slider-${tag}`)[0];  
-                noUiSlider.create(slider, options);
+                //
+                var slider = self.$(`.slider-${tag}`)[0];
+                if (slider) {
+                    if (slider.noUiSlider) {
+                        // If already exists, clear it
+                        slider.noUiSlider.destroy();
+                    }   // Make the slider
+                    console.log ("working: " + tag )
+                    noUiSlider.create(slider, options);
+                } else {
+                    console.error("no slider BEFORE destroy")
+                    debugger
+                }
+                if (slider == undefined) {
+                    console.log ("broken: " + tag)
+                    slider = self.$(`#sliderContainer-${tag}`)[0];  
+                    console.log (slider)
+                    // var slider = self.$(`.slider-${tag}`)[0];  
+                    debugger
+                } else {
+                    // working fine
+                }
                 // noUiSlider.create(slider, {
                 //     start: numberStartLocations,
                 //     tooltips: chordDataObject,

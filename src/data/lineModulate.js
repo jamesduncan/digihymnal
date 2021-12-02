@@ -3,6 +3,7 @@
 export default class lineModulate {
     constructor() {
         fetch = fetch;
+        const splitChar = String.fromCharCode(173);
     }
     lineModulate (line) {
         debugger;
@@ -20,7 +21,7 @@ export default class lineModulate {
     // line: line object including phrases and languages
     // returns object, with key for each language 'en':{lyrics:"abc",chords['chord','start','len']}
     consolidate(line) {
-        debugger
+        //debugger
         var newLine = {}
         line.phrases.forEach((phrase,phraseIndex) => {
             if (Object.hasOwnProperty.call(phrase, 'chord')) {
@@ -41,7 +42,7 @@ export default class lineModulate {
                     let stringarr = ((typeof element != 'array') ? element.split("") : element[0].split("") );
                     let elementArr = this.diacriticCheckerChord(stringarr, 0) // lets work with the 'true' length array
                     let elementTrueLen = elementArr.length
-                    //chordEndIndex = newLine[key].chords.length;
+                    // chordEndIndex = newLine[key].chords.length;
 
                     if (!thisChord && phraseIndex == 0) { // if first, make a blank chord area
                         newLine[key].chords.push({'chord':'','start':0,'len':elementTrueLen});
@@ -75,22 +76,20 @@ export default class lineModulate {
         if (oldLine.length === 0){
             return newLine;
         }
-        debugger
+        
         var iNew = 0;
         var iOld = 0;
         var newLineArr = [];
         while( newLine[iNew] || oldLine[iOld] ){
             let newPhrase;
             let i = iNew < iOld ? iNew : iOld // i is smallest
-            // let oldIsMetaless =  ( !Object.hasOwnProperty.call(oldLine[i], 'number') && !Object.hasOwnProperty.call(oldLine[i], 'chord') );
-            // let newIsMetaless = ( !Object.hasOwnProperty.call(newLine[i], 'number') && !Object.hasOwnProperty.call(newLine[i], 'chord') );
             var oldChordless = ( !Object.hasOwnProperty.call(oldLine[iOld], 'number') );
-            var oldNumberless = ( !Object.hasOwnProperty.call(oldLine[iOld], 'chord') );
             var newChordless = ( !Object.hasOwnProperty.call(newLine[iNew], 'number') );
-            var newNumberless = ( !Object.hasOwnProperty.call(newLine[iNew], 'chord') );
-            if (i == 0){ //  first phrase checker
-                let oldIsMetaless =  oldChordless && oldNumberless
-                let newIsMetaless = newChordless&&newNumberless
+            
+            //  first phrase checker
+            if (i == 0){ 
+                let oldIsMetaless =  oldChordless //&& oldNumberless
+                let newIsMetaless = newChordless//&&newNumberless
                 if (oldIsMetaless && newIsMetaless){
                     // they match already
                     newPhrase = {
@@ -125,11 +124,9 @@ export default class lineModulate {
                     newLine.splice(0,0,newPhrase)
                 }
             } else {
-                // If in middle, if no language tag for display language, it should collapse backwards
                 newLine[iNew] //{number:1}
                 oldLine[iOld] //{en:'hi', number:1,chord:A }
-                // false == false && true == true
-                if (oldChordless == newChordless && oldNumberless == newNumberless){
+                if (oldChordless == newChordless ){
                     newPhrase = {
                         ...oldLine[iOld],
                         ...newLine[iNew]
@@ -138,26 +135,24 @@ export default class lineModulate {
                     iNew++;
                 } else {
                     
-                    if (oldChordless && !oldNumberless && !newChordless && !newNumberless){
+                    if (oldChordless && !newChordless ){
                         //
+                        console.error("I don't think this is supposed to happen")
                         newPhrase = oldLine[iOld];
                         delete newLine[iNew].chord; // move number back
                         iOld++;
-                    } else if (newChordless && !newNumberless && !oldChordless && !oldNumberless){
+                        debugger
+                    } else if (newChordless  && !oldChordless ){
                         //
+                        console.error("I don't think this is supposed to happen")
                         newPhrase = newLine[iNew];
                         delete oldLine[iOld].chord; // move number back
                         iNew++;
-                    } else if (!oldChordless && oldNumberless && !newChordless && !newNumberless){
+                        debugger
+                    } else if (!oldChordless && !newChordless ){
                         //
-                        newPhrase = oldLine[iOld];
-                        delete newLine[iNew].number; // move chord back
-                        iOld++;
-                    } else if (!newChordless && newNumberless && !oldChordless && !oldNumberless){
-                        //
-                        newPhrase = newLine[iNew];
-                        delete oldLine[iOld].number; // move chord back
-                        iNew++;
+                        console.error("I don't think this is supposed to happen")
+                        debugger
                     } else {
                         if ( iNew < iOld ){
                             newPhrase = newLine[iNew];
@@ -168,30 +163,8 @@ export default class lineModulate {
                         }else {
                             debugger
                             alert("Hello! I am an alert box!!");
-                            throw new Error;
                             console.error("paradox, who wins?")
-                            if ( newLine[iNew].number === oldLine[iOld+1].number ){
-                                delete oldLine[iOld+1].number
-                                //delete newLine[iNew].chord
-                                newPhrase = newLine[iNew];
-                                iNew++;
-                                //iOld++;
-                            } else if ( oldLine[iOld].number == newLine[iNew+1].number ){
-                                //delete oldLine[iOld].chord
-                                delete newLine[iNew].number
-                                newPhrase = oldLine[iOld];
-                                iOld++;
-                            } else if ( newLine[iNew].chord == oldLine[iOld].chord ){
-                                debugger
-                                delete oldLine[iOld].number
-                                delete newLine[iNew].number
-                                newPhrase = {
-                                    ...oldLine[iOld],
-                                    ...newLine[iNew]
-                                };
-                                iOld++;
-                                iNew++;
-                            }
+                            throw new Error;
                         }
                     }
                 }

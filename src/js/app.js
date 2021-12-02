@@ -49,7 +49,7 @@ Template7.registerHelper('printLyric', function(line) {
     var results = '<br><br/><br /><br  />'
     for (const key in line.phrases[0]) {
       if (key != "chord" && key != "number") { 
-        results = results.concat(`<div  href="#" class="button button-small item-link edit-phrase" style="padding: 5px" @click="lineEditPopup('${key}')">edit ${key}</div><div id="sliderContainer${key}" style="padding: 55px"><div id="slider-${key}" class="slider-${key}"></div></div>`)
+        results = results.concat(`<div  href="#" class="button button-small item-link edit-phrase" style="padding: 5px" @click="lineEditPopup('${key}')">edit ${key}</div><div id="sliderContainer-${key}" style="padding: 55px"><div id="slider-${key}" class="slider-${key}"></div></div>`)
       }
     }
     return results;
@@ -90,22 +90,22 @@ Template7.registerHelper('printEachPhrase', function(line, languages) {
 })
 // print all numbers
 // (parentObject)
-Template7.registerHelper('printEachNumber', function(line) {
-    console.log(line)
-    if (line === undefined) {
+Template7.registerHelper('printEachNumber', function(numbers) {
+    console.log(numbers)
+    if (numbers === undefined) {
         console.error('undefined line')
         return "";
     }
     var results = ''
     //
     results = results.concat(`<div class="line metadata">`)
-    line.phrases.forEach((phrase, index) => {
+    numbers.forEach((number, index) => {
         results = results.concat(`<div class="phrase metadata phraseMetadata"> `)
-        if(phrase["number"]) {
-                if (phrase["number"]) {
-                    results = results.concat(`<div class="number ${index}"><div class="item-input-wrap"><input class="number${index}" type="text" value="${phrase["number"]}"></div></div>`)
+        if(number) {
+                if (number) {
+                    results = results.concat(`<div class="number ${index} number-${index}"><div class="item-input-wrap"><input class="number${index}" type="text" value="${number}"></div></div>`)
                 } else {
-                    results = results.concat(`<div class="number ${index}"><div class="item-input-wrap"><input class="number${index}" type="text" placeholder=""></div></div>`)
+                    results = results.concat(`<div class="number ${index} number-${index}"><div class="item-input-wrap"><input class="number${index}" type="text" placeholder=""></div></div>`)
                 }
             }
             results = results.concat('</div>');
@@ -236,6 +236,11 @@ Template7.registerHelper('printLine', function(dataObjectLine, language1, showCh
     var numberIndex = 0
 
     dataObjectLine.phrases.forEach( phrase => {
+        // all phrases but first Must have chord
+        // all phrases MAY have number (we only check if bool is passed)
+        // a phrase is a mini-line
+        // a phrase does not Have to start with a number
+        // the last number in a phrase will include the rest of the lyrics in that phrase.
         var phraseHtml = phraseHtmlTemplate;
         
         if ( phrase.chord && showChords){
@@ -245,33 +250,33 @@ Template7.registerHelper('printLine', function(dataObjectLine, language1, showCh
 
         if ( hasNum ) {
             var lyric1 = phrase[language1];
-            var lyric2 = phrase[language2];
             var lyric1NumArr = getAllIndexes(lyric1, String.fromCharCode(173)) //  invisible character
             
-            
             if (lyric1NumArr.length && showNumbers){
-                var lastnum1 = 0
+                if (typeof language2 != 'undefined'){
+                    var lyric2 = phrase[language2];
+                    var lyric2NumArr = getAllIndexes(lyric2, String.fromCharCode(173))
+                }
                 
                 lyric1NumArr.forEach( (number,index) => {
-                    phraseHtml += `<div class="number num${numberIndex}">${numberArray.slice(0,1)}</div>`
+                    phraseHtml += `<div class="number num${numberIndex}">${numberArray.slice(numberIndex,numberIndex+1)}</div>`
                     
                     var lyric = `<div class="lyric ${language1}">`
-                    number = (index != lyric1NumArr.length-1 ) ? number : phrase[language1].length
-                    let miniPhrase = phrase[language1].slice(0,number-lastnum1)
-                    miniPhrase = miniPhrase.replaceAll(String.fromCharCode(173), '')//  invisible character
+                    let next = ( lyric1NumArr[index+1] ? lyric1NumArr[index+1] : lyric1.length ); // end index of current miniphrase, either next number or all the remaining lyrics
+                    let miniPhrase = lyric1.slice( number,next )
+                    // miniPhrase = miniPhrase.replaceAll(String.fromCharCode(173), '') // remove invisible character
                     lyric += forceSpace(miniPhrase)
                     lyric += `</div>`
                     phraseHtml += lyric
                     //
                     if (typeof language2 != 'undefined'){
-                        var lastnum2 = 0
-                        var lyric2NumArr = getAllIndexes(lyric2, String.fromCharCode(173))
                         // miniPhrase = lyric2NumArr[index] ? phrase[language2].slice(0,lyric2NumArr[index]-lastnum2) : phrase[language2]
                         // miniPhraseLen = lyric2NumArr[index]? lyric2NumArr[index]-lastnum2 : phrase[language2].length
-                        let miniPhraseLen = (index != lyric1NumArr.length-1 && lyric2NumArr[index]) ? lyric2NumArr[index]-lastnum2 : phrase[language2].length
+                        let next = ( lyric2NumArr[index+1] ? lyric2NumArr[index+1] : lyric2.length ); // end index of current miniphrase, either next number or all the remaining lyrics
+                        // let miniPhraseLen = (lyric2NumArr[index] < lyric2.length && lyric2NumArr[index]) ? lyric2NumArr[index]-lastnum2 : lyric2.length
                         lyric = `<div class="lyric ${language2}">`
-                        miniPhrase = phrase[language2].slice(0,miniPhraseLen)
-                        miniPhrase = miniPhrase.replaceAll(String.fromCharCode(173), '')
+                        miniPhrase = lyric2.slice(lyric2NumArr[index],next)
+                        //miniPhrase = miniPhrase.replaceAll(String.fromCharCode(173), '')
                         lyric += forceSpace(miniPhrase)
                         lyric += `</div>`
                         phraseHtml += lyric

@@ -434,7 +434,7 @@
                         if (chord) { // our template will not create form if it's supposed to be blank
                         // setting chord
                             let chord = self.$(id)[0].value // self.$('.chord1').firstElementChild.value
-                            newData.lyrics.verses[verseId].lines[lineId].phrases[chordPlacerIndex]['chord'] = chord.value;
+                            newData.lyrics.verses[verseId].lines[lineId].phrases[chordPlacerIndex]['chord'] = chord;
                         }
                         chordPlacerIndex++;
                         i++;
@@ -715,7 +715,7 @@
                             const element = phrase[key];
                             // put lyrics to an array
                             let stringarr = ((typeof element == 'string') ? element.split("") : element[0].split(""));
-                            let elementAsArray = lineModulate.diacriticChecker(stringarr, 0) // lets work with the 'true' length array
+                            let elementAsArray = lineModulate.diacriticCheckerChord(stringarr, 0) // lets work with the 'true' length array
                             if(lyric[key]){
                                 lyric[key] = lyric[key].concat(elementAsArray);
                             } else{

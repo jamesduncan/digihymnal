@@ -444,15 +444,32 @@
                                     var numbers = []
                                     line.phrases.forEach(phrase => {
                                         if (Object.hasOwnProperty.call(phrase, 'number')) {
-                                            numbers.push(phrase['number'])
+                                            if ( phrase['number'] != undefined ){
+                                                numbers.push(phrase['number'])
+                                            } else {
+                                                number.push('1')
+                                            }
                                             delete phrase['number'];
                                             for (const key in phrase) {
                                                 if (Object.hasOwnProperty.call(phrase, key) && key != 'chord') {
                                                     phrase[key] = String.fromCharCode(173).concat(phrase[key]);
                                                 }
                                             }
-                                        }
+                                        } 
                                     });
+
+                                    if( !line.numbers || numbers.length === 0 || line.numbers.length === 0){ // if zero, lets check how many ought to be there
+                                        debugger
+                                        //TODO this shouldn't be nessicary? but my test data is very janky
+                                        line.phrases.forEach(phrase => {
+                                            if (Object.hasOwnProperty.call(phrase, defaultLanguage)) {
+                                                // count # of times there is char in lyric, add to num array
+                                                let count = (phrase[defaultLanguage]).split("").filter(x => x === String.fromCharCode(173)).length;
+                                                for (var i = 0; i < count; i++) numbers.push('1');
+                                            } 
+                                        });
+                                    }
+
                                     line['numbers'] = numbers
                                 });
                             });

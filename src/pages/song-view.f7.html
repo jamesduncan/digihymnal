@@ -459,7 +459,6 @@
                                     });
 
                                     if( !line.numbers || numbers.length === 0 || line.numbers.length === 0){ // if zero, lets check how many ought to be there
-                                        debugger
                                         //TODO this shouldn't be nessicary? but my test data is very janky
                                         line.phrases.forEach(phrase => {
                                             if (Object.hasOwnProperty.call(phrase, defaultLanguage)) {

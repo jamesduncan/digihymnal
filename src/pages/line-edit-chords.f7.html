@@ -443,7 +443,8 @@
                     line = newData.lyrics.verses[verseId].lines[lineId];
                     song = newData;
                     app.song = newData;
-                    songCollection.db.setItem(songId, newData);
+                    //debugger
+                    //songCollection.db.setItem(songId, newData);
                     self.savableUpdate(false);
                     self.clearSliders();
                     self.$setState({
@@ -457,8 +458,8 @@
                     // dataManager.putLine(songId, verseId, lineId, newData.lyrics.verses[verseId].lines[lineId])
                     //     .then(responseText => alert(JSON.stringify(responseText)));
                     // send whole song to server
-                    dataManager.putSong(songId, newData)
-                     .then(responseText => alert(JSON.stringify(responseText)));
+                    // dataManager.putSong(songId, newData)
+                    //  .then(responseText => alert(JSON.stringify(responseText)));
                 
                 }
             },
@@ -728,19 +729,20 @@
                             } else {
                                 chordEndIndex = chordStartLocations[key].length;
                             }
+                            let length = elementAsArray.length
                             if (!meta.chord && firstPhrase) {// if first phrase skip it,
                                 // if first, make a blank chord area
-                                chordStartLocations[key].push(elementAsArray.length);
+                                chordStartLocations[key].push(length);
                                 
                             } else if (!meta.chord) { // else there is no chord, concat with the last one  
                                 // if there is no chord, concat language array to last
-                                chordStartLocations[key][chordEndIndex - 1] += elementAsArray.length;
+                                chordStartLocations[key][chordEndIndex - 1] += length;
                             } else { // totally normal
                                 // if this has a chord, start adding chord start locations
                                 if (chordEndIndex == 0) {
-                                    chordStartLocations[key].push(elementAsArray.length);
+                                    chordStartLocations[key].push(lyric[key].length);
                                 } else {
-                                    chordStartLocations[key].push(chordStartLocations[key][chordEndIndex - 1] + elementAsArray.length);
+                                    chordStartLocations[key].push(lyric[key].length);
                                 }
                             }
                             firstPhrase = false;

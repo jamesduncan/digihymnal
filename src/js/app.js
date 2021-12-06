@@ -232,7 +232,6 @@ Template7.registerHelper('printLine', function(dataObjectLine, language1, showCh
     } else {
         debugger
     }
-    var lyric2numIndex = 0 
     var numberIndex = 0
 
     dataObjectLine.phrases.forEach( phrase => {
@@ -248,81 +247,61 @@ Template7.registerHelper('printLine', function(dataObjectLine, language1, showCh
             phraseHtml += `<div class="chord">${phrase.chord}</div>`
         }
 
-        if ( hasNum ) {
-            var lyric1 = phrase[language1];
-            var lyric1NumArr = getAllIndexes(lyric1, String.fromCharCode(173)) //  invisible character
+        function addLyric (lyric1, language1, lyric2, language2){
+            // there are no nums, build normally
+            var lyric = `<div class="lyric ${language1}">`;
+            lyric += forceSpace(lyric1);
+            lyric += `</div>`;
             
-            if (lyric1NumArr.length && showNumbers){
-                if (typeof language2 != 'undefined'){
-                    var lyric2 = phrase[language2];
-                    var lyric2NumArr = getAllIndexes(lyric2, String.fromCharCode(173))
-                }
-                
-                lyric1NumArr.forEach( (number,index) => {
-                    phraseHtml += `<div class="number num${numberIndex}">${numberArray.slice(numberIndex,numberIndex+1)}</div>`
-                    
-                    var lyric = `<div class="lyric ${language1}">`
-                    let next = ( lyric1NumArr[index+1] ? lyric1NumArr[index+1] : lyric1.length ); // end index of current miniphrase, either next number or all the remaining lyrics
-                    let miniPhrase = lyric1.slice( number,next )
-                    // miniPhrase = miniPhrase.replaceAll(String.fromCharCode(173), '') // remove invisible character
-                    lyric += forceSpace(miniPhrase)
-                    lyric += `</div>`
-                    phraseHtml += lyric
-                    //
-                    if (typeof language2 != 'undefined'){
-                        // miniPhrase = lyric2NumArr[index] ? phrase[language2].slice(0,lyric2NumArr[index]-lastnum2) : phrase[language2]
-                        // miniPhraseLen = lyric2NumArr[index]? lyric2NumArr[index]-lastnum2 : phrase[language2].length
-                        let next = ( lyric2NumArr[index+1] ? lyric2NumArr[index+1] : lyric2.length ); // end index of current miniphrase, either next number or all the remaining lyrics
-                        // let miniPhraseLen = (lyric2NumArr[index] < lyric2.length && lyric2NumArr[index]) ? lyric2NumArr[index]-lastnum2 : lyric2.length
-                        lyric = `<div class="lyric ${language2}">`
-                        miniPhrase = lyric2.slice(lyric2NumArr[index],next)
-                        //miniPhrase = miniPhrase.replaceAll(String.fromCharCode(173), '')
-                        lyric += forceSpace(miniPhrase)
-                        lyric += `</div>`
-                        phraseHtml += lyric
-                    }
-                    //
-                    phraseHtml += `</div>`
-                    finalLineHtml += phraseHtml;  
-                    phraseHtml = phraseHtmlTemplate; 
-                    numberIndex = 1+numberIndex     
-                });
-                
-            } else {
-                // there should be nums, there arent any here
-                var lyric = `<div class="lyric">`
-                let miniPhrase = phrase[language1].replaceAll(String.fromCharCode(173), '')
-                lyric += forceSpace(miniPhrase)
-                lyric += `</div>`
-                phraseHtml += lyric
-
-                if (typeof language2 != 'undefined'){
-                    lyric = `<div class="lyric ${language2}">`
-                    miniPhrase = phrase[language2]
-                    miniPhrase = miniPhrase.replaceAll(String.fromCharCode(173), '')
-                    lyric += forceSpace(miniPhrase)
-                    lyric += `</div>`
-                    phraseHtml += lyric
-                }
-
-                phraseHtml +=  `</div>`
-                finalLineHtml += phraseHtml;
+            if (typeof lyric2 != 'undefined'){
+                lyric = `<div class="lyric ${language2}">`;
+                lyric += forceSpace(lyric2);
+                lyric += `</div>`;
             }
+
+            //lyric += `</div>`; // don't close the phrase
+            return lyric;
+        }
+
+        var lyric1 = phrase[language1];
+        var lyric1NumArr = getAllIndexes(lyric1, String.fromCharCode(173)) //  invisible character
+        if (typeof language2 != 'undefined'){
+            var lyric2 = phrase[language2];
+            var lyric2NumArr = getAllIndexes(lyric2, String.fromCharCode(173))
+        }
+        if ( hasNum && lyric1NumArr.length && showNumbers) {
+            lyric1NumArr.forEach( (number,index) => {
+                // if the first one isn't 0 that means some lyrics need to not have a number on them.
+                if ( index === 0 && number != 0 ) {
+                    let miniPhrase1 = lyric1.slice(0,lyric1NumArr[index]);
+                    if (language2) {
+                        var miniPhrase2 = lyric2.slice(0, lyric2NumArr[index]);
+                    }
+                    // this is going to be nestled up with the chord, no number
+                    phraseHtml += addLyric(miniPhrase1, language1, miniPhrase2, language2);
+                }
+
+                phraseHtml += `<div class="number num${numberIndex}">${numberArray.slice(numberIndex,numberIndex+1)}</div>`
+                
+                let next = ( lyric1NumArr[index+1] ? lyric1NumArr[index+1] : lyric1.length ); // end index of current miniphrase, either next number or all the remaining lyrics
+                let miniPhrase = lyric1.slice( number,next )
+                if (typeof language2 != 'undefined'){
+                    let next = ( lyric2NumArr[index+1] ? lyric2NumArr[index+1] : lyric2.length ); // end index of current miniphrase, either next number or all the remaining lyrics
+                    var miniPhrase2 = lyric2.slice(lyric2NumArr[index],next)
+                }
+
+                phraseHtml += addLyric(miniPhrase, language1, miniPhrase2, language2);  
+
+                phraseHtml += `</div>`
+                finalLineHtml += phraseHtml;  
+                phraseHtml = phraseHtmlTemplate; 
+                numberIndex = 1+numberIndex     
+            });
         } else {
             // there are no nums, build normally
-            var lyric = `<div class="lyric">`
-            lyric += forceSpace(phrase[language1])
-            lyric += `</div>`
-            phraseHtml += lyric
+            phraseHtml += addLyric(lyric1, language1, lyric2, language2);  
 
-            if (typeof language2 != 'undefined'){
-                lyric = `<div class="lyric ${language2}">`
-                lyric += forceSpace(phrase[language2])
-                lyric += `</div>`
-                phraseHtml += lyric
-            }
-
-            phraseHtml +=  `</div>`
+            phraseHtml +=  `</div>` //  close the phrase
             finalLineHtml += phraseHtml;
         }
     });

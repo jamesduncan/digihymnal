@@ -442,6 +442,10 @@
                     // Get song from songCollection or from global var
                     if( !app.song || app.song.id != songId){
                         songCollection.get(songId).then(result => {
+                            if (result === null || result === undefined){
+                                console.error('song is null, replacing.....')
+                                result = songCollection.makeBlankSong(songId);
+                            }
                             
                             song = result;
                             // TODO TEMPORARY CODE, remove number trait from phrases and put on line
@@ -449,7 +453,14 @@
                                 verse.lines.forEach(line => {
                                     var numbers = []
                                     line.phrases.forEach(phrase => {
+                                        if (Object.hasOwnProperty.call(phrase, 'key')) {
+                                            delete phrase.key
+                                        };
+                                        if (Object.hasOwnProperty.call(phrase, 'numbers')) {
+                                            delete phrase.key
+                                        };
                                         if (Object.hasOwnProperty.call(phrase, 'number')) {
+                                            self.savableUpdate(true)
                                             if ( phrase['number'] != undefined ){
                                                 numbers.push(phrase['number'])
                                             } else {

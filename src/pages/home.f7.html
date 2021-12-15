@@ -131,9 +131,10 @@
                 // get the full list of songs from the server, 
                 // then send to the localforage-init area
                 songCollection.initSample().then(() => {
-                    songCollection.getAll().then(songData => {
-                        console.log(songData)
-                        preference.getLanguage().then((languageCode) => {
+                    songCollection.cleanAll().then( () => {
+                        songCollection.getAll().then(songData => {
+                            console.log(songData)
+                            preference.getLanguage().then((languageCode) => {
                             locale = languageCode;
                             window.languageCode = locale;
                             self.$setState({
@@ -141,7 +142,8 @@
                                 songs: songData,
                                 locale: languageCode
                             });
-                        });
+                            });
+                        })
                     })
                 })
 

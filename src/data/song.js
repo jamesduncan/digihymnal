@@ -183,6 +183,22 @@ export default class SongCollection {
       return this.db.getItems(null);            
     }
 
+    async cleanAll() {
+        //var allSongs = this.db.getItems(null);       
+        this.db.getItems(null).then(allSongs => {      
+            for (const key in allSongs) {
+                if (Object.hasOwnProperty.call(allSongs, key)) {
+                    const element = allSongs[key];
+                    let indexIsNum = (parseInt(key)!=NaN)
+                    if (!indexIsNum || !element || !element.title || !element.lyrics || !element.metadata){
+                        console.error(indexIsNum, element)
+                        this.db.removeItem(key);
+                    }
+                }
+            }
+        });     
+    }
+
     async checkIdClear() {
       var id = toString(this.nextAvailableId)
       this.get(id).then( data =>{
@@ -211,6 +227,20 @@ export default class SongCollection {
             console.log(data)
           })
           return id;
+        });
+      })
+    }
+    async makeBlankSong(id) {
+      // TODO get the next available ID...
+      return this.checkIdClear().then(() => {
+        // get blank data
+        var data = this.exampleSong;
+        data.id = id.toString()
+        return this.db.setItem(id, data, () => {
+          console.log({"it worked!":id})
+        }).then(() => {
+          //dataManager.putSong(id,data)
+          return data;
         });
       })
     }

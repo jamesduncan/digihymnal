@@ -666,26 +666,7 @@
                     })
                     self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
                 });
-            },  
-            
-            diacriticChecker: function(array, index) {
-                if (!index) {index = 0};
-                if (typeof(array)=='string') {
-                    array = array.split("");
-                }
-
-                var nextIndex = index + 1
-                if (nextIndex >= array.length) {
-                    return array;
-                }
-                //if ([' ྱ', ' ེ', ' ོ', ].includes(array[nextIndex])){
-                if ([4017, 3962, 3964, 3954].includes((array[nextIndex]).charCodeAt(0))) {
-                    array[index] = array[index].concat(array.splice(nextIndex, 1)[0]);
-                } else { // only increase if no diacritic
-                    ++index;
-                }
-                return self.diacriticChecker(array, index);
-            },
+            }, 
             lineEditPopup: function(selectedVerse,selectedLine) {
                 var tag = defaultLanguage;
                 verseId = selectedVerse;
@@ -700,16 +681,16 @@
                     if (phrase[tag]) {
                         langLine += phrase[tag];
                         let phraseArr = phrase[tag].split("")
-                        let elementAsArray = self.diacriticChecker(phraseArr, 0);
+                        let elementAsArray = lineModulate.diacriticCheckerChord(phraseArr, 0);
                         phraseBreakLocations[tag].push(elementAsArray.length);
                     }
                 });
 
                 // remove number elements
-                parseText.remove(langLine).then((parsed) => { // obj: text, numberlocationarray
-                    var el = `<div class="popup">
-                            <div class="block">
-                                <strong><h3>*edit line text here</h3></strong>
+                var parsed = parseText.remove(langLine)
+                var el = `<div class="popup">
+                        <div class="block">
+                            <strong><h3>*edit line text here</h3></strong>
                                 <div class='tag'>${tag}</div>
                                 <form class="item-content item-input line-form" id="line-form">
                                     <div class="item-inner">
@@ -741,16 +722,15 @@
                                     self.updateLine(newLyric, tag)
                                 });
                             },
-                        }
-                    }); 
-                    a.open();
-                });
+                    }
+                }); 
+                a.open();
   
             },
             updateLine: function(data,tag){
                 if (self.validateTag(tag)){
                     //update line and refresh
-                    var lineArr = self.diacriticChecker(data.split(""), 0)
+                    var lineArr = lineModulate.diacriticCheckerChord(data.split(""), 0)
                     var chordPlacment = phraseBreakLocations[tag]
 
                     let i = 0
@@ -942,7 +922,7 @@
                                     sourceLen[key] = sourceFullLine[key].length; 
 
                                     // sourceFullLine = {'en': "hey jude", 'at': 'zxcvqewr'}
-                                    phraseLengthList[key].push(self.diacriticChecker(element, 0).length) // (abc).length = 3
+                                    phraseLengthList[key].push(lineModulate.diacriticCheckerChord(element, 0).length) // (abc).length = 3
                                     //{'en': [1,2,3], 'at': [1,2,3] }
                                 }
                             }
@@ -967,7 +947,7 @@
                         });
                         var i = 0
                         var combinedLine = phraseCombiner(destination, lang);
-                        var destinationArr = self.diacriticChecker(combinedLine, 0);
+                        var destinationArr = lineModulate.diacriticCheckerChord(combinedLine, 0);
                         var destinationLength = destinationArr.length
 
                         while (i < chordList.length){

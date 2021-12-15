@@ -45,7 +45,7 @@ export default class ParseText {
         // length without number: 10
         // indexes, 0, 5(6-1), 8(10-2)
         var totalLength = lyricString.length
-        debugger
+
         while( numberPositions.length ){
             let currNum = numberPositions.pop()
             let i = parseInt( ( currNum* totalLength)/ 100)

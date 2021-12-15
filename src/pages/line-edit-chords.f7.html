@@ -207,40 +207,34 @@
     }
 </style>
 <script>
-    var songId
+    var app
+    var chordStartLocations
+    var firstLine
+    var languages
+    var lastLine
+    var lastVerse
+    var line
+    var lineId
     var loading
+    var lyricList
     var savable = false;
+    var song
+    var songId
     var verseId
     var verseLabel
-    var lineId
-    var languages
-    var lyricList
-    var line
-    var song
-    var app
-    var lastVerse
-    var lastLine
-    var firstLine
-    var chordStartLocations
-    import DataManager from '../data/dataManager';
-    import Song from '../data/song';
-    import noUiSlider from 'nouislider';
     import 'nouislider/dist/nouislider.css';
-
+    import DataManager from '../data/dataManager';
     import LineModulate from '../data/lineModulate';
-    const lineModulate = new LineModulate();
-    // //  the namespace:
-    // import * as noUiSlider from 'nouislider';
-    // import 'nouislider/dist/nouislider.css';
-
-    // // Alternatively, you can include both files:
-    // <link href="nouislider.css" rel="stylesheet">
-    // <script src="nouislider.js"><//////script>
-
+    import noUiSlider from 'nouislider';
+    import ParseText from "../data/parseText";
     import Preference from "../data/preference";
+    import Song from '../data/song';
+        
     const dataManager = new DataManager();
-    const songCollection = new Song();
+    const lineModulate = new LineModulate();
+    const parseText = new ParseText();
     const preference = new Preference();
+    const songCollection = new Song();
 
     // Import locales
     const locale = require('../js/locales.js');

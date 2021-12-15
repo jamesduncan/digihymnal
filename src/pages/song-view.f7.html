@@ -360,30 +360,36 @@
     .noChords .chord {
         top: -30px;
     }
+
+    .item-input-wrap{
+        width: 100%;
+    }
 </style>
 <script>
     self = this
+    var app
+    var languages
+    var languageTags = [ ];
+    var line
+    var lineId
+    var phraseBreakLocations = {}
+    var savable;
+    var self
+    var song
     var songId
     var verseId
-    var lineId
-    var song
-    var line
-    var languages
-    var app
-    var phraseBreakLocations = {}
-    var self
-    var languageTags = [ ];
-    var savable;
     import DataManager from '../data/dataManager';
-    import Song from '../data/song';
-    import Preference from "../data/preference";
-    const preference = new Preference();
+    import LineModulate from '../data/lineModulate';
     import ParseText from "../data/parseText";
-    const parseText = new ParseText();
-
+    import Preference from "../data/preference";
+    import Song from '../data/song';
+    
     // Import locales
-    const locale = require('../js/locales.js');
     const dataManager = new DataManager();
+    const lineModulate = new LineModulate();
+    const locale = require('../js/locales.js');
+    const parseText = new ParseText();
+    const preference = new Preference();
     const songCollection = new Song();
     // songCollection.initSample();
 

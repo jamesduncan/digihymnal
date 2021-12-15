@@ -249,12 +249,12 @@ Template7.registerHelper('printLine', function(dataObjectLine, language1, showCh
 
         function addLyric (lyric1, language1, lyric2, language2){
             // there are no nums, build normally
-            var lyric = `<div class="lyric ${language1}">`;
+            var lyric = `<div class="lyrics ${language1}">`;
             lyric += forceSpace(lyric1);
             lyric += `</div>`;
             
             if (typeof lyric2 != 'undefined'){
-                lyric = `<div class="lyric ${language2}">`;
+                lyric = `<div class="lyrics ${language2}">`;
                 lyric += forceSpace(lyric2);
                 lyric += `</div>`;
             }

@@ -444,7 +444,7 @@
                     song = newData;
                     app.song = newData;
                     //debugger
-                    //songCollection.db.setItem(songId, newData);
+                    songCollection.db.setItem(songId, newData);
                     self.savableUpdate(false);
                     self.clearSliders();
                     self.$setState({
@@ -496,8 +496,7 @@
                 
                 if (typeof chordArray === 'string'){// there's only the one chord
                     if (parseInt(chordArray) != 0){ // we need two phrases
-                        //var parsedLineArr self.diacriticChecker(languageLine.split(""), 0);
-                        var parsedLineArr = lineModulate.diacriticChecker(languageLine.split(""), 0)
+                        var parsedLineArr = lineModulate.diacriticCheckerChord(languageLine.split(""), 0)
                         phraseArray.push( (parsedLineArr.splice(0, parseInt(chordArray) )).join("") ); 
                         phraseArray.push( parsedLineArr.join("") ); // remaining
                     } else {
@@ -507,7 +506,7 @@
                     if( typeof languageLine == 'string'){
                         languageLine = languageLine.split("");
                     }
-                    var parsedLineArr =  lineModulate.diacriticChecker(languageLine, 0);
+                    var parsedLineArr =  lineModulate.diacriticCheckerChord(languageLine, 0);
                     var lastPhraseLength = 0;
                     var firstChord = true;
                     var totalPhrases = chordArray.length
@@ -828,24 +827,6 @@
                 // });
                 // 
             },
-            // Params: Array, 0
-            diacriticChecker: function(array, index) {
-                if (!index) {index = 0};
-                if (typeof(array)=='string') {
-                    array = array.split("");
-                }
-                var nextIndex = index + 1
-                if (nextIndex >= array.length) {
-                    return array;
-                }
-                //if ([' ྱ', ' ེ', ' ོ',  '' ].includes(array[nextIndex])){
-                if ([4017, 3962, 3964, 3954, 173].includes((array[nextIndex]).charCodeAt(0))) {
-                    array[index] = array[index].concat(array.splice(nextIndex, 1)[0]);
-                } else { // only increase if no diacritic
-                    ++index;
-                }
-                return lineModulate.diacriticChecker(array, index);
-            },
             lineEditPopup: function(tag) {
                 // app.panel.create(parameters)
                 // closeByBackdropClick
@@ -902,7 +883,7 @@
             updateLine: function(data,tag){
                 if (self.validateTag(tag)){
                     //update line and refresh
-                    var lineArr = lineModulate.diacriticChecker(data.split(""), 0)
+                    var lineArr = lineModulate.diacriticCheckerChord(data.split(""), 0)
                     var chordPlacment = chordStartLocations[tag]
 
                     let i = 0

@@ -38,8 +38,18 @@ export default class lineModulate {
                         newLine[key].lyric = element;
                         newLine[key].chords = [];
                     }
-                    
-                    let stringarr = ((typeof element != 'array') ? element.split("") : element[0].split("") );
+
+                    // let stringarr = ((typeof element != 'array') ? element.split("") : element[0].split("") );
+                    let stringarr
+                    if (typeof element == 'array' || typeof element == 'object'){
+                        if (!element[1]){
+                            stringarr = element[0].split("");
+                        } else {
+                            stringarr = element;
+                        }
+                    } else if (typeof element == 'string'){
+                        stringarr = element.split("")
+                    } 
                     let elementArr = this.diacriticCheckerChord(stringarr, 0) // lets work with the 'true' length array
                     let elementTrueLen = elementArr.length
                     // chordEndIndex = newLine[key].chords.length;

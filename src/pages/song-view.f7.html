@@ -28,7 +28,7 @@
         <div class="page-content hide-navbar-on-scroll">
             {{#if loading}}
             {{else}}
-                <div class="block block-strong" style="margin-bottom: 10px; padding-left: 30px; overflow: hidden;">
+                <div class="block block-strong" style="margin-bottom: 10px; padding-left: 30px; overflow: hidden; min-height:100%">
                     <div class="menu">
                         <div class="menu-inner no-margin-padding">
                             <a @click="zoomOut" class="menu-item icon-only">
@@ -91,9 +91,9 @@
                     </div>
 
                     <div class="sheet">
-                        <div class="song">
-                            <div class="verse">
-                                {{#each song.lyrics.verses}}
+                        <div class="song" {{#if @root.initScale}}style="width:{{scaleWidth}}px; transform: scale({{initScale}});"{{/if}}>
+                        {{#each song.lyrics.verses}}
+                        <div class="verse">
                                     {{#if @root.editMode}}
                                         <a class="color-gray link popover-open" style="margin-right: 5px;" href="#" data-popover=".popover-verses{{@index}}"><i class="fas fa-cog"></i></a>
                                     {{/if}}
@@ -192,8 +192,8 @@
                                         </div>
                                     </div>
                                     {{/if}}
-                                {{/each}}
                             </div>
+                            {{/each}}
                             <!-- <div class="chorus">
                                 {{#each song.lyrics.Chorus}}
                                     <h3>{{#if label}}{{translate label}}{{else}}<br />{{/if}}</h3>
@@ -275,11 +275,24 @@
 
     .song {
         transform-origin: left top;
+        /* max-width: 100%; */
+        display: flex;
+        flex-wrap: wrap;
     }
-
+    
+    .verse {
+        transform-origin: left top;
+        flex: 1 0 0px;
+        box-shadow: 0 0 0 1px #ff0000;
+        /* margin-right:15px; */
+        /* flex-basis: auto; */
+    }
+    
     .line {
+        margin-right: 15px;
         margin-bottom: 20px;
         display: block;
+        width: max-content;
     }
 
     input {
@@ -483,19 +496,31 @@
                                 languageTags.push(item.tag)
                             }
                         });
+                        let scaleWidth = (window.innerWidth-15)/initScale ;
                         self.$setState({
                             loading: false,
                             song: song,
                             lyric1: lyric1,
                             steps: steps,
                             languages: languages,
+                            initScale:initScale,
+                            scaleWidth:scaleWidth,
                             defaultLanguage: defaultLanguage
                         }, () => {
-                            self.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                            //self.$(".song")[0].style.width = (window.innerWidth-10)/initScale + "px";
+                            //self.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                            //self.$(".song")[0].style.width = (window.innerWidth-10) + "px";
                             self.$(".verseEdit").forEach((verse) => {
                                 verse.style.transform = "scale(" + 1/initScale + ")";
                             })
-                            self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+                            
+                            self.$(".verse").forEach((verse) => {
+                                //verse.style["flex-basis"] = window.getComputedStyle(self.$(".verse")[0]).width
+                                //verse.style["flex-basis"] = window.getComputedStyle(self.$(".verse")[0]).width
+                                //verse.style["min-width"] = window.getComputedStyle(self.$(".verse")[0]).width
+                            })
+                            //self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+                            // window.innerWidth
                             var stepper = app.stepper.create({
                                 el: '.stepper',
                                 value: steps,
@@ -518,20 +543,22 @@
         },
         methods: {
             zoomIn: function(e) {
+                let originalScale = initScale;
                 initScale += 0.05;
                 this.$(".song")[0].style.transform = "scale(" + initScale + ")";
                 this.$(".verseEdit").forEach((verse) => {
                     verse.style.transform = "scale(" + 1/initScale + ")";
                 });
-                this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
-            },
+                //this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
+                },
             zoomOut: function(e) {
+                let originalScale = initScale;
                 initScale -= 0.05;
                 this.$(".song")[0].style.transform = "scale(" + initScale + ")";
                 this.$(".verseEdit").forEach((verse) => {
                     verse.style.transform = "scale(" + 1/initScale + ")";
                 });
-                this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
+                //this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
             },
             toggleChords: function(e) {
                 if (this.$(".menuChords .fa-check-square")[0].style.display == "") {
@@ -542,7 +569,7 @@
                     this.$(".menuChords .fa-check-square")[0].style.display = "none";
                     this.$(".phrase").addClass("noChords");
                     this.$(".stepper")[0].style.display = "none";
-                    this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
+                    //this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
                 } else {
                     this.$setState({
                         showChord: true
@@ -551,7 +578,7 @@
                     this.$(".menuChords .fa-square")[0].style.display = "none";
                     this.$(".phrase").removeClass("noChords");
                     this.$(".stepper")[0].style.display = "";
-                    this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
+                    //this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
                 }
             },
             toggleNumbers: function(e) {
@@ -562,7 +589,7 @@
                     this.$(".menuNumbers .fa-circle")[0].style.display = "";
                     this.$(".menuNumbers .fa-check-circle")[0].style.display = "none";
                     this.$(".phrase").addClass("noNumbers");
-                    this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
+                    // this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
                 } else {
                     this.$setState({
                         showNumber: true
@@ -570,7 +597,7 @@
                     this.$(".menuNumbers .fa-check-circle")[0].style.display = "";
                     this.$(".menuNumbers .fa-circle")[0].style.display = "none";
                     this.$(".phrase").removeClass("noNumbers");
-                    this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
+                    // this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
                 }
             },
             toggleLyrics: function(e) {
@@ -639,10 +666,12 @@
                     song: newData
                 }, () => {
                     self.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                
                     self.$(".verseEdit").forEach((verse) => {
                         verse.style.transform = "scale(" + 1/initScale + ")";
                     })
-                    self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+                    // self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+                    self.$(".song")[0].style.width = (window.innerWidth-15) + "px";
                 });
             },  
             
@@ -776,10 +805,11 @@
                                         loading: false,
                                     }, () => {
                                         self.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                                    
                                         self.$(".verseEdit").forEach((verse) => {
                                             verse.style.transform = "scale(" + 1/initScale + ")";
                                         })
-                                        self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+                                        // self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
                                     });
                                 }
                             },
@@ -844,7 +874,7 @@
                     self.$(".verseEdit").forEach((verse) => {
                         verse.style.transform = "scale(" + 1/initScale + ")";
                     })
-                    self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+                    // self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
                 });
             },
             copyChordsToVerse: function(selectedVerse) {
@@ -994,7 +1024,7 @@
                     self.$(".verseEdit").forEach((verse) => {
                         verse.style.transform = "scale(" + 1/initScale + ")";
                     })
-                    self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+                    // self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
                 });
             },
             splitVerse: function(selectedVerse,selectedLine) {
@@ -1046,7 +1076,7 @@
                     self.$(".verseEdit").forEach((verse) => {
                         verse.style.transform = "scale(" + 1/initScale + ")";
                     })
-                    self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+                    // self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
                 });
             },
             deleteVerse: function(selectedVerse){
@@ -1075,7 +1105,8 @@
                                 self.$(".verseEdit").forEach((verse) => {
                                     verse.style.transform = "scale(" + 1/initScale + ")";
                                 })
-                                self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+                                // self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+                                self.$(".song")[0].style.width = (window.innerWidth-15) + "px";
                             });
                         }
                         },

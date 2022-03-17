@@ -11,6 +11,14 @@
                 </div>
                 <div class="title">{{#if loading}}{{else}} {{song.title[defaultLanguage]}} {{/if}}</div>
                 <div class="right">
+                    <a @click="downloadSong" class="button">
+                        <span class="fa-stack">
+                            <i class="fas fa-square fa-stack-2x" style="color:orange"></i>
+                            <!-- <i class="fas fa-down fa-stack-1x" style="color:blue"></i> -->
+                            <i class="fas fa-file fa-stack-1x"
+                                style="color:green; text-align:left;  margin-top: 9px; margin-left: 5px;"></i>
+                        </span>
+                    </a>
                     <a @click="insertChords" class="button">
                         <span class="fa-stack">
                             <i class="fas fa-music fa-stack-2x" style="color:green"></i>
@@ -18,6 +26,8 @@
                             <i class="fas fa-plus fa-stack-1x"
                                 style="color:red; text-align:left;  margin-top: 9px; margin-left: 5px;"></i>
                         </span>
+                    </a>
+
                     </a>
                     <a @click="pickCodeToAdd" class="button">
                         <span class="fa-stack">
@@ -191,6 +201,7 @@
     var app
 
     import DataManager from '../data/dataManager';
+    import saveFile from '../data/saveFile';
     import Song from '../data/song';
     import Preference from "../data/preference";
     const dataManager = new DataManager();
@@ -783,6 +794,25 @@
                     savable: bool
                 });
             },
+            downloadSong: function () {
+                console.log(song)
+                debugger
+                // let data = song || app.song
+                let data = JSON.stringify(song || app.song)
+                var filename = song.title.en || app.song.title.en || "song_no_en_title";
+                downloadObjectAsJson(data, filename)
+
+
+                function downloadObjectAsJson(exportObj, exportName) {
+                    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+                    var downloadAnchorNode = document.createElement('a');
+                    downloadAnchorNode.setAttribute("href", dataStr);
+                    downloadAnchorNode.setAttribute("download", exportName + ".json");
+                    document.body.appendChild(downloadAnchorNode); // required for firefox
+                    downloadAnchorNode.click();
+                    downloadAnchorNode.remove();
+                }
+            }
         },
     }
 </script>

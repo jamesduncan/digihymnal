@@ -28,7 +28,7 @@
         <div class="page-content hide-navbar-on-scroll">
             {{#if loading}}
             {{else}}
-                <div class="block block-strong" style="margin-bottom: 10px; padding-left: 30px; overflow: hidden;">
+                <div class="block block-strong" style="margin-bottom: 10px; padding-left: 30px; overflow: hidden; min-height:100%">
                     <div class="menu">
                         <div class="menu-inner no-margin-padding">
                             <a @click="zoomOut" class="menu-item icon-only">
@@ -91,9 +91,9 @@
                     </div>
 
                     <div class="sheet">
-                        <div class="song">
-                            <div class="verse">
-                                {{#each song.lyrics.verses}}
+                        <div class="song" {{#if @root.initScale}}style="width:{{scaleWidth}}px; transform: scale({{initScale}});"{{/if}}>
+                        {{#each song.lyrics.verses}}
+                        <div class="verse">
                                     {{#if @root.editMode}}
                                         <a class="color-gray link popover-open" style="margin-right: 5px;" href="#" data-popover=".popover-verses{{@index}}"><i class="fas fa-cog"></i></a>
                                     {{/if}}
@@ -136,6 +136,15 @@
                                                                     </a>
                                                                 </li>
                                                                 <li>
+                                                                    <!-- move notes -->
+                                                                    <a href="/song/line/music/{{@root.songId}}/{{ ../../@index }}/{{@index}}/" class="list-button item-link edit-phrase">
+                                                                        <span class="fa-stack fa-1x" style="font-size: 70%;">
+                                                                            <i style="margin-left: -5px" class="text-color-blue fas fa-music fa-stack-2x"></i>
+                                                                            <i style="position: absolute; top: -10px; left: 15px;" class="text-color-deeporange fas fa-arrows-alt-h fa-stack-1x"></i>
+                                                                        </span>
+                                                                    </a>
+                                                                </li>
+                                                                <li>
                                                                     <!-- edit line text -->
                                                                     <a @click=lineEditPopup({{../../@index}},{{@index}}) class="list-button item-link edit-phrase"><i class="text-color-deeporange fas fa-bigger fa-edit"></i></a>
                                                                 </li>
@@ -159,24 +168,7 @@
                                                 </div>
                                             {{/if}}
                                             {{#if this}}
-                                                {{#each phrases}}
-                                                    <div class="phrase {{#if @root.showNumber}}{{else}}noNumbers{{/if}} {{#if @root.showChord}}{{else}}noChords{{/if}}">
-                                                        {{#if chord}}
-                                                            {{#if @root.showChord}}
-                                                                <div class="chord">{{transpose chord @root.steps}}</div>
-                                                            {{/if}}
-                                                        {{/if}}
-                                                        {{#if number}}
-                                                            {{#if @root.showNumber}}
-                                                                <div class="number">{{number}}</div>
-                                                            {{/if}}
-                                                        {{/if}}
-                                                        <div class="lyric">{{printObjectPropertyByKey this @root.lyric1 }}</div>  
-                                                        {{#if @root.showLyric2}}
-                                                            <div class="lyric">{{printObjectPropertyByKey this @root.lyric2 }}</div>
-                                                        {{/if}}
-                                                    </div>
-                                                {{/each}}
+                                                {{printLine this @root.lyric1 @root.showChord @root.showNumber @root.steps @root.lyric2 }} 
                                             {{/if}}
                                             <div style="clear:both;"></div>
                                         </div>
@@ -200,9 +192,9 @@
                                         </div>
                                     </div>
                                     {{/if}}
-                                {{/each}}
                             </div>
-                            <div class="chorus">
+                            {{/each}}
+                            <!-- <div class="chorus">
                                 {{#each song.lyrics.Chorus}}
                                     <h3>{{#if label}}{{translate label}}{{else}}<br />{{/if}}</h3>
                                     {{#each lines}}
@@ -228,8 +220,8 @@
                                         </div>
                                     {{/each}}
                                 {{/each}}
-                            </div>
-                            <div class="bridge">
+                            </div> -->
+                            <!-- <div class="bridge">
                                 {{#each song.lyrics.Bridge}}
                                     <h3>{{#if label}}{{translate label}}{{else}}<br />{{/if}}</h3>
                                     {{#each lines}}
@@ -255,7 +247,7 @@
                                         </div>
                                     {{/each}}
                                 {{/each}}
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -283,11 +275,24 @@
 
     .song {
         transform-origin: left top;
+        /* max-width: 100%; */
+        display: flex;
+        flex-wrap: wrap;
     }
-
+    
+    .verse {
+        transform-origin: left top;
+        flex: 1 0 0px;
+        box-shadow: 0 0 0 1px #ff0000;
+        /* margin-right:15px; */
+        /* flex-basis: auto; */
+    }
+    
     .line {
+        margin-right: 15px;
         margin-bottom: 20px;
         display: block;
+        width: max-content;
     }
 
     input {
@@ -368,28 +373,36 @@
     .noChords .chord {
         top: -30px;
     }
+
+    .item-input-wrap{
+        width: 100%;
+    }
 </style>
 <script>
     self = this
+    var app
+    var languages
+    var languageTags = [ ];
+    var line
+    var lineId
+    var phraseBreakLocations = {}
+    var savable;
+    var self
+    var song
     var songId
     var verseId
-    var lineId
-    var song
-    var line
-    var languages
-    var app
-    var phraseBreakLocations = {}
-    var self
-    var languageTags = [ ];
-    var savable;
     import DataManager from '../data/dataManager';
-    import Song from '../data/song';
+    import LineModulate from '../data/lineModulate';
+    import ParseText from "../data/parseText";
     import Preference from "../data/preference";
-    const preference = new Preference();
-
+    import Song from '../data/song';
+    
     // Import locales
-    const locale = require('../js/locales.js');
     const dataManager = new DataManager();
+    const lineModulate = new LineModulate();
+    const locale = require('../js/locales.js');
+    const parseText = new ParseText();
+    const preference = new Preference();
     const songCollection = new Song();
     // songCollection.initSample();
 
@@ -412,8 +425,8 @@
             return {
                 loading: true,
                 savable: false,
-                showNumber: false,
-                showChord: false
+                showNumber: true,
+                showChord: true
             }
         },
         // Page Events
@@ -444,13 +457,54 @@
                         songCollection.get(songId).then(result => {
                             
                             song = result;
-                            app.song = result;
+                            // TODO TEMPORARY CODE, remove number trait from phrases and put on line
+                            song.lyrics.verses.forEach(verse => {
+                                verse.lines.forEach(line => {
+                                    var numbers = []
+                                    line.phrases.forEach(phrase => {
+                                        if (Object.hasOwnProperty.call(phrase, 'number')) {
+                                            if ( phrase['number'] != undefined ){
+                                                numbers.push(phrase['number'])
+                                            } else {
+                                                number.push('1')
+                                            }
+                                            delete phrase['number'];
+                                            for (const key in phrase) {
+                                                if (Object.hasOwnProperty.call(phrase, key) && key != 'chord') {
+                                                    phrase[key] = String.fromCharCode(173).concat(phrase[key]);
+                                                }
+                                            }
+                                        } 
+                                    });
+
+                                    if( !numbers.length && (!line.numbers || numbers.length === 0 || line.numbers.length === 0)){ // if zero, lets check how many ought to be there
+                                        //TODO this shouldn't be nessicary? but my test data is very janky
+                                        line.phrases.forEach(phrase => {
+                                            if (Object.hasOwnProperty.call(phrase, defaultLanguage)) {
+                                                // count # of times there is char in lyric, add to num array
+                                                let count = (phrase[defaultLanguage]).split("").filter(x => x === String.fromCharCode(173)).length;
+                                                for (var i = 0; i < count; i++) numbers.push('1');
+                                            } 
+                                        });
+                                    }
+
+                                    line['numbers'] = numbers
+                                });
+                            });
+                            //debugger
+                            //
+                            app.song = song;
                             updatePage(song);
                         });
                     } else { // else keep global var
                         song = app.song;
                         updatePage(song);
                     }
+
+
+
+
+
                     // update page with selected song
                     function updatePage(song,defaultLanguage){
                         var translationLangs = Object.keys(song.title);
@@ -464,19 +518,31 @@
                                 languageTags.push(item.tag)
                             }
                         });
+                        let scaleWidth = (window.innerWidth-15)/initScale ;
                         self.$setState({
                             loading: false,
                             song: song,
                             lyric1: lyric1,
                             steps: steps,
                             languages: languages,
+                            initScale:initScale,
+                            scaleWidth:scaleWidth,
                             defaultLanguage: defaultLanguage
                         }, () => {
-                            self.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                            //self.$(".song")[0].style.width = (window.innerWidth-10)/initScale + "px";
+                            //self.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                            //self.$(".song")[0].style.width = (window.innerWidth-10) + "px";
                             self.$(".verseEdit").forEach((verse) => {
                                 verse.style.transform = "scale(" + 1/initScale + ")";
                             })
-                            self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+                            
+                            self.$(".verse").forEach((verse) => {
+                                //verse.style["flex-basis"] = window.getComputedStyle(self.$(".verse")[0]).width
+                                //verse.style["flex-basis"] = window.getComputedStyle(self.$(".verse")[0]).width
+                                //verse.style["min-width"] = window.getComputedStyle(self.$(".verse")[0]).width
+                            })
+                            //self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+                            // window.innerWidth
                             var stepper = app.stepper.create({
                                 el: '.stepper',
                                 value: steps,
@@ -499,20 +565,22 @@
         },
         methods: {
             zoomIn: function(e) {
+                let originalScale = initScale;
                 initScale += 0.05;
                 this.$(".song")[0].style.transform = "scale(" + initScale + ")";
                 this.$(".verseEdit").forEach((verse) => {
                     verse.style.transform = "scale(" + 1/initScale + ")";
                 });
-                this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
-            },
+                //this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
+                },
             zoomOut: function(e) {
+                let originalScale = initScale;
                 initScale -= 0.05;
                 this.$(".song")[0].style.transform = "scale(" + initScale + ")";
                 this.$(".verseEdit").forEach((verse) => {
                     verse.style.transform = "scale(" + 1/initScale + ")";
                 });
-                this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
+                //this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
             },
             toggleChords: function(e) {
                 if (this.$(".menuChords .fa-check-square")[0].style.display == "") {
@@ -523,7 +591,7 @@
                     this.$(".menuChords .fa-check-square")[0].style.display = "none";
                     this.$(".phrase").addClass("noChords");
                     this.$(".stepper")[0].style.display = "none";
-                    this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
+                    //this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
                 } else {
                     this.$setState({
                         showChord: true
@@ -532,7 +600,7 @@
                     this.$(".menuChords .fa-square")[0].style.display = "none";
                     this.$(".phrase").removeClass("noChords");
                     this.$(".stepper")[0].style.display = "";
-                    this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
+                    //this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
                 }
             },
             toggleNumbers: function(e) {
@@ -543,7 +611,7 @@
                     this.$(".menuNumbers .fa-circle")[0].style.display = "";
                     this.$(".menuNumbers .fa-check-circle")[0].style.display = "none";
                     this.$(".phrase").addClass("noNumbers");
-                    this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
+                    // this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
                 } else {
                     this.$setState({
                         showNumber: true
@@ -551,7 +619,7 @@
                     this.$(".menuNumbers .fa-check-circle")[0].style.display = "";
                     this.$(".menuNumbers .fa-circle")[0].style.display = "none";
                     this.$(".phrase").removeClass("noNumbers");
-                    this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
+                    // this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
                 }
             },
             toggleLyrics: function(e) {
@@ -620,31 +688,14 @@
                     song: newData
                 }, () => {
                     self.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                
                     self.$(".verseEdit").forEach((verse) => {
                         verse.style.transform = "scale(" + 1/initScale + ")";
                     })
-                    self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+                    // self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+                    self.$(".song")[0].style.width = (window.innerWidth-15) + "px";
                 });
-            },  
-            
-            diacriticChecker: function(array, index) {
-                if (!index) {index = 0};
-                if (typeof(array)=='string') {
-                    array = array.split("");
-                }
-
-                var nextIndex = index + 1
-                if (nextIndex >= array.length) {
-                    return array;
-                }
-                //if ([' ྱ', ' ེ', ' ོ', ].includes(array[nextIndex])){
-                if ([4017, 3962, 3964, 3954].includes((array[nextIndex]).charCodeAt(0))) {
-                    array[index] = array[index].concat(array.splice(nextIndex, 1)[0]);
-                } else { // only increase if no diacritic
-                    ++index;
-                }
-                return self.diacriticChecker(array, index);
-            },
+            }, 
             lineEditPopup: function(selectedVerse,selectedLine) {
                 var tag = defaultLanguage;
                 verseId = selectedVerse;
@@ -659,50 +710,56 @@
                     if (phrase[tag]) {
                         langLine += phrase[tag];
                         let phraseArr = phrase[tag].split("")
-                        let elementAsArray = self.diacriticChecker(phraseArr, 0);
+                        let elementAsArray = lineModulate.diacriticCheckerChord(phraseArr, 0);
                         phraseBreakLocations[tag].push(elementAsArray.length);
                     }
                 });
-  
+
+                // remove number elements
+                var parsed = parseText.remove(langLine)
                 var el = `<div class="popup">
                         <div class="block">
                             <strong><h3>*edit line text here</h3></strong>
-                            <div class='tag'>${tag}</div>
-                            <form class="item-content item-input line-form" id="line-form">
-                                <div class="item-inner">
-                                    <div class="item-input-wrap" id="item-input-wrap">
-                                    <input type="text" class="lineText" style=''value="${langLine}"/>
-                                    <span class="input-clear-button"></span>
+                                <div class='tag'>${tag}</div>
+                                <form class="item-content item-input line-form" id="line-form">
+                                    <div class="item-inner">
+                                        <div class="item-input-wrap" id="item-input-wrap">
+                                        <input type="text" class="lineText" style=''value="${parsed.lyric}"/>
+                                        <span class="input-clear-button"></span>
+                                        </div>
                                     </div>
-                                </div>
-                            </form>
-                            <p><a  href="#" class="col popup-close button button-fill">*preview</a></p>
-                        </div>
-                    </div>`
-                var a = app.popup.create({
-                    content:el,
-                    'tag': tag,  
-                    closeByBackdropClick: true,
-                    on: {
-                        opened: function (popup) {
-                        console.log('Panel opened')
-                        },
-                        opened: function (popup) {
-                            console.log('Popup opened');
-                        },
-                        close: function (popup) {
-                            var tag = self.$$(".tag")[0].innerHTML
-                            var formData = self.$$(".lineText")[0].value
-                            self.updateLine(formData, tag)
-                        },
+                                </form>
+                                <p><a  href="#" class="col popup-close button button-fill">*preview</a></p>
+                            </div>
+                        </div>`
+                    var a = app.popup.create({
+                        content:el,
+                        'tag': tag,  
+                        closeByBackdropClick: true,
+                        on: {
+                            opened: function (popup) {
+                            console.log('Panel opened')
+                            },
+                            opened: function (popup) {
+                                console.log('Popup opened');
+                            },
+                            close: function (popup) {
+                                var tag = self.$$(".tag")[0].innerHTML
+                                var formData = self.$$(".lineText")[0].value
+                                // put numbers back
+                                parseText.add(formData, parsed.numberPositions).then((newLyric) => {
+                                    self.updateLine(newLyric, tag)
+                                });
+                            },
                     }
                 }); 
                 a.open();
+  
             },
             updateLine: function(data,tag){
                 if (self.validateTag(tag)){
                     //update line and refresh
-                    var lineArr = self.diacriticChecker(data.split(""), 0)
+                    var lineArr = lineModulate.diacriticCheckerChord(data.split(""), 0)
                     var chordPlacment = phraseBreakLocations[tag]
 
                     let i = 0
@@ -750,10 +807,11 @@
                                         loading: false,
                                     }, () => {
                                         self.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                                    
                                         self.$(".verseEdit").forEach((verse) => {
                                             verse.style.transform = "scale(" + 1/initScale + ")";
                                         })
-                                        self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+                                        // self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
                                     });
                                 }
                             },
@@ -818,7 +876,7 @@
                     self.$(".verseEdit").forEach((verse) => {
                         verse.style.transform = "scale(" + 1/initScale + ")";
                     })
-                    self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+                    // self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
                 });
             },
             copyChordsToVerse: function(selectedVerse) {
@@ -894,7 +952,7 @@
                                     sourceLen[key] = sourceFullLine[key].length; 
 
                                     // sourceFullLine = {'en': "hey jude", 'at': 'zxcvqewr'}
-                                    phraseLengthList[key].push(self.diacriticChecker(element, 0).length) // (abc).length = 3
+                                    phraseLengthList[key].push(lineModulate.diacriticCheckerChord(element, 0).length) // (abc).length = 3
                                     //{'en': [1,2,3], 'at': [1,2,3] }
                                 }
                             }
@@ -919,7 +977,7 @@
                         });
                         var i = 0
                         var combinedLine = phraseCombiner(destination, lang);
-                        var destinationArr = self.diacriticChecker(combinedLine, 0);
+                        var destinationArr = lineModulate.diacriticCheckerChord(combinedLine, 0);
                         var destinationLength = destinationArr.length
 
                         while (i < chordList.length){
@@ -968,7 +1026,7 @@
                     self.$(".verseEdit").forEach((verse) => {
                         verse.style.transform = "scale(" + 1/initScale + ")";
                     })
-                    self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+                    // self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
                 });
             },
             splitVerse: function(selectedVerse,selectedLine) {
@@ -1020,7 +1078,7 @@
                     self.$(".verseEdit").forEach((verse) => {
                         verse.style.transform = "scale(" + 1/initScale + ")";
                     })
-                    self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+                    // self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
                 });
             },
             deleteVerse: function(selectedVerse){
@@ -1049,7 +1107,8 @@
                                 self.$(".verseEdit").forEach((verse) => {
                                     verse.style.transform = "scale(" + 1/initScale + ")";
                                 })
-                                self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+                                // self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+                                self.$(".song")[0].style.width = (window.innerWidth-15) + "px";
                             });
                         }
                         },

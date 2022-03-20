@@ -5,4 +5,4 @@
   For example:
   module.exports = ['custom-helper', 'formatDate'];
 */
-module.exports = ['transpose', 'translate', 'getKeyInParent', 'printLyric', 'printEachPhrase', 'printEachLanguage', 'printObjectPropertyByKey'];
+module.exports = ['transpose', 'numbers', 'translate', 'getKeyInParent', 'printLyric', 'printEachPhrase', 'printEachChord', 'printEachNumber', 'printEachLanguage', 'printObjectPropertyByKey', 'printLine'];

@@ -1,0 +1,962 @@
+<template>
+    <div class="page">
+        <div class="navbar">
+            <div class="navbar-bg"></div>
+            <div class="navbar-inner sliding">
+                <div class="left">
+                    <a {{#if loading}}href=""{{else}}href="/song/view/{{this.songId}}/"{{/if}} class="link back" data-force="true" data-ignore-cache="true">
+                        <i class="icon icon-back"></i> 
+                        <span class="if-not-md" >{{#if loading}}Back{{else}}{{translate "Back"}}{{/if}}</span>
+                    </a>
+                </div>
+                <div class="title">{{#if loading}}{{else}} {{song.title[defaultLanguage]}} : {{@root.verseLabel}} {{/if}}</div>
+            </div>
+        </div>
+        <div class="page-content hide-navbar-on-scroll">
+            {{#js_if "!@root.loading"}}
+                <div class="block block-strong" style="margin-bottom: 10px; overflow: hidden;">
+                    <div class="menu">
+                        <div class="menu-inner no-margin-padding">
+                            <!-- Stepper element -->
+                            <div class="stepper stepper-large stepper-fill" style="display: none; margin-left: auto; height: 40px;">
+                                <div class="stepper-button-minus"></div>
+                                <div class="stepper-input-wrap">
+                                    <input type="text" value="{{transpose song.key @root.steps}}" readonly>
+                                </div>
+                                <div class="stepper-button-plus"></div>
+                            </div>
+                            <div>
+                                <div class="menu-item">
+                                    <div class="menu-item-content icon-only">
+                                        <div class="menu-item-content">
+                                            <a @click="save" class="col button button-fill">
+                                                <i class="text-color-gray fa-bigger fas fa-save"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="menu-item">
+                                <div class="menu-item-content icon-only">
+                                    <div class="menu-item-content">
+                                        <a class="col button button-fill{{#if firstLine}} disabled{{/if}}" @click="prevLine">
+                                            <i class="text-color-gray fas fa-bigger fa-arrow-left"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--
+                            goto next
+                            -->
+                            <div class="menu-item">
+                                <div class="menu-item-content icon-only">
+                                    <div class="menu-item-content">
+                                        <a @click="nextLine" class="col button button-fill{{#js_if "@root.lastLine && @root.lastVerse"}} disabled{{/js_if}}">
+                                            <i class="text-color-gray fa-bigger fas fa-arrow-right"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="item-title item-label">
+                                Chord tools:
+                            </div>
+                            <!--
+                                phrase
+                            -->
+                            <div class="menu-item">
+                                <div class="menu-item-content icon-only">
+                                    <div class="menu-item-content">
+                                        <a @click="addPhrase" class="col button">
+                                            <i class="text-color-gray fas fa-plus"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--
+                                delete phrase, only show if totally empty??????
+                            -->
+                            <div class="menu-item">
+                                <div class="menu-item-content icon-only">
+                                    <div class="menu-item-content">
+                                        <a @click="deletePhrase" class="col button">
+                                            <i class="text-color-gray fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--
+                            LINE
+                            -->
+                            <!-- <div class="item-title item-label">
+                                <t>Line tools:</t>
+                            </div>
+                            <div class="menu-item">
+                                <div class="menu-item-content icon-only">
+                                    <div class="menu-item-content">
+                                        <a @click="addLine" class="col button button-fill">
+                                            <i class="text-color-gray fa-bigger fas fa-plus"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="menu-item">
+                                <div class="menu-item-content icon-only">
+                                    <div class="menu-item-content">
+                                        <a class="col button button-fill" @click="deleteLine">
+                                            <i class="text-color-gray fa-bigger fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div> -->
+                        </div>
+                    </div>
+
+                    <div class="sheet">
+                        <div class="song">
+                            <div class="verse">
+                                <div class="line" id="edit-line">
+                                    <!-- -->
+                                    {{ printEachChord @root.line}}
+                                    <!-- -->
+                                    {{ printLyric @root.line}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {{#js_if "@root.savable"}}
+                    <p><a @click="save"  class="col popup-close button button-fill">*Save</a></p>
+                {{/js_if}}
+                </div>
+                <div class="block text-align-right text-color-gray" style="margin-top: 10px;">
+                    {{song.author[defaultLanguage]}}
+                </div>
+            {{/js_if}}
+        </div>
+    </div>
+</template>
+<style>
+    .noUi-marker {
+        height: 0 !important;
+    }
+
+    .no-margin-padding {
+        margin: 0;
+        padding: 0;
+    }
+
+    .fa-bigger {
+        font-size: larger;
+    }
+
+    .song {
+        transform-origin: left top;
+    }
+
+    .line {
+        margin-bottom: 20px;
+    }
+
+    .phrase {
+        position: relative;
+        display: inline-block;
+        margin: 55px 10px 0 0;
+        min-width: 20px;
+    }
+
+    .chord,
+    .number {
+        top: -55px;
+        background: var(--f7-theme-color);
+        border-radius: 3px;
+        min-width: 20px;
+        height: 20px;
+        line-height: 20px;
+        text-align: center;
+        color: white;
+        font-weight: bold;
+        display: inline-block;
+        padding: 0 2px;
+        margin-right: 5px;
+        position: absolute;
+        padding: 2px;
+    }
+
+    .number {
+        top: -25px;
+        border-radius: 100%;
+        width: 20px;
+        height: 20px;
+        padding: 2px;
+        background: var(--f7-color-blue);
+        font-family: 'Notes', monospace;
+    }
+
+    .noNumbers,
+    .noChords {
+        margin-top: 30px !important;
+    }
+
+    .noNumbers.noChords {
+        margin-top: 10px !important;
+    }
+
+    .noNumbers .chord,
+    .noChords .chord {
+        top: -30px;
+    }
+    .item-input-wrap{
+        width: 100%;
+    }
+</style>
+<script>
+    var app
+    var chordStartLocations
+    var firstLine
+    var languages
+    var lastLine
+    var lastVerse
+    var line
+    var lineId
+    var loading
+    var lyricList
+    var savable = false;
+    var song
+    var songId
+    var verseId
+    var verseLabel
+    import 'nouislider/dist/nouislider.css';
+    import DataManager from '../data/dataManager';
+    import LineModulate from '../data/lineModulate';
+    import noUiSlider from 'nouislider';
+    import ParseText from "../data/parseText";
+    import Preference from "../data/preference";
+    import Song from '../data/song';
+        
+    const dataManager = new DataManager();
+    const lineModulate = new LineModulate();
+    const parseText = new ParseText();
+    const preference = new Preference();
+    const songCollection = new Song();
+
+    // Import locales
+    const locale = require('../js/locales.js');
+
+    var initScale = 1;
+    var lyric1;
+    var lyric2;
+    var defaultLanguage;
+    var deviceWidth = window.innerWidth;
+    var self = this;
+    if (deviceWidth >= 700) {
+        initScale = 2;
+    } else if (deviceWidth >= 500) {
+        initScale = 1.5;
+    }
+    var steps = 0;
+
+    export default {
+        // Component Data
+        data: function() {
+            // Must return an object
+            self = this;
+            return {
+                loading: true,
+                savable: savable,
+                lastVerse: false,
+                lastLine: false,
+                firstLine: false,
+                showNumber: false,
+                showChord: false
+            }
+        },
+        // Page Events
+        on: {
+            pageInit: function(e, page) {
+                self = this;
+                app = self.$app;
+                var $form = this.$('#edit-line')
+                
+                songId = this.$route.params.songId;
+                verseId = this.$route.params.verseId;
+                lineId = this.$route.params.lineId;
+                
+                // get global savable
+                self.savableUpdate(app.savable);
+
+                preference.getLanguage().then((languageCode) => {
+                    lyric1 = languageCode;
+                    defaultLanguage = languageCode;
+                    languages = [];
+                    lyricList = []
+                    var result = app.song;
+                    var translationLangs = Object.keys(result.lyrics.verses[verseId].lines[lineId].phrases[0]);
+                    //var translationLangs = Object.keys(result.title);
+                    locale.customLocales.forEach((item) => {
+                        if (translationLangs.indexOf(item.tag) > -1) {
+                            if (item.tag == lyric1) {
+                                item.default = true;
+                            }
+                            languages.push(item.tag)
+                        }
+                    });
+                    line = result.lyrics.verses[verseId].lines[lineId]
+
+                    // check if last line
+                    lastLine = (lineId >= (result.lyrics.verses[verseId].lines.length - 1));
+                    lastVerse = (verseId >= (result.lyrics.verses.length - 1));
+                    // song is used to get next line
+                    song = result
+
+                    self.$setState({
+                        loading: false,
+                        savable: savable,
+                        songId: songId,
+                        lastLine: lastLine,
+                        lastVerse: lastVerse,
+                        verseLabel: result.lyrics.verses[verseId].label,
+                        firstLine: (lineId == 0 && verseId == 0),
+                        song: song,
+                        // verse: result.verse[verseId],
+                        line: line,
+                        steps: steps,
+                        languages: languages,
+                        lyricList: lyricList,
+                        defaultLanguage: defaultLanguage
+                    }, () => {
+                        self.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                        self.$(".sheet")[0].style.height = (self.$(".song")[0].offsetHeight * initScale) + "px";
+
+                        // make the sliders
+                        self.displayLyricSliders()
+
+                        languages.forEach(lang => {
+                            line.phrases.forEach(phrase => {
+                                lyricList.push({
+                                    "tag": lang,
+                                    "lyric": line[lang]
+                                })
+                            });
+                        });
+
+                        var stepper = app.stepper.create({
+                            el: '.stepper',
+                            value: steps,
+                            min: 0,
+                            max: 11,
+                            wraps: true,
+                            on: {
+                                change: function(e) {
+                                    steps = e.value;
+                                    self.$setState({
+                                        steps: steps,
+                                    });
+                                }
+                            }
+                        });
+                    });
+                });
+            },
+        },
+        methods: {
+            zoomIn: function(e) {
+                initScale += 0.05;
+                this.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
+            },
+            zoomOut: function(e) {
+                initScale -= 0.05;
+                this.$(".song")[0].style.transform = "scale(" + initScale + ")";
+                this.$(".sheet")[0].style.height = (this.$(".song")[0].offsetHeight * initScale) + "px";
+            },
+            save: function(e) {
+                var $form = this.$('#edit-line')
+                var $ = $form.find("select[name='']") //relation
+                if (!self.$app.input.validateInputs('#edit-line')) {
+                    // TODO make this say what the error is
+                    self.$app.dialog.alert('Please correct your entries.');
+                    console.error('<t>Please correct your entries.</t>');
+                } else {
+                    let newData = song;
+
+                    // How much metadata?
+                    let metadataLength = (self.$('.metadata')[0].children).length;
+                    var newLanguageLineData = {}
+                    
+                    var chordPlacerIndex = 0; // if a new first phrase is chordless, this starts on second phrase
+
+                    languages.forEach(langTag => { // selected language
+                        newLanguageLineData[langTag] = self.parseLanguageText(langTag);
+                        // this logic tries to account for going from a chord at the beginning, to forcing a chordless phrase
+                        if ( metadataLength == (newLanguageLineData[langTag].length - 1)){ // This means there is a new chordless phrase
+                            // Other language might have already been inserted, 
+                            if (Object.hasOwnProperty.call(newData.lyrics.verses[verseId].lines[lineId].phrases[0], 'chord')) { // if 0 has chord, need to insert new chordless phrase
+                                let newPhrase = {}
+                                languages.forEach(langTag => {newPhrase[langTag] = ''}); // make / insert new chordless phrase
+                                newData.lyrics.verses[verseId].lines[lineId].phrases.splice(0, 0, newPhrase);
+                            } 
+                            chordPlacerIndex = 1;
+                        } else if (chordPlacerIndex || newLanguageLineData[langTag].length == ( metadataLength - 1 ) ) { // this language doesn't have no-chord phrase, another one does.
+                            newLanguageLineData[langTag].splice(0,0,'');
+                        };
+                        let i = 0;
+                        var expectedLength = newData.lyrics.verses[verseId].lines[lineId].phrases.length
+                        if(newLanguageLineData[langTag].length != expectedLength){
+                            if(expectedLength == 1){ // we may not have added chord, and still be trying to save.
+                                newLanguageLineData[langTag][0] = newLanguageLineData[langTag].join('');
+                                while(newLanguageLineData[langTag].length != expectedLength){
+                                    newLanguageLineData[langTag].pop()
+                                }
+                            }else if(newLanguageLineData[langTag].length == 1 + expectedLength){ // only a difference of one means theres a chord at beginning of phrase now.
+                                if (newLanguageLineData[langTag].pop()!=''){
+                                    console.error("Why is this happening?")
+                                    debugger;
+                                }
+                            }else{
+                                console.error("Why is this happening?")
+                                debugger
+                            }
+                        }
+                        while (i < newLanguageLineData[langTag].length){ // insert this language to the song data
+                            const element = newLanguageLineData[langTag][i];
+                            newData.lyrics.verses[verseId].lines[lineId].phrases[i][langTag] = element;
+                            i++;
+                        }
+                    });
+                    var i = 0;
+
+                    while (i < metadataLength) {
+                        let id = ('.chord').concat(i)
+                        let chord = self.$(id)[0]//.value // self.$('.chord1').firstElementChild.value
+                        if (chord) { // our template will not create form if it's supposed to be blank
+                        // setting chord
+                            let chord = self.$(id)[0].value // self.$('.chord1').firstElementChild.value
+                            newData.lyrics.verses[verseId].lines[lineId].phrases[chordPlacerIndex]['chord'] = chord;
+                        }
+                        chordPlacerIndex++;
+                        i++;
+                    };
+                    // save
+                    line = newData.lyrics.verses[verseId].lines[lineId];
+                    song = newData;
+                    app.song = newData;
+                    //debugger
+                    //songCollection.db.setItem(songId, newData);
+                    self.savableUpdate(false);
+                    self.clearSliders();
+                    self.$setState({
+                        loading: false,
+                        song: newData,
+                        line: newData.lyrics.verses[verseId].lines[lineId]
+                    }, () => {
+                        self.displayLyricSliders();
+                    });
+                    // send line changes to server
+                    // dataManager.putLine(songId, verseId, lineId, newData.lyrics.verses[verseId].lines[lineId])
+                    //     .then(responseText => alert(JSON.stringify(responseText)));
+                    // send whole song to server
+                    // dataManager.putSong(songId, newData)
+                    //  .then(responseText => alert(JSON.stringify(responseText)));
+                
+                }
+            },
+            parseLanguageText: function(tag, languageLine, chordArray){
+                // I need the full string "Twinkle, twinkle, little star"
+                // I need placment of phrase breaks ["0.00", "10.00", "15.00"]
+                // return [('Twinkle, tw'),('inkle'),(', little star')]
+                if(!chordArray){ // get from dom
+                    try {
+                        chordArray = this.$$(`#slider-${tag}`)[0].noUiSlider.get()
+                    } catch (error) {
+                        console.error(error)
+                    }
+                    if (!chordArray) {
+                        console.error({"no div for tag":tag})
+                    }
+                }
+                if(!languageLine){ // get from global var
+                    try {
+                        languageLine = ''
+                        line.phrases.forEach(phrase => {
+                            if (Object.hasOwnProperty.call(phrase, tag)) {
+                                languageLine = languageLine.concat(phrase[tag]);   
+                            }
+                        });
+                    } catch (error) {
+                        console.error(error)
+                    }
+                    if (!languageLine) {
+                        console.error({"no line data for tag":tag});
+                    }
+                }
+                var phraseArray = [] ;// ["Twin","kle, twinkle,", " little star"]
+                
+                if (typeof chordArray === 'string'){// there's only the one chord
+                    if (parseInt(chordArray) != 0){ // we need two phrases
+                        var parsedLineArr = lineModulate.diacriticCheckerChord(languageLine.split(""), 0)
+                        phraseArray.push( (parsedLineArr.splice(0, parseInt(chordArray) )).join("") ); 
+                        phraseArray.push( parsedLineArr.join("") ); // remaining
+                    } else {
+                        phraseArray.push(languageLine);
+                    }
+                } else {
+                    if( typeof languageLine == 'string'){
+                        languageLine = languageLine.split("");
+                    }
+                    var parsedLineArr =  lineModulate.diacriticCheckerChord(languageLine, 0);
+                    var lastPhraseLength = 0;
+                    var firstChord = true;
+                    var totalPhrases = chordArray.length
+
+                    var i = 0;
+                    while (chordArray[i]) {
+                        let chord = (chordArray[i]);
+                        var currentIndexValue = parseInt(chord);
+                        var currentPhraseLength
+                        // to chop off index
+                        
+                         
+                        if(firstChord && currentIndexValue != 0){ // first and skipping phrase
+                            firstChord = false;
+                            // put a chordless phrase end of chordless is start of next
+                            let toInsert = (parsedLineArr.splice(0,currentIndexValue)).join(""); // splice(start, deleteCount)
+                            totalPhrases++;
+                            phraseArray.push( toInsert );
+                        } else {
+                            firstChord = false;
+                        }
+                            
+                            //else if(firstChord && currentIndexValue === 0){ // There is always a chordless phrase
+                        //     phraseArray.push( '' )
+                        // }
+                        if (totalPhrases == phraseArray.length+1){ // we're on last chord, claim rest of phrase
+                            currentPhraseLength = parsedLineArr.length;
+                            i++;
+                        } else { // middle
+                            currentPhraseLength = parseInt(chordArray[i+1]) - currentIndexValue;
+                            i++;
+                        }
+                        
+                        
+                        lastPhraseLength = currentPhraseLength;
+                        let toInsert = (parsedLineArr.splice(0,currentPhraseLength)).join(""); // splice(start, deleteCount)
+                        phraseArray.push( toInsert );
+                    }
+                }
+                return phraseArray;
+            },
+            nextLine: function(e) {
+                // only get index forward if it exists in song
+                if (lastLine && !lastVerse) { // if at end of NOTlastVerse, check next verse
+                    lastVerse = ((verseId + 1) >= (song.lyrics.verses.length - 1)); // is next verse last verse?
+                    lastLine = ((song.lyrics.verses[parseInt(verseId) + 1].lines[1]) == undefined); // is there only one line in next verse?
+                    ++verseId;
+                    lineId = 0;
+                    verseLabel = song.lyrics.verses[verseId].label;
+                } else {
+                    // check if last line
+                    lastLine = ((lineId + 1) >= (song.lyrics.verses[verseId].lines.length - 1));
+                    ++lineId;
+                }
+                // update variable
+                line = song.lyrics.verses[verseId].lines[lineId]
+                self.clearSliders()
+                self.$setState({
+                    loading: false,
+                    firstLine: (lineId == 0 && verseId == 0),
+                    lastLine: lastLine,
+                    lastVerse: lastVerse,
+                    verseLabel: verseLabel,
+                    line: song.lyrics.verses[verseId].lines[lineId]
+                }, () => {
+                    self.clearSliders()
+                    self.displayLyricSliders()
+                });
+            },
+            prevLine: function(e) {
+                if (lineId == 0) {
+                    --verseId
+                    lineId = song.lyrics.verses[verseId].lines.length - 1
+                    // update variable
+                    lastVerse = ((verseId) >= (song.lyrics.verses.length - 1)); // is next verse last verse?
+                    verseLabel = song.lyrics.verses[verseId].label;
+                } else {
+                    --lineId
+                }
+                line = song.lyrics.verses[verseId].lines[lineId]
+                self.clearSliders()
+                self.$setState({
+                    loading: false,
+                    firstLine: (lineId == 0 && verseId == 0),
+                    lastLine: false,
+                    verseLabel: verseLabel,
+                    lastVerse: lastVerse,
+                    line: song.lyrics.verses[verseId].lines[lineId]
+                }, () => {
+                    self.displayLyricSliders()
+                });
+            },
+            addPhrase: function(e) {
+                let newData = song
+                // At index, add one element
+
+                var phraseArray = newData.lyrics.verses[verseId].lines[lineId].phrases
+                var workingIndex = phraseArray.length - 1;
+                phraseArray.push({
+                    ...phraseArray[workingIndex]
+                }); // extend by copying the last -will only keep object structure
+                workingIndex = phraseArray.length - 1;
+
+                for (const tag in phraseArray[workingIndex]) {
+                    if (Object.hasOwnProperty.call(phraseArray[workingIndex], tag)) {
+                        // set all data inside empty
+                        phraseArray[workingIndex][tag] = ""
+                    }
+                }
+                
+                // if (!Object.hasOwnProperty.call(phraseArray[workingIndex], 'chord')) {
+                phraseArray[workingIndex].chord = '*';
+                // }
+
+                newData.lyrics.verses[verseId].lines[lineId].phrases = phraseArray
+                app.song = newData;
+                self.savableUpdate(true);
+                //songCollection.db.setItem(songId, newData)
+                song = newData;
+                line = song.lyrics.verses[verseId].lines[lineId];
+                self.clearSliders()
+                self.$setState({
+                    loading: false,
+                    song: newData,
+                    line: newData.lyrics.verses[verseId].lines[lineId]
+                }, () => {
+                    self.displayLyricSliders()
+                });
+            },
+            savableUpdate: function(bool) {
+                if (typeof(bool) != 'boolean'){
+                    bool = false;
+                }
+                app.savable = bool;
+                savable = bool;
+                self.$setState({
+                    savable: bool
+                });
+            },
+            deletePhrase: function(e) {
+                if( line.phrases.length <= 1 ){
+                    return;
+                }
+                let newData = song;
+
+                var workingIndex = (newData.lyrics.verses[verseId].lines[lineId].phrases).length - 1;
+                let deletedPhrase = newData.lyrics.verses[verseId].lines[lineId].phrases.splice(workingIndex--, 1)[0]
+                // merge the lyrics
+                for (const tag in deletedPhrase) {
+                    if (Object.hasOwnProperty.call(deletedPhrase, tag)) {
+                        if (tag != 'chord' && tag != 'number'){
+                            const element = deletedPhrase[tag];
+                            newData.lyrics.verses[verseId].lines[lineId].phrases[workingIndex][tag] += element;
+                        }
+                    }
+                }
+
+                line = newData.lyrics.verses[verseId].lines[lineId]
+                app.song = newData;
+                self.savableUpdate(true)
+                self.clearSliders()
+                self.$setState({
+                    loading: false,
+                    song: newData,
+                    line: newData.lyrics.verses[verseId].lines[lineId]
+                }, () => {
+                    self.displayLyricSliders()
+                });
+            },
+            clearSliders: function() {
+                languages.forEach(languageCode => {
+                    var slider = self.$(`.slider-${languageCode}`)[0];
+                    if (slider) {
+                        if (slider.noUiSlider) {
+                            slider.noUiSlider.destroy();
+                        }
+                    }
+                });
+            },
+            displayLyricSliders: function(e) {
+                // 
+                var lyric = {};
+                chordStartLocations = {}; //  {'en':[1,5,12]}
+                var chordList = [];           // tooltips: [ {to: function() {return "2<br/>A";} } ]
+
+                // init each language
+                languages.forEach(languageCode => {
+                    chordStartLocations[languageCode] = [];
+                    lyric[languageCode] = [];
+                });
+
+                var firstPhrase = true;
+                line.phrases.forEach(phrase => {
+                    let meta = {}; // chord and number
+                    if (phrase['chord']) {
+                        meta.chord = phrase['chord']
+                        // push to chord/num list
+                        chordList.push({
+                            'to': function() {
+                                return `${meta.chord}`
+                            }
+                        })
+                    }
+                    for (const key in phrase) {
+                        if (Object.hasOwnProperty.call(phrase, key) && key != 'chord'  && key != 'number' ) {
+                            const element = phrase[key];
+                            // put lyrics to an array
+                            let stringarr = ((typeof element == 'string') ? element.split("") : element[0].split(""));
+                            let elementAsArray = lineModulate.diacriticCheckerChord(stringarr, 0) // lets work with the 'true' length array
+                            if(lyric[key]){
+                                lyric[key] = lyric[key].concat(elementAsArray);
+                            } else{
+                                lyric[key] = elementAsArray;
+                            }
+                            var chordEndIndex;
+                            if (firstPhrase) {
+                                chordStartLocations[key] = [];
+                                chordEndIndex = 0;
+                            } else {
+                                chordEndIndex = chordStartLocations[key].length;
+                            }
+                            let length = elementAsArray.length
+                            if (!meta.chord && firstPhrase) {// if first phrase skip it,
+                                // if first, make a blank chord area
+                                chordStartLocations[key].push(length);
+                                
+                            } else if (!meta.chord) { // else there is no chord, concat with the last one  
+                                // if there is no chord, concat language array to last
+                                chordStartLocations[key][chordEndIndex - 1] += length;
+                            } else { // totally normal
+                                // if this has a chord, start adding chord start locations
+                                if (chordEndIndex == 0) {
+                                    chordStartLocations[key].push(lyric[key].length);
+                                } else {
+                                    chordStartLocations[key].push(lyric[key].length);
+                                }
+                            }
+                            firstPhrase = false;
+                        }
+                    }
+                });
+
+                var pipFormatter = {}; //var pipFormats = {'0':'abc', '1':'pqr', '2':'xyz'};
+                var range = {}; // {min/max/percentage: [increment, 1]}
+
+                for (const tag in lyric) {
+                    pipFormatter[tag] = {};
+                    range[tag] = {};
+                    if (Object.hasOwnProperty.call(lyric, tag)) {
+                        if (typeof(lyric[tag])) {
+                            var langArray = lyric[tag]
+                            let totalCharacters = langArray.length;
+                            let increment = (Math.floor((100 / totalCharacters) * 10)) / 10
+                            var i = 0;
+                            // pipFormatter = {'min': [0,increment]}
+                            range[tag]['min'] = [0, 1];
+                            while (i < totalCharacters) {
+                                // {('0':'abc')}
+                                let currentChar = langArray[i]; // get char from position 0, insert to position 1
+                                pipFormatter[tag][i.toString()] = currentChar;
+
+                                // range
+                                // {'50%': [1,1]}
+                                let currentPlace = (increment * i) // starts at 0
+                                let nextPlace = (increment * (++i))
+                                range[tag][`${nextPlace}%`] = [i, 1];
+                            };
+                            pipFormatter[tag][i.toString()] = "";
+                            range[tag]['max'] = [i, 1];
+                            self.makeSlider(tag, pipFormatter[tag], range[tag], chordStartLocations[tag], chordList)
+                        }
+                    }
+                };
+            },
+            makeSlider: function(tag, pipFormats, lyricRange, chordStartLocations, chordDataObject) {
+                if(chordStartLocations.length != chordDataObject.length){
+                    chordStartLocations.pop()
+                } else { // is new data
+                    chordStartLocations.splice(0,0,'')
+                    chordStartLocations.pop()
+                }
+                while(chordDataObject.length > chordStartLocations.length){
+                    chordStartLocations.push(lyricRange.max[0])
+                }
+                var options = {}
+                options.range = lyricRange;
+                options.pips= {
+                    mode: 'range',
+                    format: {
+                        to: function(a) {
+                            return pipFormats[a];
+                        }
+                    }
+                }
+                if (chordDataObject.length){
+                    options.tooltips = chordDataObject;
+                    options.start= chordStartLocations;
+                    options.tooltips= chordDataObject;
+                } else {
+                    // no chords on this song
+                    options.start= [lyricRange.max[0]];
+                }
+                //  Make the slider
+                var slider = self.$(`.slider-${tag}`)[0];  
+                noUiSlider.create(slider, options);
+                // noUiSlider.create(slider, {
+                //     start: chordStartLocations, 
+                //     tooltips: chordDataObject,
+                //     range: lyricRange,
+                //     pips: {
+                //         mode: 'range',
+                //         format: {
+                //             to: function(a) {
+                //                 return pipFormats[a];
+                //             }
+                //         }
+                //     }
+                // });
+                // 
+            },
+            lineEditPopup: function(tag) {                
+                tag = tag || defaultLanguage;
+                var phraseBreakLocations = {};
+                
+                var langLine = ""
+                if(!phraseBreakLocations[tag]){ // is is not set
+                    phraseBreakLocations[tag] = [];
+                }
+                line.phrases.forEach(phrase => {
+                    if (phrase[tag]) {
+                        langLine += phrase[tag];
+                        let phraseArr = phrase[tag].split("")
+                        let elementAsArray = lineModulate.diacriticCheckerChord(phraseArr, 0);
+                        phraseBreakLocations[tag].push(elementAsArray.length);
+                    }
+                });
+
+                // remove number elements
+                var parsed = parseText.remove(langLine)
+                var el = `<div class="popup">
+                        <div class="block">
+                            <strong><h3>*edit line text here</h3></strong>
+                            <div class='tag'>${tag}</div>
+                            <form class="item-content item-input line-form" id="line-form">
+                                <div class="item-inner">
+                                    <div class="item-input-wrap" id="item-input-wrap">
+                                    <input type="text" class="lineText" style=''value="${parsed.lyric}"/>
+                                    <span class="input-clear-button"></span>
+                                    </div>
+                                </div>
+                            </form>
+                            <p><a  href="#" class="col popup-close button button-fill">*preview</a></p>
+                        </div>
+                    </div>`
+                var a = app.popup.create({
+                    content:el,
+                    'tag': tag,  
+                    closeByBackdropClick: true,
+                    on: {
+                        opened: function (popup) {
+                        console.log('Panel opened')
+                        },
+                        opened: function (popup) {
+                            console.log('Popup opened');
+                        },
+                        close: function (popup) {
+                            var tag = self.$$(".tag")[0].innerHTML
+                            var formData = self.$$(".lineText")[0].value
+                            // put numbers back
+                            parseText.add(formData, parsed.numberPositions).then((newLyric) => {
+                                self.updateLine(newLyric, tag, phraseBreakLocations)
+                            });
+                        },
+                    }
+                }); 
+                a.open();
+            },
+            updateLine: function(data,tag,phraseBreakLocations){
+                if (self.validateTag(tag)){
+                    //update line and refresh
+                    var lineArr = lineModulate.diacriticCheckerChord(data.split(""), 0)
+                    var chordPlacment = phraseBreakLocations[tag]
+
+                    let i = 0
+                    while (i < line.phrases.length) {
+                        let expectPhraseLength = chordPlacment[i];
+                        // the array may be shorter than we expect, allow phrases to be at end of array
+                        // at end of array, include any extra characters
+                        // if exists,           is less than remaining length,           on last index, grab remainder => set. otherwise is remaining length. remaining length can be 0
+                        let phraseLength = ((expectPhraseLength && expectPhraseLength < lineArr.length-1 && (i+1) < line.phrases.length) ? expectPhraseLength : (lineArr.length));
+                        let newPhrase = lineArr.splice(0,phraseLength).join('');
+
+                        //set it
+                        line.phrases[i][tag] = newPhrase;
+                        song.lyrics.verses[verseId].lines[lineId].phrases[i++][tag] = newPhrase;
+                    }
+                    self.clearSliders();
+                    self.$setState({
+                        loading: false,
+                        song: song,
+                        line: line,
+                        savable: true
+                    }, () => {
+                        self.displayLyricSliders()
+                        // User will need to save ....
+                    });                   
+                }
+            },
+            validateTag: function(tag){
+                if (languages.includes(tag)){
+                    return true;
+                }
+                console.error("This should never fail")
+                return false
+            },
+            backChecker: function(e){
+                let newStatus = app.form.convertToData('#edit-donation')
+                // Dirty is True if they don't match
+                return (JSON.stringify(saveStatus) != JSON.stringify(newStatus))
+                ev.preventDefault();
+                // If status means form can be edited AND If form is dirty
+                // then ask for confirmation 
+                // complete 1581051573142 Submitted 1581051573215
+                if (isDirty()) {
+                    // 
+                    var dialog = app.dialog.create({
+                        backdrop: true,
+                        closeByBackdropClick: false,
+                        title: "<t>Leave this page?</t>",
+                        text: "<t>Do you want to save your changes?</t>",
+                        buttons: [{
+                                text: "<t>Don't Save</t>",
+                                onClick: (dialog, ev) => {
+                                    this.$router.back();
+                                }
+                            },
+                            {
+                                text: "<t>Save</t>",
+                                onClick: (dialog, ev) => {
+                                    app.dialog.close()
+                                    setStatus()
+                                }
+                            }
+                        ],
+                        verticalButtons: true
+                    });
+                    dialog.open();
+                }
+                // If form is empty, go back immediately
+                else {
+                    this.$router.back();
+                }
+            }
+        }
+    }
+</script>

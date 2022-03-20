@@ -1,5 +1,22 @@
 //const dirTree = require("directory-tree");
 /*
+Does it...
+Starts with 
+A B C D E F G
+valid characters to follow, can be in any order
+' - ', '/', '-', '#', 'b', 'sus', 'maj', 'm','2','s', '7', '(', ')'....  A-G
+
+IF whole line is "starts with" followed by "valid follower"
+Then it is a chord line
+
+// get length of Chord
+// get length of lyric
+
+//first chord is at position 0
+//second chord is at pos 6
+//third chord is at pos 14
+
+
 Above All
 
 A		    E/D-D   Esus - E		   A		A2
@@ -32,9 +49,12 @@ Like a rose trampled on the ground,
 You took the fall and thought of me, 	above all.
 
 */
-array.forEach(element => {
-  
-});
+for (const key in object) {
+  if (Object.hasOwnProperty.call(object, key)) {
+    const element = object[key];
+    
+  }
+}
 
 var fs = require('fs');
 const { stringify } = require("querystring");

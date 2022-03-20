@@ -11,21 +11,41 @@
                 </div>
                 <div class="title">{{#if loading}}{{else}} {{song.title[defaultLanguage]}} {{/if}}</div>
                 <div class="right">
+                    <a @click="downloadSong" class="button">
+                        <span class="fa-stack">
+                            <i class="fas fa-square fa-stack-2x" style="color:orange"></i>
+                            <!-- <i class="fas fa-down fa-stack-1x" style="color:blue"></i> -->
+                            <i class="fas fa-file fa-stack-1x"
+                                style="color:green; text-align:left;  margin-top: 9px; margin-left: 5px;"></i>
+                        </span>
+                    </a>
+                    <a @click="insertChords" class="button">
+                        <span class="fa-stack">
+                            <i class="fas fa-music fa-stack-2x" style="color:green"></i>
+                            <i class="fas fa-square fa-stack-1x" style="color:yellow"></i>
+                            <i class="fas fa-plus fa-stack-1x"
+                                style="color:red; text-align:left;  margin-top: 9px; margin-left: 5px;"></i>
+                        </span>
+                    </a>
+
+                    </a>
                     <a @click="pickCodeToAdd" class="button">
                         <span class="fa-stack">
                             <i class="fas fa-square fa-stack-2x" style="color:orange"></i>
                             <i class="fas fa-globe fa-stack-1x" style="color:blue"></i>
-                            <i class="fas fa-plus fa-stack-1x" style="color:red; text-align:left;  margin-top: 9px; margin-left: 5px;"></i>
+                            <i class="fas fa-plus fa-stack-1x"
+                                style="color:red; text-align:left;  margin-top: 9px; margin-left: 5px;"></i>
                         </span>
                     </a>
                     <a @click="pickLanguageCode" class="button">
                         <span class="fa-stack">
                             <i class="fas fa-square fa-stack-2x" style="color:grey"></i>
                             <i class="fas fa-globe fa-stack-1x" style="color:white"></i>
-                            <i class="fas fa-plus fa-stack-1x" style="color:Tomato; text-align:left;  margin-top: 9px; margin-left: 5px;"></i>
+                            <i class="fas fa-plus fa-stack-1x"
+                                style="color:Tomato; text-align:left;  margin-top: 9px; margin-left: 5px;"></i>
                         </span>
                     </a>
-                </div> 
+                </div>
             </div>
         </div>
         <div class="page-content hide-navbar-on-scroll">
@@ -34,63 +54,64 @@
                     <div class="list no-hairlines-md" id="songMetaData">
                         {{#if loading}}
                         {{else}}
-                            <ul>
-                                <li class="item-content item-input">
-                                    <div class="item-inner">
-                                        <div class="item-title item-label">
-                                            <t>Author</t>
-                                        </div>
-                                        <div class="item-input-wrap">
-                                            <input name="author" type="text" placeholder="Author" value="{{author}}" />
-                                            <span class="input-clear-button"></span>
-                                        </div>
+                        <ul>
+                            <li class="item-content item-input">
+                                <div class="item-inner">
+                                    <div class="item-title item-label">
+                                        <t>Author</t>
                                     </div>
-                                </li>
-                                <li class="item-content item-input">
-                                    <div class="item-inner">
-                                        <div class="item-title item-label">
-                                            <t>Key</t>
-                                        </div>
-                                        <div class="item-input-wrap">
-                                            <input name="key" type="text" placeholder="Key" value="{{key}}" />
-                                            <span class="input-clear-button"></span>
-                                        </div>
+                                    <div class="item-input-wrap">
+                                        <input name="author" type="text" placeholder="Author" value="{{author}}" />
+                                        <span class="input-clear-button"></span>
                                     </div>
-                                </li>
-                            </ul>
+                                </div>
+                            </li>
+                            <li class="item-content item-input">
+                                <div class="item-inner">
+                                    <div class="item-title item-label">
+                                        <t>Key</t>
+                                    </div>
+                                    <div class="item-input-wrap">
+                                        <input name="key" type="text" placeholder="Key" value="{{key}}" />
+                                        <span class="input-clear-button"></span>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
 
-                            <div class="block-title">
-                                <t>Title</t>
-                            </div>
-                            <ul id="edit-title">
-                                {{ printEachLanguage @root.title @root.languages "title"}}
-                            </ul>
+                        <div class="block-title">
+                            <t>Title</t>
+                        </div>
+                        <ul id="edit-title">
+                            {{ printEachLanguage @root.title @root.languages "title"}}
+                        </ul>
 
-                            <div class="block-title">
-                                <t>Metadata</t>
-                            </div>
-                            <ul id="edit-metadata">
-                                {{ printEachLanguage @root.metadata @root.languages "metadata"}}
-                            </ul>
+                        <div class="block-title">
+                            <t>Metadata</t>
+                        </div>
+                        <ul id="edit-metadata">
+                            {{ printEachLanguage @root.metadata @root.languages "metadata"}}
+                        </ul>
 
-                            <div class="block-title">
-                                <t>Verse Labels</t>
-                            </div>
-                            <ul id="edit-verseLabels">
-                                {{#each verseLabels}}
-                                    <li class="item-content item-input">
-                                        <div class="item-inner">
-                                            <div class="item-title item-label">
-                                                <t>Label</t>
-                                            </div>
-                                            <div class="item-input-wrap">
-                                                <textarea name="verseLabel" class="resizable resizeMe" placeholder="Label">{{label}}</textarea>
-                                                <span class="input-clear-button"></span>
-                                            </div>
-                                        </div>
-                                    </li>
-                                {{/each}}
-                            </ul>
+                        <div class="block-title">
+                            <t>Verse Labels</t>
+                        </div>
+                        <ul id="edit-verseLabels">
+                            {{#each verseLabels}}
+                            <li class="item-content item-input">
+                                <div class="item-inner">
+                                    <div class="item-title item-label">
+                                        <t>Label</t>
+                                    </div>
+                                    <div class="item-input-wrap">
+                                        <textarea name="verseLabel" class="resizable resizeMe"
+                                            placeholder="Label">{{label}}</textarea>
+                                        <span class="input-clear-button"></span>
+                                    </div>
+                                </div>
+                            </li>
+                            {{/each}}
+                        </ul>
                         {{/if}}
                     </div>
                 </div>
@@ -180,6 +201,7 @@
     var app
 
     import DataManager from '../data/dataManager';
+    import saveFile from '../data/saveFile';
     import Song from '../data/song';
     import Preference from "../data/preference";
     const dataManager = new DataManager();
@@ -206,7 +228,7 @@
 
     export default {
         // Component Data
-        data: function() {
+        data: function () {
             // Must return an object
             return {
                 loading: true
@@ -214,7 +236,7 @@
         },
         // Page Events
         on: {
-            pageInit: function(e, page) {
+            pageInit: function (e, page) {
                 self = this;
                 app = self.$app;
                 songId = this.$route.params.songId;
@@ -257,14 +279,14 @@
                         verseLabels: verseLabels,
                         languages: languages
                     });
-                    self.$tick(function() {
+                    self.$tick(function () {
                         self.$('textarea').trigger('change');
                     });
                 });
             },
         },
         methods: {
-            save: function(e) {
+            save: function (e) {
                 var $form = this.$('#songMetaData')
                 var $ = $form.find("select[name='']")
 
@@ -315,50 +337,50 @@
                         this.$router.back();
                     });
             },
-            pickLanguageCode: function() {
+            pickLanguageCode: function () {
                 //make popup: list of all languages minus langagues already in song
                 var el = `<div class="popup">
                         <div class="block">
                             <strong><h3>*Pick language to add</h3></strong>`
                 locale.customLocales.forEach(element => {
-                    if(!languages.includes(element['tag'])){
+                    if (!languages.includes(element['tag'])) {
                         el += `<a  href="#" id="${element.tag}" class="col popup-close button button-fill ${element.tag}">${element.name} - ${element.local}</a></p>`
                     }
                 });
-                el +=  `</div></div>`
+                el += `</div></div>`
                 var a = app.popup.create({
-                    content:el,
+                    content: el,
                     closeByBackdropClick: true,
                     on: {
                         close: function (popup) {
                             var selected;
-                            if( popup && popup.$el[0].children[0] && popup.$el[0].children[0].getElementsByClassName('active-state')[0]){
+                            if (popup && popup.$el[0].children[0] && popup.$el[0].children[0].getElementsByClassName('active-state')[0]) {
                                 selected = popup.$el[0].children[0].getElementsByClassName('active-state')[0].id
-                            } else { 
+                            } else {
                                 // This is a very janky way of digging into the popup's elements to find the 'ripple-wave class
                                 var popupButtons = this.$el[0].children[0].getElementsByClassName('col')
-                                if(popupButtons.length == 1){
+                                if (popupButtons.length == 1) {
                                     // only one language tag here
                                     selected = popupButtons[0].id
-                                } else{
+                                } else {
                                     // Start digging...
                                     var a = Array.from(popupButtons)
                                     let i = 0
-                                    while (i < a.length){
-                                        if (a[i].children){
+                                    while (i < a.length) {
+                                        if (a[i].children) {
                                             selected = a[i++].id
                                         }
                                     }
                                 }
-                            }   
+                            }
 
                             self.addLanguageCode(selected)
                         },
                     }
-                }); 
+                });
                 a.open();
             },
-            addLanguageCode: function(newLanguageTag) {
+            addLanguageCode: function (newLanguageTag) {
                 let newData = app.song;
 
                 // Language tag
@@ -388,50 +410,242 @@
                     languages: languages
                 });
             },
+            // Add chords, file or paste
+            insertChords: function () {
+                //make popup: list of all languages minus langagues already in song
+                // open popup
+                var totalLines = 0;
+                app.song.lyrics.verses.forEach(verse => {
+                    totalLines += verse.lines.length;
+                });
+
+                var el = `<div class="popup">
+                        <div class="block">
+                            <strong><h3>*Total Lines: ${totalLines}</h3></strong>
+                            <input type="file" id="file-selector" accept=".txt, .doc, .docx">
+                        </div></div>`
+
+                var dialog = app.dialog.create({
+                    backdrop: true,
+                    closeByBackdropClick: false,
+                    title: `<t>Upload File or paste text
+                    Current total lines: ${totalLines}</t>`,
+                    text: "<input type='file' id='file' accept='.txt, .doc, .docx'> </br><textarea id='textarea' cols='29' rows='5'></textarea>",
+                    buttons: [{
+                        text: "<t>Cancel</t>",
+                        onClick: (dialog, ev) => {
+                            dialog.close();
+                        }
+                    },
+                    {
+                        text: "<t>Upload - overwrite</t>",
+                        onClick: (dialog, ev) => {
+                            self.handleChords(self.$$("#file")[0].files[0], totalLines, self.$$("#textarea")[0].value);
+                            self.savableUpdate(true);
+                            dialog.close();
+                        }
+                    },
+                        // {
+                        //     text: "<t>Upload - add on</t>",
+                        //     onClick: (dialog, ev) => {
+                        //         self.handleFilesAddon(self.$$("#file")[0].files[0], languageTag, totalLines, self.$$("#textarea")[0].value);
+                        //         self.savableUpdate(true);
+                        //         dialog.close();
+                        //     }
+                        // }
+                    ],
+                    verticalButtons: true
+                });
+                dialog.open();
+            },
+            handleFiles: function (file, tag, totalLines, userText) {
+
+                if (file && !userText) {
+                    const reader = new FileReader();
+
+                    reader.onload = (event) => {
+                        const file = event.target.result;
+                        const allLines = file.split(/\r\n|\n/);
+                        processLines(allLines);
+                    };
+
+                    reader.onerror = (event) => {
+                        alert(event.target.error.name);
+                    };
+
+                    reader.readAsText(file);
+                } else if (userText) {
+                    const allLines = userText.split(/\r\n|\n/);
+                    processLines(allLines);
+                }
+
+                function processLines(allLines) {
+
+                    var linesForExistingSlots = allLines.splice(0, totalLines)
+
+                    song.lyrics.verses.forEach(verse => {
+                        verse.lines.forEach(line => {
+                            // add blanks
+                            line.phrases.forEach(phrase => {
+                                phrase[tag] = ''
+                            });
+                            // add upload
+                            let newLine = linesForExistingSlots.splice(0, 1)[0];
+                            console.log(newLine);
+                            line.phrases[0][tag] = newLine;
+                        });
+                    });
+                    if (allLines.length) { // overflow goes into last verse
+                        var lastVerseId = song.lyrics.verses.length - 1;
+                        var lastLineId = song.lyrics.verses[lastVerseId].lines.length - 1;
+
+                        var templatePhrase = {};
+                        for (const key in song.lyrics.verses[lastVerseId].lines[lastLineId].phrases[0]) {
+                            if (Object.hasOwnProperty.call(song.lyrics.verses[lastVerseId].lines[lastLineId].phrases[0], key)) {
+                                if (key != 'chord' && key != 'number') {
+                                    templatePhrase[key] = '';
+                                }
+                            }
+                        }
+
+                        allLines.forEach(newLine => {
+                            // The same line gets inserted over and over if I DON'T do this
+                            let a = { 'phrases': [] };
+                            a.phrases.push({})
+                            a.phrases[0][tag] = newLine
+                            song.lyrics.verses[lastVerseId].lines[++lastLineId] = a;
+                        });
+                    }
+                }
+
+            },
+            handleChords: function (file, totalLines, userText) {
+
+                if (file && !userText) {
+                    const reader = new FileReader();
+
+                    reader.onload = (event) => {
+                        const file = event.target.result;
+                        const allLines = splitChords(file);
+                        processLines(allLines);
+                    };
+
+                    reader.onerror = (event) => {
+                        alert(event.target.error.name);
+                    };
+
+                    reader.readAsText(file);
+                } else if (userText) {
+                    const allLines = splitChords(userText)
+                    processLines(allLines);
+                }
+                function splitChords(text) {
+                    //G   D   A
+                    //G   C   Bm
+                    text = text.replaceAll(/^\s*\n/gm, ""); // TODO we we actually want to strip all blank lines?
+                    var textArray = text.split(/\r\n|\n/);
+                    textArray.forEach((line, index) => {
+                        // remove all spaces " "
+                        textArray[index] = line.split(/[\s,]+/)
+                    });
+                    // [['A','E'],['G','Bm']]
+                    return textArray;
+                }
+
+                function processLines(allLines) {
+
+                    var linesForExistingSlots = allLines.splice(0, totalLines);
+
+                    song.lyrics.verses.forEach((verse, vIndex) => {
+                        verse.lines.forEach((line, lIndex) => {
+                            var chordLine = linesForExistingSlots[vIndex + lIndex]
+                            var chordToInsert = 0
+                            line.phrases.forEach((phrase, pIndex) => {
+                                // add upload
+                                if (phrase["chord"]) {
+                                    phrase['chord'] = chordLine[chordToInsert++];
+                                }
+                            });
+                            // let newLine = linesForExistingSlots.splice(0, 1)[0];
+                            if (chordLine.length - line.phrases.length) {
+                                // if we're at end of existing, and there's more, then add on
+                                for (let index = chordToInsert; chordToInsert < chordLine.length; chordToInsert++) {
+                                    song.lyrics.verses[vIndex].lines[lIndex].phrases.push({ 'chord': chordLine[chordToInsert] });
+                                }
+                            }
+                        });
+                    });
+                    return song;
+
+
+                    if (allLines.length) { // overflow goes into last verse
+                        var lastVerseId = song.lyrics.verses.length - 1;
+                        var lastLineId = song.lyrics.verses[lastVerseId].lines.length - 1;
+
+                        var templatePhrase = {};
+                        for (const key in song.lyrics.verses[lastVerseId].lines[lastLineId].phrases[0]) {
+                            if (Object.hasOwnProperty.call(song.lyrics.verses[lastVerseId].lines[lastLineId].phrases[0], key)) {
+                                if (key != 'chord' && key != 'number') {
+                                    templatePhrase[key] = '';
+                                }
+                            }
+                        }
+
+                        allLines.forEach(newLine => {
+                            // The same line gets inserted over and over if I DON'T do this
+                            let a = { 'phrases': [] };
+                            a.phrases.push({})
+                            a.phrases[0]['Chord'] = newLine
+                            song.lyrics.verses[lastVerseId].lines[++lastLineId] = a;
+                        });
+                    }
+                }
+            },
+
             // Add lyrics to existing language
-            pickCodeToAdd: function() {
+            pickCodeToAdd: function () {
                 //make popup: list of all languages minus langagues already in song
                 var el = `<div class="popup">
                         <div class="block">
                             <strong><h3>*Pick language to bulk edit lyrics</h3></strong>`
                 locale.customLocales.forEach(element => {
-                    if(languages.includes(element['tag'])){
+                    if (languages.includes(element['tag'])) {
                         el += `<a  href="#" id="${element.tag}" class="col popup-close button button-fill ${element.tag}">${element.name} - ${element.local}</a></p>`
                     }
                 });
-                el +=  `</div></div>`
+                el += `</div></div>`
                 var a = app.popup.create({
-                    content:el,
+                    content: el,
                     closeByBackdropClick: true,
                     on: {
                         close: function (popup) {
                             var selected;
-                            if( popup && popup.$el[0].children[0] && popup.$el[0].children[0].getElementsByClassName('active-state')[0]){
+                            if (popup && popup.$el[0].children[0] && popup.$el[0].children[0].getElementsByClassName('active-state')[0]) {
                                 selected = popup.$el[0].children[0].getElementsByClassName('active-state')[0].id
                             } else {
                                 // This is a very janky way of digging into the popup's elements to find the 'ripple-wave class
                                 var popupButtons = this.$el[0].children[0].getElementsByClassName('col')
-                                if(popupButtons.length == 1){
+                                if (popupButtons.length == 1) {
                                     // only one language tag here
                                     selected = popupButtons[0].id
-                                } else{
+                                } else {
                                     // Start digging...
                                     var a = Array.from(popupButtons)
                                     let i = 0
-                                    while (i < a.length){
-                                        if (a[i].children){
+                                    while (i < a.length) {
+                                        if (a[i].children) {
                                             selected = a[i++].id
                                         }
                                     }
                                 }
-                            } 
+                            }
                             self.addLyricsPopup(selected)
                         },
                     }
-                }); 
+                });
                 a.open();
             },
-            addLyricsPopup: function(languageTag) {
+            addLyricsPopup: function (languageTag) {
                 //make popup: list of all languages minus langagues already in song
                 // open popup
                 var totalLines = 0;
@@ -444,47 +658,64 @@
                             <strong><h3>*Upload File with ${totalLines} total lines.</h3></strong>
                             <input type="file" id="file-selector" accept=".txt, .doc, .docx">
                         </div></div>`
-                        
+
                 var dialog = app.dialog.create({
                     backdrop: true,
                     closeByBackdropClick: false,
-                    title: `<t>Upload File with ${totalLines} total lines.</t>`,
-                    text: "<input type='file' id='file' accept='.txt, .doc, .docx'>",
+                    title: `<t>Upload File or paste text
+                    Current total lines: ${totalLines}</t>`,
+                    text: "<input type='file' id='file' accept='.txt, .doc, .docx'> </br><textarea id='textarea' cols='29' rows='5'></textarea>",
                     buttons: [{
-                            text: "<t>Cancel</t>",
-                            onClick: (dialog, ev) => {
-                                dialog.close();
-                            }
-                        },
-                        {
-                            text: "<t>Upload - overwrite</t>",
-                            onClick: (dialog, ev) => {
-                                self.handleFiles(self.$$("#file")[0].files[0] , languageTag, totalLines);
-                                self.savableUpdate(true);
-                                dialog.close();
-                            }
-                        },
-                        {
-                            text: "<t>Upload - add on</t>",
-                            onClick: (dialog, ev) => {
-                                self.handleFilesAddon(self.$$("#file")[0].files[0] , languageTag, totalLines);
-                                self.savableUpdate(true);
-                                dialog.close();
-                            }
+                        text: "<t>Cancel</t>",
+                        onClick: (dialog, ev) => {
+                            dialog.close();
                         }
+                    },
+                    {
+                        text: "<t>Upload - overwrite</t>",
+                        onClick: (dialog, ev) => {
+                            self.handleFiles(self.$$("#file")[0].files[0], languageTag, totalLines, self.$$("#textarea")[0].value);
+                            self.savableUpdate(true);
+                            dialog.close();
+                        }
+                    },
+                    {
+                        text: "<t>Upload - add on</t>",
+                        onClick: (dialog, ev) => {
+                            self.handleFilesAddon(self.$$("#file")[0].files[0], languageTag, totalLines, self.$$("#textarea")[0].value);
+                            self.savableUpdate(true);
+                            dialog.close();
+                        }
+                    }
                     ],
                     verticalButtons: true
                 });
                 dialog.open();
             },
-            handleFiles: function(file, tag, totalLines) {
-                const reader = new FileReader();
+            handleFiles: function (file, tag, totalLines, userText) {
 
-                reader.onload = (event) => {
-                    const file = event.target.result;
-                    const allLines = file.split(/\r\n|\n/);
-                    
-                    var linesForExistingSlots = allLines.splice(0,totalLines)
+                if (file && !userText) {
+                    const reader = new FileReader();
+
+                    reader.onload = (event) => {
+                        const file = event.target.result;
+                        const allLines = file.split(/\r\n|\n/);
+                        processLines(allLines);
+                    };
+
+                    reader.onerror = (event) => {
+                        alert(event.target.error.name);
+                    };
+
+                    reader.readAsText(file);
+                } else if (userText) {
+                    const allLines = userText.split(/\r\n|\n/);
+                    processLines(allLines);
+                }
+
+                function processLines(allLines) {
+
+                    var linesForExistingSlots = allLines.splice(0, totalLines)
 
                     song.lyrics.verses.forEach(verse => {
                         verse.lines.forEach(line => {
@@ -493,19 +724,19 @@
                                 phrase[tag] = ''
                             });
                             // add upload
-                            let newLine = linesForExistingSlots.splice(0,1)[0];
+                            let newLine = linesForExistingSlots.splice(0, 1)[0];
                             console.log(newLine);
                             line.phrases[0][tag] = newLine;
                         });
                     });
-                    if(allLines.length){ // overflow goes into last verse
-                        var lastVerseId = song.lyrics.verses.length-1;
-                        var lastLineId = song.lyrics.verses[lastVerseId].lines.length-1;
-                        
+                    if (allLines.length) { // overflow goes into last verse
+                        var lastVerseId = song.lyrics.verses.length - 1;
+                        var lastLineId = song.lyrics.verses[lastVerseId].lines.length - 1;
+
                         var templatePhrase = {};
                         for (const key in song.lyrics.verses[lastVerseId].lines[lastLineId].phrases[0]) {
                             if (Object.hasOwnProperty.call(song.lyrics.verses[lastVerseId].lines[lastLineId].phrases[0], key)) {
-                                if(key != 'chord' && key != 'number'){
+                                if (key != 'chord' && key != 'number') {
                                     templatePhrase[key] = '';
                                 }
                             }
@@ -513,47 +744,49 @@
 
                         allLines.forEach(newLine => {
                             // The same line gets inserted over and over if I DON'T do this
-                            let a = {'phrases':[]};
+                            let a = { 'phrases': [] };
                             a.phrases.push({})
                             a.phrases[0][tag] = newLine
                             song.lyrics.verses[lastVerseId].lines[++lastLineId] = a;
                         });
                     }
-                };
+                }
 
-                reader.onerror = (event) => {
-                    alert(event.target.error.name);
-                };
-                
-                reader.readAsText(file);
             },
-            handleFilesAddon: function(file, tag, totalLines) {
-                const reader = new FileReader();
+            handleFilesAddon: function (file, tag, totalLines, userText) {
+                if (file && !userText) {
+                    const reader = new FileReader();
 
-                reader.onload = (event) => {
-                    const file = event.target.result;
-                    const allLines = file.split(/\r\n|\n/);
+                    reader.onerror = (event) => {
+                        alert(event.target.error.name);
+                    };
 
-                    var lastVerseId = song.lyrics.verses.length-1;
-                    var lastLineId = song.lyrics.verses[lastVerseId].lines.length-1;
+                    reader.onload = (event) => {
+                        const file = event.target.result;
+                        const allLines = file.split(/\r\n|\n/);
+                        writeLines(allLines)
+                    };
+                    reader.readAsText(file);
+                } else if (userText) {
+                    const allLines = userText.split(/\r\n|\n/);
+                    writeLines(allLines)
+                }
+
+                function writeLines(allLines) {
+                    var lastVerseId = song.lyrics.verses.length - 1;
+                    var lastLineId = song.lyrics.verses[lastVerseId].lines.length - 1;
 
                     allLines.forEach(newLine => {
                         // The same line gets inserted over and over if I DON'T do this
-                        let a = {'phrases':[]};
+                        let a = { 'phrases': [] };
                         a.phrases.push({})
                         a.phrases[0][tag] = newLine
                         song.lyrics.verses[lastVerseId].lines[++lastLineId] = a;
                     });
-                };
-
-                reader.onerror = (event) => {
-                    alert(event.target.error.name);
-                };
-                
-                reader.readAsText(file);
+                }
             },
-            savableUpdate: function(bool) {
-                if (typeof(bool) != 'boolean'){
+            savableUpdate: function (bool) {
+                if (typeof (bool) != 'boolean') {
                     bool = false;
                 }
                 app.savable = bool;
@@ -561,6 +794,25 @@
                     savable: bool
                 });
             },
+            downloadSong: function () {
+                console.log(song)
+                debugger
+                // let data = song || app.song
+                let data = JSON.stringify(song || app.song)
+                var filename = song.title.en || app.song.title.en || "song_no_en_title";
+                downloadObjectAsJson(data, filename)
+
+
+                function downloadObjectAsJson(exportObj, exportName) {
+                    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+                    var downloadAnchorNode = document.createElement('a');
+                    downloadAnchorNode.setAttribute("href", dataStr);
+                    downloadAnchorNode.setAttribute("download", exportName + ".json");
+                    document.body.appendChild(downloadAnchorNode); // required for firefox
+                    downloadAnchorNode.click();
+                    downloadAnchorNode.remove();
+                }
+            }
         },
     }
 </script>

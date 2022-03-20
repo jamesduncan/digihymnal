@@ -59,7 +59,7 @@
                             </div>
                             
                             <div class="item-title item-label">
-                                Chord tools:
+                                Number tools:
                             </div>
                             <!--
                                 phrase
@@ -67,7 +67,7 @@
                             <div class="menu-item">
                                 <div class="menu-item-content icon-only">
                                     <div class="menu-item-content">
-                                        <a @click="addPhrase" class="col button">
+                                        <a @click="addNote" class="col button">
                                             <i class="text-color-gray fas fa-plus"></i>
                                         </a>
                                     </div>
@@ -79,7 +79,7 @@
                             <div class="menu-item">
                                 <div class="menu-item-content icon-only">
                                     <div class="menu-item-content">
-                                        <a @click="deletePhrase" class="col button">
+                                        <a @click="deleteNote" class="col button">
                                             <i class="text-color-gray fas fa-trash"></i>
                                         </a>
                                     </div>
@@ -117,7 +117,7 @@
                             <div class="verse">
                                 <div class="line" id="edit-line">
                                     <!-- -->
-                                    {{ printEachPhrase @root.line @root.languages }}
+                                    {{ printEachNumber @root.line.numbers }}
                                     <!-- -->
                                     {{ printLyric @root.line}}
                                 </div>
@@ -205,40 +205,41 @@
     .noChords .chord {
         top: -30px;
     }
+    .item-input-wrap{
+        width: 100%;
+    }
 </style>
 <script>
-    var songId
+    var app
+    var firstLine
+    var languages
+    var lastLine
+    var lastVerse
+    var line
+    var lineId
     var loading
+    var lyricList
+    var numberArray = [];
+    var numberStartLocations
     var savable = false;
+    var song
+    var songId
     var verseId
     var verseLabel
-    var lineId
-    var languages
-    var lyricList
-    var line
-    var song
-    var app
-    var lastVerse
-    var lastLine
-    var firstLine
-    var chordStartLocations
-    import DataManager from '../data/dataManager';
-    import Song from '../data/song';
-    import noUiSlider from 'nouislider';
     import 'nouislider/dist/nouislider.css';
-    // //  the namespace:
-    // import * as noUiSlider from 'nouislider';
-    // import 'nouislider/dist/nouislider.css';
-
-    // // Alternatively, you can include both files:
-    // <link href="nouislider.css" rel="stylesheet">
-    // <script src="nouislider.js"><//////script>
-
+    import DataManager from '../data/dataManager';
+    import LineModulate from '../data/lineModulate';
+    import noUiSlider from 'nouislider';
+    import ParseText from "../data/parseText";
     import Preference from "../data/preference";
+    import Song from '../data/song';
+        
     const dataManager = new DataManager();
-    const songCollection = new Song();
+    const lineModulate = new LineModulate();
+    const parseText = new ParseText();
     const preference = new Preference();
-
+    const songCollection = new Song();
+    
     // Import locales
     const locale = require('../js/locales.js');
 
@@ -377,174 +378,200 @@
                     self.$app.dialog.alert('Please correct your entries.');
                     console.error('<t>Please correct your entries.</t>');
                 } else {
-                    let newData = song;
-
-                    // How much metadata?
-                    let metadataLength = (self.$('.metadata')[0].children).length;
-                    var newLanguageLineData = {}
-                    
-                    var chordPlacerIndex = 0; // if a new first phrase is chordless, this starts on second phrase
-
-                    languages.forEach(langTag => { // selected language
-                        newLanguageLineData[langTag] = self.parseLanguageText(langTag);
-                        // this logic tries to account for going from a chord at the beginning, to forcing a chordless phrase
-                        if ( metadataLength == (newLanguageLineData[langTag].length - 1)){ // This means there is a new chordless phrase
-                            // Other language might have already been inserted, 
-                            if (Object.hasOwnProperty.call(newData.lyrics.verses[verseId].lines[lineId].phrases[0], 'chord')) { // if 0 has chord, need to insert new chordless phrase
-                                let newPhrase = {}
-                                languages.forEach(langTag => {newPhrase[langTag] = ''}); // make / insert new chordless phrase
-                                newData.lyrics.verses[verseId].lines[lineId].phrases.splice(0, 0, newPhrase);
-                            } 
-                            chordPlacerIndex = 1;
-                        } else if (chordPlacerIndex || newLanguageLineData[langTag].length == ( metadataLength - 1 ) ) { // this language doesn't have no-chord phrase, another one does.
-                            newLanguageLineData[langTag].splice(0,0,'');
-                        };
-                        let i = 0;
-                        var expectedLength = newData.lyrics.verses[verseId].lines[lineId].phrases.length
-                        if(newLanguageLineData[langTag].length != expectedLength){
-                            if(expectedLength == 1){ // we may not have added chord, and still be trying to save.
-                                newLanguageLineData[langTag][0] = newLanguageLineData[langTag].join('');
-                                while(newLanguageLineData[langTag].length != expectedLength){
-                                    newLanguageLineData[langTag].pop()
-                                }
-                            }else if(newLanguageLineData[langTag].length == 1 + expectedLength){ // only a difference of one means theres a chord at beginning of phrase now.
-                                if (newLanguageLineData[langTag].pop()!=''){
-                                    console.error("Why is this happening?")
-                                    debugger;
-                                }
-                            }else{
-                                console.error("Why is this happening?")
-                                debugger
-                            }
-                        }
-                        while (i < newLanguageLineData[langTag].length){ // insert this language to the song data
-                            const element = newLanguageLineData[langTag][i];
-                            newData.lyrics.verses[verseId].lines[lineId].phrases[i][langTag] = element;
-                            i++;
-                        }
-                    });
-                    var i = 0;
-
-                    while (i < metadataLength) {
-                        let id = ('.chord').concat(i)
-                        let chord = self.$(id)[0]//.value // self.$('.chord1').firstElementChild.value
-                        if (chord) { // our template will not create form if it's supposed to be blank
-                            // setting chord
-                            newData.lyrics.verses[verseId].lines[lineId].phrases[chordPlacerIndex]['chord'] = chord.value;
+                    let newData = song; 
+                    var metaIndex = 0 
+                    numberArray = []
+                    while ( metaIndex < newData.lyrics.verses[verseId].lines[lineId].numbers.length ){
+                        let id = ('.number').concat(metaIndex)
+                        let number = self.$(id)[0]//.value // self.$('.number1').firstElementChild.value
+                        if (number) { // our template will not create form if it's supposed to be blank
                             // setting number
-                            id = ('.number').concat(i) // '.number1'
                             let number = self.$(id)[0].value 
-                            newData.lyrics.verses[verseId].lines[lineId].phrases[chordPlacerIndex]['number'] = number
-                        }
-                        chordPlacerIndex++;
-                        i++;
-                    };
+                            numberArray.push(number)
+                        } 
+                        metaIndex++;
+                    }
+                    
+                    var newPhrasesCombined = [];
+                    languages.forEach(langTag => { // selected language
+                        newPhrasesCombined = lineModulate.combineLines(newPhrasesCombined, self.parseLanguageText(langTag));
+                    });  
+
+                    newData.lyrics.verses[verseId].lines[lineId].phrases = newPhrasesCombined;
+                    newData.lyrics.verses[verseId].lines[lineId].numbers = numberArray;
+                    // // this only updates the numbers, **if the nouisliders were not modified** this would be a fast way of updating just the notes
+                    // var metaIndex = 0;
+                    // var phraseIndex = 0;
+
+                    // while (phraseIndex < newData.lyrics.verses[verseId].lines[lineId].phrases.length) {
+                    //     if(newData.lyrics.verses[verseId].lines[lineId].phrases[phraseIndex].number){
+                    //         let id = ('.number').concat(metaIndex)
+                    //         let number = self.$(id)[0]//.value // self.$('.number1').firstElementChild.value
+                    //         if (number) { // our template will not create form if it's supposed to be blank
+                    //             // setting number
+                    //             let number = self.$(id)[0].value 
+                    //             newData.lyrics.verses[verseId].lines[lineId].phrases[phraseIndex]['number'] = number
+                    //         }
+                    //         metaIndex ++;
+                    //     }
+                    //     phraseIndex++;
+                    // };
+                    
                     // save
-                    line = newData.lyrics.verses[verseId].lines[lineId];
+                    line = {
+                        'phrases':newPhrasesCombined,
+                        'numbers':numberArray
+                    };
                     song = newData;
                     app.song = newData;
-                    songCollection.db.setItem(songId, newData);
+                    //songCollection.db.setItem(songId, newData);
                     self.savableUpdate(false);
-                    self.clearSliders();
+                    //self.clearSliders();
+
+                    // TODO  when there are 3+ languages sliders get nuked somewhere starting here
                     self.$setState({
                         loading: false,
                         song: newData,
                         line: newData.lyrics.verses[verseId].lines[lineId]
                     }, () => {
+                        // <endTODO>The slider elements are destroyed by now
                         self.displayLyricSliders();
                     });
                     // send line changes to server
                     // dataManager.putLine(songId, verseId, lineId, newData.lyrics.verses[verseId].lines[lineId])
                     //     .then(responseText => alert(JSON.stringify(responseText)));
                     // send whole song to server
-                    dataManager.putSong(songId, newData)
-                     .then(responseText => alert(JSON.stringify(responseText)));
+                    // dataManager.putSong(songId, newData)
+                    //  .then(responseText => alert(JSON.stringify(responseText)));
                 
                 }
             },
-            parseLanguageText: function(tag, languageLine, chordArray){
+            // make phraseList 
+            parseLanguageText: function(tag, languageArr, insertArray, chordMap){
                 // I need the full string "Twinkle, twinkle, little star"
                 // I need placment of phrase breaks ["0.00", "10.00", "15.00"]
-                // return [('Twinkle, tw'),('inkle'),(', little star')]
-                if(!chordArray){ // get from dom
+                // make phrases list:
+                var phraseArray = [] ;
+                // [(en:'Twinkl%e, tw'),(chord:'A',en:'ink%le'),(chord:'E',en:', litt%le star%%%'),(chord:'D',en:'%%%')] 
+                if(!insertArray){ // get from dom
                     try {
-                        chordArray = this.$$(`#slider-${tag}`)[0].noUiSlider.get()
+                        insertArray = this.$$(`#slider-${tag}`)[0].noUiSlider.get()
                     } catch (error) {
                         console.error(error)
                     }
-                    if (!chordArray) {
+                    if (!insertArray) {
                         console.error({"no div for tag":tag})
                     }
                 }
-                if(!languageLine){ // get from global var
+                
+                if(!languageArr){ // get from global var
                     try {
-                        languageLine = ''
+                        languageArr = []
+                        chordMap = []
+                        var languageLen = 0
+                        var lastLength = 0
+                        var first = true;
                         line.phrases.forEach(phrase => {
                             if (Object.hasOwnProperty.call(phrase, tag)) {
-                                languageLine = languageLine.concat(phrase[tag]);   
+                                // let cleanLyric = lineModulate.hiddenStringCleaner(phrase[tag]); // this doesn't work?
+                                let cleaner = phrase[tag].replaceAll(String.fromCharCode(173), '')
+                                let arr = lineModulate.diacriticCheckerChord(cleaner, 0);
+                                languageArr = languageArr.concat(arr)
+                                languageLen += arr.length
+                            } 
+                            let phraseMap = {}
+                            if (Object.hasOwnProperty.call(phrase, 'chord')) { // has chord
+                                phraseMap['len'] = lastLength // we get distance from start
+                                lastLength = languageLen
+                                phraseMap['chord'] = phrase['chord']
+                                chordMap.push(phraseMap)
+                            } else if ( !Object.hasOwnProperty.call(phrase, 'chord') && first ) { 
+                                // first phrase is chordless,
+                                phraseMap['len'] = 0 // is start
+                                lastLength =  languageLen
+                                phraseMap['chord'] = ''
+                                chordMap.push(phraseMap)
                             }
+
+                            first = false;
                         });
                     } catch (error) {
                         console.error(error)
                     }
-                    if (!languageLine) {
+                    if (!languageArr) {
                         console.error({"no line data for tag":tag});
                     }
                 }
-                var phraseArray = [] ;// ["Twin","kle, twinkle,", " little star"]
-                
-                if (typeof chordArray === 'string'){// there's only the one chord
-                    if (parseInt(chordArray) != 0){ // we need two phrases
-                        var parsedLineArr = self.diacriticChecker(languageLine.split(""), 0);
-                        phraseArray.push( (parsedLineArr.splice(0, parseInt(chordArray) )).join("") ); 
-                        phraseArray.push( parsedLineArr.join("") ); // remaining
-                    } else {
-                        phraseArray.push(languageLine);
-                    }
+                // // tool: if there are to many number markers run this
+                // for (let index = 0; index < languageArr.length; index++) {
+                //     if (languageArr[index].includes(String.fromCharCode(173))){
+                //         console.error("found hidden char, should all be stripped")
+                //     }
+                // }
+
+                if (typeof insertArray === 'string'){// there's only the one number 
+                    let numberLoc = parseInt(insertArray)
+                    languageArr[numberLoc] = String.fromCharCode(173).concat(languageArr[numberLoc]) 
                 } else {
-                    if( typeof languageLine == 'string'){
-                        languageLine = languageLine.split("");
-                    }
-                    var parsedLineArr =  self.diacriticChecker(languageLine, 0);
-                    var lastPhraseLength = 0;
+                    // array of strings to array of useable indexes
+                    var numberMap = [];
+                    insertArray.forEach(element => {
+                        numberMap.push( parseInt(element) );
+                    });
+
                     var firstChord = true;
-                    var totalPhrases = chordArray.length
 
                     var i = 0;
-                    while (chordArray[i]) {
-                        let chord = (chordArray[i]);
-                        var currentIndexValue = parseInt(chord);
-                        var currentPhraseLength
-                        // to chop off index
-                        
-                         
-                        if(firstChord && currentIndexValue != 0){ // first and skipping phrase
-                            firstChord = false;
-                            // put a chordless phrase end of chordless is start of next
-                            let toInsert = (parsedLineArr.splice(0,currentIndexValue)).join(""); // splice(start, deleteCount)
-                            totalPhrases++;
-                            phraseArray.push( toInsert );
-                        } else {
-                            firstChord = false;
+                    console.log(chordMap) // this is the expected map
+                    console.log(languageArr) // lyrics with number markers NOT messing in indexes
+
+                    // from JSON
+                    // chordMap
+                    // from nouislider
+                    // insertArray
+                    //if(tag == 'en'){debugger}
+                    numberMap.forEach((element) => {
+                        if ( element < languageArr.length ){
+                            languageArr[element] = String.fromCharCode(173).concat(languageArr[element]) ; // 
+                            //languageArr[element] = "%".concat(languageArr[element]) ; 
+                        } else { //put it into last
+                            //languageArr.push("%".concat(String.fromCharCode(173)))
+                            languageArr.push(String.fromCharCode(173))
                         }
-                            
-                            //else if(firstChord && currentIndexValue === 0){ // There is always a chordless phrase
-                        //     phraseArray.push( '' )
-                        // }
-                        if (totalPhrases == phraseArray.length+1){ // we're on last chord, claim rest of phrase
-                            currentPhraseLength = parsedLineArr.length;
-                            i++;
-                        } else { // middle
-                            currentPhraseLength = parseInt(chordArray[i+1]) - currentIndexValue;
-                            i++;
-                        }
-                        
-                        
-                        lastPhraseLength = currentPhraseLength;
-                        let toInsert = (parsedLineArr.splice(0,currentPhraseLength)).join(""); // splice(start, deleteCount)
-                        phraseArray.push( toInsert );
-                    }
+                    });
                 }
+                if (chordMap){
+                    var first = true;
+                    var chordMapi = 0;
+                    while(chordMap[chordMapi]){ 
+                        let currentChord = chordMap[chordMapi];
+                        let phraseLen = ( chordMap[chordMapi+1]? (chordMap[chordMapi+1].len-currentChord.len) : languageArr.length ); // sub next len from curr lent to get expected strong. if no next get whole string
+                        let e = {}
+
+                        if( first ){
+                            // phrase 0 can lack a chord/num, if it does, we show it via ''
+                            if ( currentChord['chord'] != '' ){
+                                e.chord = currentChord.chord;
+                            }
+                            if ( phraseLen > 0) {
+                                e[tag] = languageArr.splice(0,phraseLen).join('')
+                            } 
+                            first = false;
+                        } else { 
+                            e.chord = currentChord.chord
+                            e[tag] = languageArr.splice(0,phraseLen).join('')
+                        }
+                        chordMapi++
+                        phraseArray.push(e)
+                    }
+                } else { 
+                    // no chords, possibly no numbers.
+                    phraseArray.push(e[tag] = languageArr.join(''))
+                }
+                // if(tag == 'en'){
+                //     console.log({'new line': phraseArray, 'old line':line.phrases});
+                //    // debugger
+                // }
                 return phraseArray;
             },
             nextLine: function(e) {
@@ -598,33 +625,24 @@
                     self.displayLyricSliders()
                 });
             },
-            addPhrase: function(e) {
+            addNote: function(e) {
                 let newData = song
                 // At index, add one element
 
                 var phraseArray = newData.lyrics.verses[verseId].lines[lineId].phrases
-                var workingIndex = phraseArray.length - 1;
-                phraseArray.push({
-                    ...phraseArray[workingIndex]
-                }); // extend by copying the last -will only keep object structure
-                workingIndex = phraseArray.length - 1;
+                var workingIndex = phraseArray.length - 1; // get last index
 
                 for (const tag in phraseArray[workingIndex]) {
-                    if (Object.hasOwnProperty.call(phraseArray[workingIndex], tag)) {
-                        // set all data inside empty
-                        phraseArray[workingIndex][tag] = ""
+                    if (Object.hasOwnProperty.call(phraseArray[workingIndex], tag) && tag != 'chord') {
+                        phraseArray[workingIndex][tag] = (phraseArray[workingIndex][tag]).concat(String.fromCharCode(173))
                     }
                 }
                 
-                // if (!Object.hasOwnProperty.call(phraseArray[workingIndex], 'chord')) {
-                phraseArray[workingIndex].chord = '*';
-                phraseArray[workingIndex].number = 1;
-                // }
 
                 newData.lyrics.verses[verseId].lines[lineId].phrases = phraseArray
+                newData.lyrics.verses[verseId].lines[lineId].numbers.push('1');
                 app.song = newData;
                 self.savableUpdate(true);
-                //songCollection.db.setItem(songId, newData)
                 song = newData;
                 line = song.lyrics.verses[verseId].lines[lineId];
                 self.clearSliders()
@@ -646,21 +664,33 @@
                     savable: bool
                 });
             },
-            deletePhrase: function(e) {
-                if( line.phrases.length <= 1 ){
+            deleteNote: function(e) {
+                if( line.numbers.length <= 1 ){
                     return;
                 }
                 let newData = song;
 
+                newData.lyrics.verses[verseId].lines[lineId].numbers.pop(); // get the number out
+
                 var workingIndex = (newData.lyrics.verses[verseId].lines[lineId].phrases).length - 1;
-                let deletedPhrase = newData.lyrics.verses[verseId].lines[lineId].phrases.splice(workingIndex--, 1)[0]
-                // merge the lyrics
-                for (const tag in deletedPhrase) {
-                    if (Object.hasOwnProperty.call(deletedPhrase, tag)) {
-                        if (tag != 'chord' && tag != 'number'){
-                            const element = deletedPhrase[tag];
-                            newData.lyrics.verses[verseId].lines[lineId].phrases[workingIndex][tag] += element;
-                        }
+                languages.forEach(langTag => {
+                    // tick through each language tag, search from end of line, remove last occurence of hidden character. 
+                    newData.lyrics.verses[verseId].lines[lineId] = deleteTheCharacter(newData.lyrics.verses[verseId].lines[lineId],workingIndex,langTag);
+                });
+
+                function deleteTheCharacter(line,index,langTag){
+                    if(index<0){console.error("trying to delete a character that doesn't exist"); return;}
+                    let hiddenCharLocation = line.phrases[index][langTag].lastIndexOf(String.fromCharCode(173));
+                    if ( hiddenCharLocation === -1 ){ // not here, recurse
+                        deleteTheCharacter(line,++index,langTag)
+                    } else { // remove and return line sans one hidden character
+                        // regx option, not sure how to use the hidden char here
+                        // var str = 'a_b_c';
+                        // console.log(  str.replace(/_([^_]*)$/, '$1')  ) //a_bc
+                        let str = line.phrases[index][langTag].split('')
+                        str.splice(hiddenCharLocation, 1)
+                        line.phrases[index][langTag] = str.join('')
+                        return line
                     }
                 }
 
@@ -689,60 +719,62 @@
             displayLyricSliders: function(e) {
                 // 
                 var lyric = {};
-                chordStartLocations = {}; //  {'en':[1,5,12]}
-                var chordList = [];           // tooltips: [ {to: function() {return "2<br/>A";} } ]
+                numberStartLocations = {}; //  {'en':[1,5,12]}
+                //var noteList = [];           // tooltips: [ {to: function() {return "2<br/>A";} } ]
+                var noteList = [];  
+                line.numbers.forEach(element => {
+                    noteList.push({
+                        'to': function() {
+                            return `${element}`
+                        }
+                    })
+                });
 
                 // init each language
                 languages.forEach(languageCode => {
-                    chordStartLocations[languageCode] = [];
+                    numberStartLocations[languageCode] = [];
                     lyric[languageCode] = [];
                 });
 
-                line.phrases.forEach(phrase => {
-                    let meta = {}; // chord and number
-                    for (const key in phrase) {
-                        if (Object.hasOwnProperty.call(phrase, key)) {
-                            const element = phrase[key];
-                            if (key == 'chord') {
-                                meta.chord = element
-                            } else if (key == 'number') {
-                                meta.number = element
-                            } else { // language
-                                let elementAsArray = self.diacriticChecker(element.split(""), 0) // lets work with the 'true' length array
-                                if(lyric[key]){
-                                    lyric[key] = lyric[key].concat(elementAsArray);
-                                } else{
-                                    lyric[key] = elementAsArray;
-                                }
-                                // 
-                                var chordEndIndex // falsy
-                                if (chordStartLocations[key]){  // if already exists
-                                    chordEndIndex = chordStartLocations[key].length;
-                                }else{
-                                    chordStartLocations[key] = [];
-                                    chordEndIndex = 0;
-                                }
-                                if (chordEndIndex == 0) {
-                                    chordStartLocations[key].push(elementAsArray.length)
-                                } else {
-                                    chordStartLocations[key].push(chordStartLocations[key][chordEndIndex - 1] + elementAsArray.length)
-                                }
-                            }
+                var firstPhrase = true;
+                var lineModulated = lineModulate.consolidate(line)
+                //
+                for (const key in lineModulated) {
+                    if (Object.hasOwnProperty.call(lineModulated, key)) {
+                        // we're working with a single language here
+                        // combining the whole line together (as if there were no chords)
+                        // then splitting it back out as if the numbers were chords
+                        const lang = lineModulated[key];
+                        const element = lineModulated[key];
+                        const languageLineCombinedLyric = lang.lyric;
+                        const languageLineCombinedChordLocations = lang.chords;
+
+                        // we need to split each of these in relation to position of 173
+                        // use parseText
+                        var parsed = parseText.remove(lang.lyric)
+                        console.log(parsed)
+                        // For Each then we need to find the true length of non diacritic elements
+
+                        //let stringarr = ((typeof element == 'string') ? element.split("") : element[0].split(""));
+                        //let stringarr = ( languageLineCombinedLyric.split( String.fromCharCode(173) ) );
+                        let stringarr = parsed.splitLyrics
+                        // 'aaa','bbb','ccccc'
+                        if (!(stringarr.length == line.numbers.length || stringarr.length-1 == line.numbers.length)) {
+                            console.error("What is happening, these should match")
                         }
+
+                        let elementAsArray = lineModulate.diacriticChecker(parsed.lyric, 0) // lets work with the 'true' length array
+                        lyric[key] = elementAsArray;
+
+                        numberStartLocations[key] = parsed.numberStartLocations;
                     }
-                    if (meta.chord){ // if meta is set
-                        // push to chord/num list
-                        chordList.push({
-                            'to': function() {
-                                return `${meta.chord}<br/>${meta.number}`
-                            }
-                        })
-                    }
-                });
+                }
 
                 var pipFormatter = {}; //var pipFormats = {'0':'abc', '1':'pqr', '2':'xyz'};
                 var range = {}; // {min/max/percentage: [increment, 1]}
 
+                // setup pipFormatter
+                // we want to group diacritic characters together
                 for (const tag in lyric) {
                     pipFormatter[tag] = {};
                     range[tag] = {};
@@ -767,20 +799,24 @@
                             };
                             pipFormatter[tag][i.toString()] = "";
                             range[tag]['max'] = [i, 1];
-                            self.makeSlider(tag, pipFormatter[tag], range[tag], chordStartLocations[tag], chordList)
+                            if (!( numberStartLocations[tag].length === noteList.length )){
+                                console.error("We don't have matching expectations for how many numbers there should be. Something went wrong")
+                            }
+                            self.makeSlider(tag, pipFormatter[tag], range[tag], numberStartLocations[tag], noteList)
                         }
                     }
                 };
             },
-            makeSlider: function(tag, pipFormats, lyricRange, chordStartLocations, chordDataObject) {
-                if(chordStartLocations.length != chordDataObject.length){
-                    chordStartLocations.pop()
-                } else { // is new data
-                    chordStartLocations.splice(0,0,'')
-                    chordStartLocations.pop()
-                }
-                while(chordDataObject.length > chordStartLocations.length){
-                    chordStartLocations.push(lyricRange.max[0])
+            makeSlider: function(tag, pipFormats, lyricRange, numberStartLocations, chordDataObject) {
+                if(numberStartLocations.length != chordDataObject.length){
+                    console.error("We don't have matching expectations for how many numbers there should be. Something went wrong")
+                    numberStartLocations.pop()
+                } else //{ // is new data
+                //     numberStartLocations.splice(0,0,'')
+                //     numberStartLocations.pop()
+                // }
+                while(chordDataObject.length > numberStartLocations.length){
+                    numberStartLocations.push(lyricRange.max[0])
                 }
                 var options = {}
                 options.range = lyricRange;
@@ -794,17 +830,36 @@
                 }
                 if (chordDataObject.length){
                     options.tooltips = chordDataObject;
-                    options.start= chordStartLocations;
+                    options.start= numberStartLocations;
                     options.tooltips= chordDataObject;
                 } else {
                     // no chords on this song
                     options.start= [lyricRange.max[0]];
                 }
-                //  Make the slider
-                var slider = self.$(`.slider-${tag}`)[0];  
-                noUiSlider.create(slider, options);
+                //
+                var slider = self.$(`.slider-${tag}`)[0];
+                if (slider) {
+                    if (slider.noUiSlider) {
+                        // If already exists, clear it
+                        slider.noUiSlider.destroy();
+                    }   // Make the slider
+                    console.log ("working: " + tag )
+                    noUiSlider.create(slider, options);
+                } else {
+                    console.error("no slider BEFORE destroy")
+                    debugger
+                }
+                if (slider == undefined) {
+                    console.log ("broken: " + tag)
+                    slider = self.$(`#sliderContainer-${tag}`)[0];  
+                    console.log (slider)
+                    // var slider = self.$(`.slider-${tag}`)[0];  
+                    debugger
+                } else {
+                    // working fine
+                }
                 // noUiSlider.create(slider, {
-                //     start: chordStartLocations,
+                //     start: numberStartLocations,
                 //     tooltips: chordDataObject,
                 //     range: lyricRange,
                 //     pips: {
@@ -817,41 +872,25 @@
                 //     }
                 // });
             },
-            // Params: Array, 0
-            diacriticChecker: function(array, index) {
-                if (!index) {index = 0};
-                if (typeof(array)=='string') {
-                    array = array.split("");
-                }
-                var nextIndex = index + 1
-                if (nextIndex >= array.length) {
-                    return array;
-                }
-                //if ([' ྱ', ' ེ', ' ོ', ].includes(array[nextIndex])){
-                if ([4017, 3962, 3964, 3954].includes((array[nextIndex]).charCodeAt(0))) {
-                    array[index] = array[index].concat(array.splice(nextIndex, 1)[0]);
-                } else { // only increase if no diacritic
-                    ++index;
-                }
-                return self.diacriticChecker(array, index);
-            },
             lineEditPopup: function(tag) {
-                // app.panel.create(parameters)
-                // closeByBackdropClick
-                // el	:HTMLElementstring
-
-                // app.panel.open(panel, animate)
-                // Other option. pass app.js the line data to pre-generate this generated popup when a button it programatically generates is pressed. 
-                // onclick, it calls one of these to update. 
-                // That's also the way to change lang on song edit
+                tag = tag || defaultLanguage;
+                var phraseBreakLocations = {};
                 
                 var langLine = ""
+                if(!phraseBreakLocations[tag]){ // if is not set
+                    phraseBreakLocations[tag] = [];
+                }
                 line.phrases.forEach(phrase => {
                     if (phrase[tag]) {
                         langLine += phrase[tag];
+                        let phraseArr = phrase[tag].split("")
+                        let elementAsArray = lineModulate.diacriticChecker(phraseArr, 0);
+                        phraseBreakLocations[tag].push(elementAsArray.length);
                     }
                 });
-  
+
+                // remove number elements
+                var parsed = parseText.remove(langLine)
                 var el = `<div class="popup">
                         <div class="block">
                             <strong><h3>*edit line text here</h3></strong>
@@ -859,12 +898,12 @@
                             <form class="item-content item-input line-form" id="line-form">
                                 <div class="item-inner">
                                     <div class="item-input-wrap" id="item-input-wrap">
-                                    <input type="text" class="lineText" style=''value="${langLine}"/>
+                                    <input type="text" class="lineText" style=''value="${parsed.lyric}"/>
                                     <span class="input-clear-button"></span>
                                     </div>
                                 </div>
                             </form>
-                            <p><a  href="#" class="col popup-close button button-fill">*Preview</a></p>
+                            <p><a  href="#" class="col popup-close button button-fill">*preview</a></p>
                         </div>
                     </div>`
                 var a = app.popup.create({
@@ -881,30 +920,28 @@
                         close: function (popup) {
                             var tag = self.$$(".tag")[0].innerHTML
                             var formData = self.$$(".lineText")[0].value
-                            self.updateLine(formData, tag)
-                            self.savableUpdate(true)
+                            // put numbers back
+                            parseText.add(formData, parsed.numberPositions).then((newLyric) => {
+                                self.updateLine(newLyric, tag,phraseBreakLocations)
+                            });
                         },
                     }
                 }); 
                 a.open();
             },
-            updateLine: function(data,tag){
+            updateLine: function(data,tag,phraseBreakLocations){
                 if (self.validateTag(tag)){
                     //update line and refresh
-                    var lineArr = self.diacriticChecker(data.split(""), 0)
-                    var chordPlacment = chordStartLocations[tag]
+                    var lineArr = lineModulate.diacriticChecker(data.split(""), 0)
+                    var chordPlacment = phraseBreakLocations[tag]
 
                     let i = 0
                     while (i < line.phrases.length) {
-                        let firstChord = chordPlacment[i];
-                        let startPhraseIndex = ((firstChord && firstChord < lineArr.length-1) ? firstChord : '0');
-                        let nextChord = chordPlacment[i+1];
-                        // checking that...
+                        let expectPhraseLength = chordPlacment[i];
                         // the array may be shorter than we expect, allow phrases to be at end of array
                         // at end of array, include any extra characters
-                        let endPhraseIndex = ((nextChord && nextChord < lineArr.length-1 && i < line.phrases.length) ? nextChord : (lineArr.length));
-
-                        let phraseLength = endPhraseIndex - startPhraseIndex;
+                        // if exists,           is less than remaining length,           on last index, grab remainder => set. otherwise is remaining length. remaining length can be 0
+                        let phraseLength = ((expectPhraseLength && expectPhraseLength < lineArr.length-1 && (i+1) < line.phrases.length) ? expectPhraseLength : (lineArr.length));
                         let newPhrase = lineArr.splice(0,phraseLength).join('');
 
                         //set it
@@ -915,7 +952,8 @@
                     self.$setState({
                         loading: false,
                         song: song,
-                        line: line
+                        line: line,
+                        savable: true
                     }, () => {
                         self.displayLyricSliders()
                         // User will need to save....

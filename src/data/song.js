@@ -170,7 +170,7 @@ export default class SongCollection {
           reject("Id undefined")
         }
         this.db.setItem(songId,song).then(() =>{
-          if (this.nextAvailableId <= parseInt(songId)){
+          if (this.nextAvailableId == parseInt(songId)  ){
             this.nextAvailableId = (parseInt(songId) + 1);
             console.log({"The nextAvailableId is": this.nextAvailableId});
           }

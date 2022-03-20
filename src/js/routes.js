@@ -2,7 +2,8 @@
 import HomePage from '../pages/home.f7.html';
 import SongViewPage from '../pages/song-view.f7.html';
 import SongEditPage from '../pages/song-edit.f7.html';
-import LineEditPage from '../pages/line-edit.f7.html';
+import LineEditPage from '../pages/line-edit-chords.f7.html';
+import MusicEditPage from '../pages/line-edit-numbers.f7.html';
 import NotFoundPage from '../pages/404.f7.html';
 import SettingsPanel from '../panels/settings.f7.html';
 
@@ -22,6 +23,10 @@ var routes = [
   {
     path: '/song/line/edit/:songId/:verseId/:lineId/', // needs to include song id...
     component: LineEditPage,
+  },
+  {
+    path: '/song/line/music/:songId/:verseId/:lineId/', // needs to include song id...
+    component: MusicEditPage,
   },
   {
     path: '/settings/',

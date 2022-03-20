@@ -1,0 +1,70 @@
+{1=C}
+
+{'number':'1', en:'La་'}
+
+use cases
+There is no character
+There is a character
+
+find where the character is,
+put meta there
+
+we have 'diacrit' loc
+get true loc
+iterate through phrases
+
+metadata = [{m:'A', destination:3}]
+indMeta
+indexLine
+for each line{
+    for char in phrase[langTag]{
+
+    }
+}
+
+
+
+{ 'chord':'Bm', 'number':'6--', at:'གཙོ་' }
+{'number':'5z6zrr',at:'བོ།' }
+{'chord':A, 'number':'a3.', at:'ལྷ་'}
+{'number':'6z', at:'ཡི་'}
+{'number':'5',  at:'ཁྲོད་'}
+{'number':'4a', at:'དུ་'}
+{'chord':Bm, 'number':'3z', at:'ཁྱེད་'}
+
+
+
+    { 'number':'5z6zrr' at:'Ta'}
+    {chord':'Bm', at:'ke' }
+    {'number':'5z6zrr',at:' a ' }
+    {'chord':A}
+    {'number':'a3.', at:'sa'}
+    {'number':'6z', at:'d '}
+    {'number':'5',  at:'song'}
+    {'number':'4a', at:'and'}
+    {'chord':Bm, 'number':'3z', at:' make'}
+    {'number':'4a', at:' it '}
+    {'chord':G 'number':'4a', at:'b'}
+    {'number':'4e', at:'e'}
+    {'number':'4b', at:''}
+    {'number':'4f', at:'tter'}
+]
+ 
+ Bm    A            A       G
+Take a sad song and make it better.
+
+Smallest possible item is BOTH/EITHER a single note, a single character
+
+
+'number':'3z'|ཀྱི་|
+6z|འགྲན་|
+7z|ཟླ་
+[F#m] 
+|6z7x6xy|སུ་|
+5z4zta|ཡང་
+[Bm] |3---a|མེད།
+
+[{Bm,1},{Fm,5},{Am,13},]
+
+[{Bm},{Fm},{Am},]
+[1,5,13,]
